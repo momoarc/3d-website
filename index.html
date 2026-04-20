@@ -1,0 +1,1820 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="description" content="Portes premium en Algérie – Portes blindées, entrée, intérieure, vitrée. Livraison & installation dans toute l'Algérie. Paiement à la livraison." />
+  <meta name="keywords" content="portes algérie, portes blindées, portes d'entrée, portes intérieures, COD, livraison algérie" />
+  <meta property="og:title" content="PORTE PRESTIGE – Portes Premium Algérie" />
+  <meta property="og:description" content="Votre showroom de portes premium en ligne. Livraison partout en Algérie. Paiement à la livraison." />
+  <title>PORTE PRESTIGE – Portes Premium Algérie</title>
+
+  <!-- Google Fonts -->
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Playfair+Display:wght@400;500;700&display=swap" rel="stylesheet" />
+
+  <!-- Three.js — same version as showroom-360.html (proven) -->
+  <script type="importmap">
+  {
+    "imports": {
+      "three": "https://unpkg.com/three@0.160.0/build/three.module.js",
+      "three/addons/": "https://unpkg.com/three@0.160.0/examples/jsm/"
+    }
+  }
+  </script>
+
+  <!-- Meta Pixel (replace YOUR_PIXEL_ID) -->
+  <script>
+    !function(f,b,e,v,n,t,s){if(f.fbq)return;n=f.fbq=function(){n.callMethod?
+    n.callMethod.apply(n,arguments):n.queue.push(arguments)};if(!f._fbq)f._fbq=n;
+    n.push=n;n.loaded=!0;n.version='2.0';n.queue=[];t=b.createElement(e);t.async=!0;
+    t.src=v;s=b.getElementsByTagName(e)[0];s.parentNode.insertBefore(t,s)}(window,
+    document,'script','https://connect.facebook.net/en_US/fbevents.js');
+    fbq('init', 'YOUR_META_PIXEL_ID');
+    fbq('track', 'PageView');
+  </script>
+
+  <!-- TikTok Pixel (replace YOUR_TIKTOK_ID) -->
+  <script>
+    !function (w, d, t) { w.TiktokAnalyticsObject=t; var ttq=w[t]=w[t]||[];
+    ttq.methods=["page","track","identify","instances","debug","on","off","once","ready","alias","group","enableCookie","disableCookie"];
+    ttq.setAndDefer=function(t,e){t[e]=function(){t.push([e].concat(Array.prototype.slice.call(arguments,0)))}};
+    for(var i=0;i<ttq.methods.length;i++)ttq.setAndDefer(ttq,ttq.methods[i]);
+    ttq.instance=function(t){for(var e=ttq._i[t]||[],n=0;n<ttq.methods.length;n++)ttq.setAndDefer(e,ttq.methods[n]);return e};
+    ttq.load=function(e,n){var i="https://analytics.tiktok.com/i18n/pixel/events.js";ttq._i=ttq._i||{};ttq._i[e]=[];ttq._i[e]._u=i;ttq._t=ttq._t||{};ttq._t[e]=+new Date;ttq._o=ttq._o||{};ttq._o[e]=n||{};var o=document.createElement("script");o.type="text/javascript";o.async=!0;o.src=i+"?sdkid="+e+"&lib="+t;var a=document.getElementsByTagName("script")[0];a.parentNode.insertBefore(o,a)};
+    ttq.load('YOUR_TIKTOK_PIXEL_ID'); ttq.page(); }(window, document, 'ttq');
+  </script>
+
+  <!-- GA4 (replace YOUR_GA4_ID) -->
+  <script async src="https://www.googletagmanager.com/gtag/js?id=YOUR_GA4_ID"></script>
+  <script>
+    window.dataLayer = window.dataLayer || [];
+    function gtag(){dataLayer.push(arguments);}
+    gtag('js', new Date()); gtag('config', 'YOUR_GA4_ID');
+  </script>
+
+<style>
+/* ============================================================
+   CSS VARIABLES & RESET
+   ============================================================ */
+:root {
+  --bg-base: #08080a;
+  --bg-card: #111113;
+  --bg-elevated: #1a1a1e;
+  --border: rgba(255,255,255,0.08);
+  --border-hover: rgba(255,255,255,0.18);
+  --gold: #c9a84c;
+  --gold-light: #e4c06a;
+  --gold-dim: rgba(201,168,76,0.15);
+  --text-primary: #f5f5f0;
+  --text-secondary: #a0a09a;
+  --text-muted: #606060;
+  --green: #4ade80;
+  --red: #f87171;
+  --nav-h: 72px;
+  --radius: 4px;
+  --radius-lg: 10px;
+  --transition: 0.28s cubic-bezier(0.4,0,0.2,1);
+  --font-sans: 'Inter', system-ui, sans-serif;
+  --font-serif: 'Playfair Display', Georgia, serif;
+}
+
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+html { scroll-behavior: smooth; font-size: 16px; }
+body {
+  background: var(--bg-base);
+  color: var(--text-primary);
+  font-family: var(--font-sans);
+  line-height: 1.6;
+  overflow-x: hidden;
+  -webkit-font-smoothing: antialiased;
+}
+img { display: block; max-width: 100%; }
+a { color: inherit; text-decoration: none; }
+button { cursor: pointer; border: none; background: none; font-family: inherit; }
+input, select, textarea { font-family: inherit; }
+
+/* ============================================================
+   UTILITY
+   ============================================================ */
+.hidden { display: none !important; }
+.page { display: none; }
+.page.active { display: block; }
+.container { max-width: 1200px; margin: 0 auto; padding: 0 24px; }
+.section-label {
+  font-size: 10px; letter-spacing: 4px; text-transform: uppercase;
+  color: var(--gold); font-weight: 600; margin-bottom: 12px;
+}
+.section-title {
+  font-family: var(--font-serif); font-size: clamp(28px, 5vw, 48px);
+  font-weight: 500; line-height: 1.15; color: var(--text-primary);
+}
+.btn {
+  display: inline-flex; align-items: center; justify-content: center;
+  gap: 8px; padding: 14px 28px; border-radius: var(--radius);
+  font-size: 12px; font-weight: 600; letter-spacing: 2px;
+  text-transform: uppercase; transition: var(--transition); cursor: pointer;
+  white-space: nowrap;
+}
+.btn-gold {
+  background: var(--gold); color: #0a0800;
+  box-shadow: 0 4px 24px rgba(201,168,76,0.3);
+}
+.btn-gold:hover { background: var(--gold-light); transform: translateY(-1px); box-shadow: 0 8px 32px rgba(201,168,76,0.4); }
+.btn-outline {
+  background: transparent; color: var(--text-primary);
+  border: 1px solid var(--border-hover);
+}
+.btn-outline:hover { border-color: var(--gold); color: var(--gold); }
+.btn-ghost { background: transparent; color: var(--text-secondary); }
+.btn-ghost:hover { color: var(--text-primary); }
+.badge {
+  display: inline-block; padding: 3px 10px; border-radius: 20px;
+  font-size: 10px; font-weight: 600; letter-spacing: 1.5px; text-transform: uppercase;
+}
+.badge-gold { background: var(--gold-dim); color: var(--gold); border: 1px solid rgba(201,168,76,0.3); }
+.badge-green { background: rgba(74,222,128,0.1); color: var(--green); border: 1px solid rgba(74,222,128,0.3); }
+
+/* ============================================================
+   SCROLLBAR
+   ============================================================ */
+::-webkit-scrollbar { width: 6px; }
+::-webkit-scrollbar-track { background: var(--bg-base); }
+::-webkit-scrollbar-thumb { background: #333; border-radius: 3px; }
+
+/* ============================================================
+   3D SHOWROOM HOTSPOTS
+   ============================================================ */
+.showroom-hotspot {
+  position: absolute;
+  transform: translate(-50%, -50%);
+  cursor: pointer;
+  pointer-events: auto;
+  opacity: 0;
+  transition: opacity 0.4s;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 8px;
+}
+.hotspot-pulse {
+  width: 40px; height: 40px;
+  border-radius: 50%;
+  background: rgba(201,168,76,0.2);
+  border: 2px solid var(--gold);
+  position: relative;
+  transition: transform 0.2s;
+}
+.hotspot-pulse::before {
+  content: '';
+  position: absolute; inset: -8px;
+  border-radius: 50%;
+  border: 1.5px solid rgba(201,168,76,0.4);
+  animation: hotspot-ring 2s ease-out infinite;
+}
+.hotspot-pulse::after {
+  content: '→';
+  position: absolute; inset: 0;
+  display: flex; align-items: center; justify-content: center;
+  color: var(--gold); font-size: 16px; font-weight: 600;
+}
+@keyframes hotspot-ring {
+  0%   { transform: scale(1); opacity: 0.8; }
+  100% { transform: scale(2); opacity: 0; }
+}
+.showroom-hotspot:hover .hotspot-pulse { transform: scale(1.15); background: rgba(201,168,76,0.35); }
+.hotspot-label {
+  background: rgba(8,8,10,0.85);
+  backdrop-filter: blur(12px);
+  border: 1px solid var(--border-hover);
+  border-radius: 4px;
+  padding: 6px 12px;
+  font-size: 10px; font-weight: 600;
+  letter-spacing: 2px; text-transform: uppercase;
+  color: var(--gold);
+  white-space: nowrap;
+}
+
+/* ============================================================
+   NAVIGATION
+   ============================================================ */
+#navbar {
+  position: fixed; top: 0; left: 0; right: 0; z-index: 1000;
+  height: var(--nav-h);
+  background: rgba(8,8,10,0.92);
+  backdrop-filter: blur(20px);
+  border-bottom: 1px solid var(--border);
+  transition: var(--transition);
+}
+#navbar.scrolled { background: rgba(8,8,10,0.98); }
+.nav-inner {
+  display: flex; align-items: center; justify-content: space-between;
+  height: var(--nav-h); max-width: 1200px; margin: 0 auto; padding: 0 24px;
+}
+.nav-logo {
+  display: flex; align-items: center; gap: 12px; cursor: pointer;
+}
+.nav-logo-mark {
+  width: 38px; height: 38px; background: var(--gold);
+  display: flex; align-items: center; justify-content: center;
+  font-size: 18px; font-weight: 700; color: #0a0800;
+  border-radius: 2px; flex-shrink: 0;
+}
+.nav-logo-text { font-size: 14px; font-weight: 600; letter-spacing: 3px; text-transform: uppercase; }
+.nav-logo-sub { font-size: 9px; letter-spacing: 2px; color: var(--text-muted); text-transform: uppercase; }
+.nav-links {
+  display: flex; align-items: center; gap: 8px;
+}
+.nav-link {
+  padding: 8px 14px; font-size: 11px; font-weight: 500; letter-spacing: 1.5px;
+  text-transform: uppercase; color: var(--text-secondary);
+  border-radius: var(--radius); transition: var(--transition); cursor: pointer;
+}
+.nav-link:hover, .nav-link.active { color: var(--text-primary); background: rgba(255,255,255,0.05); }
+.nav-cta {
+  background: var(--gold); color: #0a0800;
+  padding: 10px 20px; border-radius: var(--radius);
+  font-size: 11px; font-weight: 700; letter-spacing: 2px; text-transform: uppercase;
+  transition: var(--transition); cursor: pointer;
+}
+.nav-cta:hover { background: var(--gold-light); transform: translateY(-1px); }
+.nav-mobile-toggle {
+  display: none; flex-direction: column; gap: 5px; cursor: pointer; padding: 4px;
+}
+.nav-mobile-toggle span {
+  display: block; width: 24px; height: 2px; background: var(--text-primary);
+  transition: var(--transition); border-radius: 2px;
+}
+.nav-mobile-menu {
+  display: none; position: fixed; top: var(--nav-h); left: 0; right: 0;
+  background: rgba(8,8,10,0.98); backdrop-filter: blur(20px);
+  border-bottom: 1px solid var(--border); padding: 20px 24px; z-index: 999;
+  flex-direction: column; gap: 4px;
+}
+.nav-mobile-menu.open { display: flex; }
+.nav-mobile-link {
+  padding: 14px 0; font-size: 13px; font-weight: 500; letter-spacing: 2px;
+  text-transform: uppercase; color: var(--text-secondary);
+  border-bottom: 1px solid var(--border); cursor: pointer;
+  transition: var(--transition);
+}
+.nav-mobile-link:hover { color: var(--gold); }
+.nav-mobile-cta {
+  margin-top: 12px; padding: 16px;
+  background: var(--gold); color: #0a0800; text-align: center;
+  font-size: 13px; font-weight: 700; letter-spacing: 2px; text-transform: uppercase;
+  border-radius: var(--radius); cursor: pointer;
+}
+
+/* ============================================================
+   HOME PAGE – HERO
+   ============================================================ */
+#page-home { padding-top: var(--nav-h); }
+
+.hero {
+  position: relative;
+  min-height: calc(100vh - var(--nav-h));
+  display: flex; align-items: center;
+  overflow: hidden;
+  background: var(--bg-base);
+}
+
+/* Ambient glow */
+.hero::before {
+  content: '';
+  position: absolute; top: -30%; left: 50%; transform: translateX(-50%);
+  width: 800px; height: 600px;
+  background: radial-gradient(ellipse at center, rgba(201,168,76,0.08) 0%, transparent 70%);
+  pointer-events: none;
+}
+
+.hero-bg-grid {
+  position: absolute; inset: 0; z-index: 0;
+  background-image:
+    linear-gradient(rgba(255,255,255,0.02) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(255,255,255,0.02) 1px, transparent 1px);
+  background-size: 60px 60px;
+}
+
+.hero-inner {
+  position: relative; z-index: 1;
+  width: 100%; max-width: 1200px; margin: 0 auto; padding: 60px 24px;
+  display: grid; grid-template-columns: 1fr 1fr; gap: 60px; align-items: center;
+}
+
+.hero-content {}
+.hero-eyebrow {
+  display: flex; align-items: center; gap: 12px; margin-bottom: 24px;
+}
+.hero-eyebrow-line { width: 40px; height: 1px; background: var(--gold); }
+.hero-eyebrow-text { font-size: 10px; letter-spacing: 4px; text-transform: uppercase; color: var(--gold); font-weight: 600; }
+
+.hero-title {
+  font-family: var(--font-serif);
+  font-size: clamp(36px, 5.5vw, 64px);
+  font-weight: 500; line-height: 1.1;
+  margin-bottom: 24px;
+}
+.hero-title em { font-style: italic; color: var(--gold); }
+.hero-subtitle {
+  font-size: 16px; color: var(--text-secondary); line-height: 1.7;
+  max-width: 440px; margin-bottom: 40px;
+}
+.hero-ctas {
+  display: flex; gap: 14px; flex-wrap: wrap; margin-bottom: 48px;
+}
+.hero-trust-row {
+  display: flex; gap: 24px; flex-wrap: wrap;
+}
+.hero-trust-item {
+  display: flex; align-items: center; gap: 8px;
+  font-size: 12px; color: var(--text-muted);
+}
+.hero-trust-item svg { color: var(--gold); flex-shrink: 0; }
+
+/* ---- 3D Showroom Visual ---- */
+.hero-showroom {
+  position: relative;
+  perspective: 1000px;
+  height: 500px;
+}
+.showroom-room {
+  position: relative; width: 100%; height: 100%;
+  transform-style: preserve-3d;
+}
+
+/* Three clickable door zones */
+.door-zone {
+  position: absolute;
+  cursor: pointer;
+  border-radius: var(--radius-lg);
+  overflow: hidden;
+  transition: transform 0.4s cubic-bezier(0.4,0,0.2,1), box-shadow 0.4s;
+}
+.door-zone::after {
+  content: '';
+  position: absolute; inset: 0;
+  background: linear-gradient(to top, rgba(0,0,0,0.7) 0%, transparent 50%);
+  border-radius: var(--radius-lg);
+  transition: opacity 0.3s;
+}
+.door-zone:hover::after { opacity: 0.5; }
+.door-zone img {
+  width: 100%; height: 100%; object-fit: cover;
+  transition: transform 0.6s cubic-bezier(0.4,0,0.2,1);
+}
+.door-zone:hover img { transform: scale(1.07); }
+.door-zone-label {
+  position: absolute; bottom: 0; left: 0; right: 0; z-index: 2;
+  padding: 20px 18px 18px;
+  display: flex; align-items: center; justify-content: space-between;
+}
+.door-zone-label-text { font-size: 13px; font-weight: 600; letter-spacing: 2px; text-transform: uppercase; }
+.door-zone-label-arrow {
+  width: 32px; height: 32px; border-radius: 50%;
+  background: var(--gold); display: flex; align-items: center; justify-content: center;
+  color: #0a0800; flex-shrink: 0;
+  transition: transform 0.3s;
+}
+.door-zone:hover .door-zone-label-arrow { transform: translate(3px, -3px); }
+
+/* Layout of 3 door zones */
+.door-zone-main {
+  left: 0; right: 36%; top: 0; bottom: 0;
+  transform: rotateY(8deg) translateZ(-20px);
+  box-shadow: -10px 0 40px rgba(0,0,0,0.5);
+}
+.door-zone-right {
+  left: 66%; right: 0; top: 0; bottom: 30%;
+  transform: rotateY(-12deg) translateZ(-30px);
+  box-shadow: 10px 0 40px rgba(0,0,0,0.5);
+}
+.door-zone-small {
+  left: 66%; right: 0; top: 72%; bottom: 0;
+  transform: rotateY(-12deg) translateZ(-30px);
+  box-shadow: 10px 0 40px rgba(0,0,0,0.5);
+}
+
+.door-zone-main:hover { transform: rotateY(4deg) translateZ(0) scale(1.01); z-index: 10; }
+.door-zone-right:hover { transform: rotateY(-6deg) translateZ(10px) scale(1.02); z-index: 10; }
+.door-zone-small:hover { transform: rotateY(-6deg) translateZ(10px) scale(1.02); z-index: 10; }
+
+/* Floating badge on showroom */
+.showroom-badge {
+  position: absolute; top: 16px; left: 16px; z-index: 20;
+  background: rgba(8,8,10,0.9); backdrop-filter: blur(12px);
+  border: 1px solid var(--border-hover); border-radius: 8px;
+  padding: 10px 14px;
+}
+.showroom-badge-count { font-size: 22px; font-weight: 700; color: var(--gold); line-height: 1; }
+.showroom-badge-label { font-size: 9px; letter-spacing: 2px; text-transform: uppercase; color: var(--text-muted); margin-top: 2px; }
+
+/* ============================================================
+   MARQUEE STRIP
+   ============================================================ */
+.marquee-strip {
+  background: var(--gold); overflow: hidden; padding: 12px 0; white-space: nowrap;
+}
+.marquee-track {
+  display: inline-flex; gap: 0;
+  animation: marquee 25s linear infinite;
+}
+.marquee-track:hover { animation-play-state: paused; }
+.marquee-item {
+  display: inline-flex; align-items: center; gap: 16px;
+  padding: 0 32px; font-size: 11px; font-weight: 700;
+  letter-spacing: 2.5px; text-transform: uppercase; color: #0a0800;
+}
+.marquee-item::after { content: '◆'; font-size: 8px; opacity: 0.5; }
+@keyframes marquee {
+  from { transform: translateX(0); }
+  to { transform: translateX(-50%); }
+}
+
+/* ============================================================
+   STATS BAR
+   ============================================================ */
+.stats-bar {
+  padding: 48px 0;
+  border-bottom: 1px solid var(--border);
+}
+.stats-grid {
+  display: grid; grid-template-columns: repeat(4, 1fr);
+  gap: 0; text-align: center;
+}
+.stat-item {
+  padding: 24px 0;
+  border-right: 1px solid var(--border);
+}
+.stat-item:last-child { border-right: none; }
+.stat-number {
+  font-family: var(--font-serif); font-size: 40px; font-weight: 500;
+  color: var(--gold); line-height: 1;
+}
+.stat-label { font-size: 11px; letter-spacing: 2px; text-transform: uppercase; color: var(--text-muted); margin-top: 6px; }
+
+/* ============================================================
+   CATEGORIES SECTION
+   ============================================================ */
+.categories-section {
+  padding: 80px 0;
+}
+.categories-header {
+  display: flex; align-items: flex-end; justify-content: space-between;
+  margin-bottom: 48px; gap: 24px; flex-wrap: wrap;
+}
+.categories-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 16px;
+}
+.category-card {
+  position: relative; border-radius: var(--radius-lg); overflow: hidden;
+  cursor: pointer; aspect-ratio: 3/4;
+  border: 1px solid var(--border);
+  transition: border-color 0.3s;
+}
+.category-card:hover { border-color: var(--gold-dim); }
+.category-card-wide { grid-column: span 2; aspect-ratio: auto; min-height: 340px; }
+.category-card img {
+  width: 100%; height: 100%; object-fit: cover;
+  transition: transform 0.6s cubic-bezier(0.4,0,0.2,1);
+  filter: brightness(0.7);
+}
+.category-card:hover img { transform: scale(1.05); filter: brightness(0.85); }
+.category-card-overlay {
+  position: absolute; inset: 0;
+  background: linear-gradient(to top, rgba(0,0,0,0.85) 0%, rgba(0,0,0,0.2) 50%, transparent 100%);
+}
+.category-card-content {
+  position: absolute; bottom: 0; left: 0; right: 0; padding: 24px;
+}
+.category-card-name {
+  font-family: var(--font-serif); font-size: 22px; font-weight: 500; margin-bottom: 6px;
+}
+.category-card-desc { font-size: 12px; color: var(--text-secondary); margin-bottom: 14px; }
+.category-card-link {
+  display: inline-flex; align-items: center; gap: 6px;
+  font-size: 10px; font-weight: 600; letter-spacing: 2px; text-transform: uppercase;
+  color: var(--gold);
+  transition: gap 0.3s;
+}
+.category-card:hover .category-card-link { gap: 10px; }
+
+/* ============================================================
+   FEATURED PRODUCTS
+   ============================================================ */
+.featured-section { padding: 80px 0; border-top: 1px solid var(--border); }
+.featured-header {
+  display: flex; align-items: flex-end; justify-content: space-between;
+  margin-bottom: 48px; gap: 24px; flex-wrap: wrap;
+}
+.products-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 20px;
+}
+.product-card {
+  background: var(--bg-card);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-lg); overflow: hidden;
+  cursor: pointer;
+  transition: border-color 0.3s, transform 0.3s, box-shadow 0.3s;
+}
+.product-card:hover {
+  border-color: rgba(201,168,76,0.3);
+  transform: translateY(-4px);
+  box-shadow: 0 20px 60px rgba(0,0,0,0.4);
+}
+.product-card-image {
+  aspect-ratio: 4/3; overflow: hidden; position: relative;
+}
+.product-card-image img {
+  width: 100%; height: 100%; object-fit: cover;
+  transition: transform 0.6s cubic-bezier(0.4,0,0.2,1);
+}
+.product-card:hover .product-card-image img { transform: scale(1.08); }
+.product-card-badge {
+  position: absolute; top: 12px; left: 12px;
+}
+.product-card-body { padding: 20px; }
+.product-card-category { font-size: 10px; letter-spacing: 2px; text-transform: uppercase; color: var(--gold); margin-bottom: 8px; }
+.product-card-name { font-family: var(--font-serif); font-size: 18px; font-weight: 500; margin-bottom: 8px; }
+.product-card-desc { font-size: 13px; color: var(--text-secondary); margin-bottom: 16px; line-height: 1.5; }
+.product-card-footer {
+  display: flex; align-items: center; justify-content: space-between;
+  border-top: 1px solid var(--border); padding-top: 16px;
+}
+.product-card-price { font-size: 20px; font-weight: 600; color: var(--text-primary); }
+.product-card-price span { font-size: 12px; color: var(--text-muted); font-weight: 400; margin-left: 4px; }
+.product-card-action {
+  width: 40px; height: 40px; border-radius: 50%;
+  background: var(--gold-dim); border: 1px solid rgba(201,168,76,0.3);
+  display: flex; align-items: center; justify-content: center;
+  color: var(--gold); transition: var(--transition);
+}
+.product-card:hover .product-card-action {
+  background: var(--gold); color: #0a0800; transform: scale(1.1);
+}
+
+/* ============================================================
+   CONVERSION STRIP
+   ============================================================ */
+.conversion-strip {
+  margin: 0; padding: 80px 0;
+  background: linear-gradient(135deg, rgba(201,168,76,0.08) 0%, transparent 60%);
+  border-top: 1px solid var(--border);
+  border-bottom: 1px solid var(--border);
+}
+.conversion-strip-inner {
+  display: grid; grid-template-columns: 1fr auto;
+  gap: 48px; align-items: center;
+}
+.conversion-strip-title {
+  font-family: var(--font-serif); font-size: clamp(24px, 4vw, 42px);
+  font-weight: 500; line-height: 1.2; margin-bottom: 12px;
+}
+.conversion-strip-title em { color: var(--gold); font-style: italic; }
+.conversion-strip-sub { color: var(--text-secondary); font-size: 15px; }
+.conversion-strip-cta { display: flex; flex-direction: column; gap: 12px; align-items: flex-end; }
+.phone-cta {
+  display: flex; align-items: center; gap: 12px;
+  padding: 16px 24px; border-radius: var(--radius-lg);
+  background: var(--bg-elevated); border: 1px solid var(--border-hover);
+  transition: var(--transition);
+}
+.phone-cta:hover { border-color: var(--gold); background: var(--gold-dim); }
+.phone-cta-icon { color: var(--gold); flex-shrink: 0; }
+.phone-cta-label { font-size: 10px; letter-spacing: 2px; text-transform: uppercase; color: var(--text-muted); }
+.phone-cta-number { font-size: 18px; font-weight: 600; color: var(--text-primary); }
+</style>
+</head>
+
+<body>
+<!-- ============================================================
+     NAVBAR
+     ============================================================ -->
+<nav id="navbar">
+  <div class="nav-inner">
+    <div class="nav-logo" onclick="showPage('home')">
+      <div class="nav-logo-mark">P</div>
+      <div>
+        <div class="nav-logo-text">Porte Prestige</div>
+        <div class="nav-logo-sub">Algérie · Showroom Premium</div>
+      </div>
+    </div>
+
+    <div class="nav-links" id="navLinks">
+      <span class="nav-link active" data-page="home" onclick="showPage('home')">Showroom</span>
+      <span class="nav-link" data-page="shop" onclick="showPage('shop')">Catalogue</span>
+      <span class="nav-link" data-page="about" onclick="showPage('about')">À Propos</span>
+      <span class="nav-link" data-page="faq" onclick="showPage('faq')">FAQ</span>
+      <span class="nav-link" data-page="contact" onclick="showPage('contact')">Contact</span>
+    </div>
+
+    <div style="display:flex;align-items:center;gap:12px;">
+      <div class="nav-cta" onclick="showPage('order')">Commander</div>
+      <div class="nav-mobile-toggle" id="mobileToggle" onclick="toggleMobileMenu()">
+        <span></span><span></span><span></span>
+      </div>
+    </div>
+  </div>
+</nav>
+
+<div class="nav-mobile-menu" id="mobileMenu">
+  <span class="nav-mobile-link" onclick="showPage('home');toggleMobileMenu()">Showroom</span>
+  <span class="nav-mobile-link" onclick="showPage('shop');toggleMobileMenu()">Catalogue</span>
+  <span class="nav-mobile-link" onclick="showPage('about');toggleMobileMenu()">À Propos</span>
+  <span class="nav-mobile-link" onclick="showPage('faq');toggleMobileMenu()">FAQ</span>
+  <span class="nav-mobile-link" onclick="showPage('contact');toggleMobileMenu()">Contact</span>
+  <div class="nav-mobile-cta" onclick="showPage('order');toggleMobileMenu()">🛒 Commander Maintenant</div>
+</div>
+
+<!-- ============================================================
+     PAGE: HOME
+     ============================================================ -->
+<div id="page-home" class="page active">
+
+  <!-- ============================================================
+       3D SHOWROOM HERO — 360° Panoramic Experience
+       ============================================================ -->
+  <section id="showroom-section" style="position:relative;width:100%;height:calc(100vh - var(--nav-h));overflow:hidden;background:#0b0906;">
+
+    <!-- Canvas mounts here (Three.js appends its <canvas> inside) -->
+    <div id="showroom-canvas-wrap" style="position:absolute;inset:0;"></div>
+
+    <!-- ── LOADING SCREEN ── -->
+    <div id="showroom-loading" style="position:absolute;inset:0;z-index:50;background:#0b0906;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:18px;pointer-events:none;">
+      <div style="font-family:var(--font-serif);font-size:36px;font-weight:500;color:var(--gold);letter-spacing:2px;">Porte Prestige</div>
+      <div style="font-size:10px;letter-spacing:5px;text-transform:uppercase;color:var(--text-muted);">Chargement du Showroom</div>
+      <div style="width:220px;height:1.5px;background:rgba(255,255,255,0.07);border-radius:2px;overflow:hidden;margin-top:4px;">
+        <div id="showroom-progress-bar" style="height:100%;background:var(--gold);width:0%;transition:width 0.35s ease;border-radius:2px;"></div>
+      </div>
+      <div id="showroom-progress-text" style="font-size:10px;color:var(--text-muted);letter-spacing:1px;">0%</div>
+    </div>
+
+    <!-- ── TOP: Brand label ── -->
+    <div style="position:absolute;top:0;left:0;right:0;z-index:20;pointer-events:none;padding:20px 28px;display:flex;align-items:center;justify-content:space-between;">
+      <div style="background:rgba(8,7,5,0.72);backdrop-filter:blur(14px);border:1px solid rgba(201,168,76,0.18);border-radius:6px;padding:8px 16px;display:flex;align-items:center;gap:10px;">
+        <div style="width:24px;height:24px;background:var(--gold);border-radius:2px;display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:700;color:#0a0800;flex-shrink:0;">P</div>
+        <span style="font-size:10px;font-weight:700;letter-spacing:3px;text-transform:uppercase;color:var(--text-primary);">Showroom Virtuel</span>
+      </div>
+      <div style="background:rgba(8,7,5,0.72);backdrop-filter:blur(14px);border:1px solid var(--border);border-radius:6px;padding:8px 14px;">
+        <span style="font-size:10px;color:var(--gold);font-weight:600;letter-spacing:2px;">+200 Modèles · 58 Wilayas</span>
+      </div>
+    </div>
+
+    <!-- ── Hover tooltip ── -->
+    <div id="showroom-tooltip" style="position:absolute;z-index:30;background:rgba(8,7,5,0.92);backdrop-filter:blur(14px);border:1px solid rgba(201,168,76,0.4);border-radius:6px;padding:8px 16px;font-size:11px;font-weight:700;letter-spacing:2px;text-transform:uppercase;color:var(--gold);pointer-events:none;opacity:0;transition:opacity 0.18s;white-space:nowrap;box-shadow:0 4px 24px rgba(0,0,0,0.4);"></div>
+
+    <!-- ── Drag hint (auto-fades after 3.8s) ── -->
+    <div id="showroom-hint" style="position:absolute;bottom:88px;left:50%;transform:translateX(-50%);z-index:20;pointer-events:none;opacity:0;display:flex;align-items:center;gap:14px;background:rgba(8,7,5,0.78);backdrop-filter:blur(14px);border:1px solid rgba(255,255,255,0.1);border-radius:28px;padding:11px 26px;">
+      <svg width="15" height="15" fill="none" stroke="var(--gold)" stroke-width="2.5" viewBox="0 0 24 24"><path d="M19 12H5"/><polyline points="12 19 5 12 12 5"/></svg>
+      <span style="font-size:10px;letter-spacing:3px;text-transform:uppercase;color:rgba(255,255,255,0.7);">Glissez pour explorer</span>
+      <svg width="15" height="15" fill="none" stroke="var(--gold)" stroke-width="2.5" viewBox="0 0 24 24"><path d="M5 12h14"/><polyline points="12 5 19 12 12 19"/></svg>
+    </div>
+
+    <!-- ── Arrow Buttons ── -->
+    <button id="showroom-arrow-left"
+      style="position:absolute;top:50%;left:20px;transform:translateY(-50%);z-index:20;width:48px;height:48px;border-radius:50%;background:rgba(8,7,5,0.7);backdrop-filter:blur(12px);border:1px solid rgba(201,168,76,0.25);color:rgba(255,255,255,0.8);font-size:22px;display:flex;align-items:center;justify-content:center;cursor:pointer;transition:background 0.2s,border-color 0.2s;"
+      onmouseenter="this.style.background='rgba(201,168,76,0.15)';this.style.borderColor='rgba(201,168,76,0.6)'"
+      onmouseleave="this.style.background='rgba(8,7,5,0.7)';this.style.borderColor='rgba(201,168,76,0.25)'"
+      aria-label="Rotation gauche">‹</button>
+
+    <button id="showroom-arrow-right"
+      style="position:absolute;top:50%;right:20px;transform:translateY(-50%);z-index:20;width:48px;height:48px;border-radius:50%;background:rgba(8,7,5,0.7);backdrop-filter:blur(12px);border:1px solid rgba(201,168,76,0.25);color:rgba(255,255,255,0.8);font-size:22px;display:flex;align-items:center;justify-content:center;cursor:pointer;transition:background 0.2s,border-color 0.2s;"
+      onmouseenter="this.style.background='rgba(201,168,76,0.15)';this.style.borderColor='rgba(201,168,76,0.6)'"
+      onmouseleave="this.style.background='rgba(8,7,5,0.7)';this.style.borderColor='rgba(201,168,76,0.25)'"
+      aria-label="Rotation droite">›</button>
+
+    <!-- ── Bottom bar: CTA + phone ── -->
+    <div style="position:absolute;bottom:0;left:0;right:0;z-index:20;padding:20px 28px;display:flex;align-items:center;justify-content:space-between;background:linear-gradient(to top,rgba(8,7,5,0.9) 0%,transparent 100%);pointer-events:none;">
+      <div style="display:flex;align-items:center;gap:12px;pointer-events:auto;">
+        <button class="btn btn-gold" style="padding:14px 26px;font-size:11px;letter-spacing:2.5px;animation:none;box-shadow:0 4px 28px rgba(201,168,76,0.35);" onclick="showPage('order')">
+          Commander (COD)
+        </button>
+        <button class="btn btn-outline" style="padding:13px 20px;font-size:11px;letter-spacing:2px;" onclick="showPage('shop')">
+          Catalogue →
+        </button>
+      </div>
+      <a href="tel:+213XXXXXXXXX" style="display:flex;align-items:center;gap:10px;background:rgba(8,7,5,0.78);backdrop-filter:blur(14px);border:1px solid var(--border);border-radius:8px;padding:10px 16px;pointer-events:auto;transition:border-color 0.2s;" onclick="trackEvent('click_call','hero')" onmouseenter="this.style.borderColor='var(--gold)'" onmouseleave="this.style.borderColor='var(--border)'">
+        <svg width="14" height="14" fill="none" stroke="var(--gold)" stroke-width="2" viewBox="0 0 24 24"><path d="M22 16.92v3a2 2 0 01-2.18 2 19.79 19.79 0 01-8.63-3.07A19.5 19.5 0 013.07 9.81 19.79 19.79 0 01.22 1.18 2 2 0 012.18 0h3a2 2 0 012 1.72c.127.96.361 1.903.7 2.81a2 2 0 01-.45 2.11L6.91 7.09a16 16 0 006 6l.55-.55a2 2 0 012.11-.45c.907.339 1.85.573 2.81.7A2 2 0 0122 14.92z"/></svg>
+        <div>
+          <div style="font-size:9px;letter-spacing:2px;text-transform:uppercase;color:var(--text-muted);">Appel direct</div>
+          <div style="font-size:13px;font-weight:600;color:var(--text-primary);">+213 XX XX XX XX</div>
+        </div>
+      </a>
+    </div>
+
+  </section>
+
+  <!-- MARQUEE -->
+  <div class="marquee-strip">
+    <div class="marquee-track" id="marqueeTrack">
+      <span class="marquee-item">Livraison Nationale</span>
+      <span class="marquee-item">Paiement à la Livraison</span>
+      <span class="marquee-item">Installation Professionnelle</span>
+      <span class="marquee-item">Garantie 5 Ans</span>
+      <span class="marquee-item">58 Wilayas</span>
+      <span class="marquee-item">+200 Modèles</span>
+      <span class="marquee-item">Devis Gratuit</span>
+      <span class="marquee-item">SAV Inclus</span>
+      <span class="marquee-item">Livraison Nationale</span>
+      <span class="marquee-item">Paiement à la Livraison</span>
+      <span class="marquee-item">Installation Professionnelle</span>
+      <span class="marquee-item">Garantie 5 Ans</span>
+      <span class="marquee-item">58 Wilayas</span>
+      <span class="marquee-item">+200 Modèles</span>
+      <span class="marquee-item">Devis Gratuit</span>
+      <span class="marquee-item">SAV Inclus</span>
+    </div>
+  </div>
+
+  <!-- STATS BAR -->
+  <div class="stats-bar">
+    <div class="container">
+      <div class="stats-grid">
+        <div class="stat-item">
+          <div class="stat-number">+2000</div>
+          <div class="stat-label">Clients Satisfaits</div>
+        </div>
+        <div class="stat-item">
+          <div class="stat-number">58</div>
+          <div class="stat-label">Wilayas Livrées</div>
+        </div>
+        <div class="stat-item">
+          <div class="stat-number">5 Ans</div>
+          <div class="stat-label">De Garantie</div>
+        </div>
+        <div class="stat-item">
+          <div class="stat-number">48H</div>
+          <div class="stat-label">Délai de Livraison</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- CATEGORIES -->
+  <section class="categories-section">
+    <div class="container">
+      <div class="categories-header">
+        <div>
+          <div class="section-label">Nos Collections</div>
+          <h2 class="section-title">Explorez par<br>Catégorie</h2>
+        </div>
+        <button class="btn btn-outline" onclick="showPage('shop')">Voir Tout le Catalogue →</button>
+      </div>
+      <div class="categories-grid">
+        <div class="category-card category-card-wide" onclick="showPage('shop','blindées')">
+          <img src="steel-door.jpg" alt="Portes Blindées" loading="lazy" />
+          <div class="category-card-overlay"></div>
+          <div class="category-card-content">
+            <div class="badge badge-gold" style="margin-bottom:10px;">Bestseller</div>
+            <div class="category-card-name">Portes Blindées</div>
+            <div class="category-card-desc">Sécurité maximale certifiée. Serrures multipoints intégrées.</div>
+            <div class="category-card-link">Voir la collection <svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><line x1="5" y1="12" x2="19" y2="12"/><polyline points="12 5 19 12 12 19"/></svg></div>
+          </div>
+        </div>
+        <div class="category-card" onclick="showPage('shop','entrée')">
+          <img src="wooden-door.jpg" alt="Portes d'Entrée" loading="lazy" />
+          <div class="category-card-overlay"></div>
+          <div class="category-card-content">
+            <div class="category-card-name">Portes d'Entrée</div>
+            <div class="category-card-desc">Élégance et robustesse. Bois massif, aluminium, acier.</div>
+            <div class="category-card-link">Voir la collection <svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><line x1="5" y1="12" x2="19" y2="12"/><polyline points="12 5 19 12 12 19"/></svg></div>
+          </div>
+        </div>
+        <div class="category-card" onclick="showPage('shop','intérieure')">
+          <img src="panel-door.jpg" alt="Portes Intérieures" loading="lazy" />
+          <div class="category-card-overlay"></div>
+          <div class="category-card-content">
+            <div class="category-card-name">Portes Intérieures</div>
+            <div class="category-card-desc">Design moderne pour chaque pièce de votre maison.</div>
+            <div class="category-card-link">Voir la collection <svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><line x1="5" y1="12" x2="19" y2="12"/><polyline points="12 5 19 12 12 19"/></svg></div>
+          </div>
+        </div>
+        <div class="category-card" onclick="showPage('shop','verre')">
+          <img src="glass-door.jpg" alt="Portes Vitrées" loading="lazy" />
+          <div class="category-card-overlay"></div>
+          <div class="category-card-content">
+            <div class="category-card-name">Portes Vitrées</div>
+            <div class="category-card-desc">Luminosité et style. Verre trempé sécurisé.</div>
+            <div class="category-card-link">Voir la collection <svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><line x1="5" y1="12" x2="19" y2="12"/><polyline points="12 5 19 12 12 19"/></svg></div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- FEATURED PRODUCTS -->
+  <section class="featured-section">
+    <div class="container">
+      <div class="featured-header">
+        <div>
+          <div class="section-label">Sélection Premium</div>
+          <h2 class="section-title">Nos Produits<br>Vedettes</h2>
+        </div>
+        <button class="btn btn-outline" onclick="showPage('shop')">Catalogue Complet →</button>
+      </div>
+      <div class="products-grid" id="featuredProducts"></div>
+    </div>
+  </section>
+
+  <!-- CONVERSION STRIP -->
+  <section class="conversion-strip">
+    <div class="container">
+      <div class="conversion-strip-inner">
+        <div>
+          <div class="section-label">Commande Facile</div>
+          <div class="conversion-strip-title">Commandez par téléphone,<br>payez à la <em>livraison</em></div>
+          <div class="conversion-strip-sub">Notre équipe vous accompagne du choix à l'installation. Aucun paiement en ligne requis.</div>
+        </div>
+        <div class="conversion-strip-cta">
+          <button class="btn btn-gold" style="font-size:13px;padding:18px 32px;" onclick="showPage('order')">
+            Passer Commande Maintenant
+          </button>
+          <a href="tel:+213XXXXXXXXX" class="phone-cta" onclick="trackEvent('click_call','hero')">
+            <div class="phone-cta-icon">
+              <svg width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M22 16.92v3a2 2 0 01-2.18 2 19.79 19.79 0 01-8.63-3.07A19.5 19.5 0 013.07 9.81 19.79 19.79 0 01.22 1.18 2 2 0 012.18 0h3a2 2 0 012 1.72c.127.96.361 1.903.7 2.81a2 2 0 01-.45 2.11L6.91 7.09a16 16 0 006 6l.55-.55a2 2 0 012.11-.45c.907.339 1.85.573 2.81.7A2 2 0 0122 14.92z"/></svg>
+            </div>
+            <div>
+              <div class="phone-cta-label">Appeler maintenant</div>
+              <div class="phone-cta-number">+213 XX XX XX XX</div>
+            </div>
+          </a>
+        </div>
+      </div>
+    </div>
+  </section>
+
+</div><!-- /page-home -->
+
+<!-- ============================================================
+     PAGE: SHOP
+     ============================================================ -->
+<div id="page-shop" class="page">
+  <div style="padding-top:var(--nav-h);">
+    <div class="container" style="padding-top:48px;padding-bottom:80px;">
+
+      <!-- Shop Header -->
+      <div style="margin-bottom:40px;">
+        <div class="section-label">Catalogue Complet</div>
+        <h1 class="section-title">Nos Portes Premium</h1>
+        <p style="color:var(--text-secondary);margin-top:12px;font-size:15px;">
+          Livraison et installation dans toute l'Algérie · Paiement à la livraison
+        </p>
+      </div>
+
+      <!-- Filters Row -->
+      <div style="display:flex;align-items:center;gap:10px;flex-wrap:wrap;margin-bottom:40px;padding-bottom:24px;border-bottom:1px solid var(--border);">
+        <span style="font-size:11px;letter-spacing:2px;text-transform:uppercase;color:var(--text-muted);margin-right:8px;">Filtrer :</span>
+        <button class="filter-btn active" data-filter="all" onclick="filterProducts('all')">Tous</button>
+        <button class="filter-btn" data-filter="blindées" onclick="filterProducts('blindées')">Blindées</button>
+        <button class="filter-btn" data-filter="entrée" onclick="filterProducts('entrée')">Entrée</button>
+        <button class="filter-btn" data-filter="intérieure" onclick="filterProducts('intérieure')">Intérieure</button>
+        <button class="filter-btn" data-filter="verre" onclick="filterProducts('verre')">Vitrée</button>
+        <button class="filter-btn" data-filter="aluminium" onclick="filterProducts('aluminium')">Aluminium</button>
+        <div style="margin-left:auto;display:flex;align-items:center;gap:8px;">
+          <span style="font-size:11px;color:var(--text-muted);">Trier :</span>
+          <select id="sortSelect" onchange="sortProducts()" style="background:var(--bg-elevated);color:var(--text-primary);border:1px solid var(--border);border-radius:4px;padding:8px 12px;font-size:12px;cursor:pointer;">
+            <option value="default">Par défaut</option>
+            <option value="price-asc">Prix croissant</option>
+            <option value="price-desc">Prix décroissant</option>
+            <option value="name">Alphabétique</option>
+          </select>
+        </div>
+      </div>
+
+      <!-- Products Grid -->
+      <div class="products-grid" id="shopProducts"></div>
+
+      <!-- No results -->
+      <div id="noResults" class="hidden" style="text-align:center;padding:80px 0;">
+        <div style="font-size:48px;margin-bottom:16px;">🚪</div>
+        <div style="font-size:18px;color:var(--text-secondary);">Aucun produit trouvé dans cette catégorie.</div>
+        <button class="btn btn-gold" style="margin-top:24px;" onclick="filterProducts('all')">Voir tous les produits</button>
+      </div>
+
+    </div>
+  </div>
+</div><!-- /page-shop -->
+
+<!-- ============================================================
+     PAGE: ORDER (COD FORM)
+     ============================================================ -->
+<div id="page-order" class="page">
+  <div style="padding-top:var(--nav-h);">
+    <div class="container" style="padding-top:48px;padding-bottom:80px;">
+      <div style="max-width:680px;margin:0 auto;">
+
+        <!-- Order Header -->
+        <div style="text-align:center;margin-bottom:48px;">
+          <div class="section-label" style="justify-content:center;display:flex;">Paiement à la Livraison</div>
+          <h1 class="section-title" style="margin-bottom:16px;">Passer votre<br>Commande</h1>
+          <p style="color:var(--text-secondary);font-size:15px;">
+            Remplissez le formulaire ci-dessous. Notre équipe vous contactera dans les 2h pour confirmer.
+          </p>
+        </div>
+
+        <!-- Trust Row -->
+        <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:12px;margin-bottom:40px;">
+          <div style="background:var(--bg-card);border:1px solid var(--border);border-radius:var(--radius-lg);padding:16px;text-align:center;">
+            <div style="font-size:24px;margin-bottom:8px;">🔒</div>
+            <div style="font-size:11px;font-weight:600;letter-spacing:1px;color:var(--text-primary);margin-bottom:4px;">100% Sécurisé</div>
+            <div style="font-size:11px;color:var(--text-muted);">Paiement à la réception</div>
+          </div>
+          <div style="background:var(--bg-card);border:1px solid var(--border);border-radius:var(--radius-lg);padding:16px;text-align:center;">
+            <div style="font-size:24px;margin-bottom:8px;">🚚</div>
+            <div style="font-size:11px;font-weight:600;letter-spacing:1px;color:var(--text-primary);margin-bottom:4px;">Livraison 48H</div>
+            <div style="font-size:11px;color:var(--text-muted);">Toute l'Algérie</div>
+          </div>
+          <div style="background:var(--bg-card);border:1px solid var(--border);border-radius:var(--radius-lg);padding:16px;text-align:center;">
+            <div style="font-size:24px;margin-bottom:8px;">🔧</div>
+            <div style="font-size:11px;font-weight:600;letter-spacing:1px;color:var(--text-primary);margin-bottom:4px;">Installation</div>
+            <div style="font-size:11px;color:var(--text-muted);">Par nos équipes</div>
+          </div>
+        </div>
+
+        <!-- COD FORM -->
+        <form id="codForm" onsubmit="submitOrder(event)" style="background:var(--bg-card);border:1px solid var(--border);border-radius:var(--radius-lg);padding:36px;">
+
+          <div style="font-size:12px;font-weight:600;letter-spacing:3px;text-transform:uppercase;color:var(--gold);margin-bottom:24px;padding-bottom:16px;border-bottom:1px solid var(--border);">
+            Informations Personnelles
+          </div>
+
+          <div style="display:grid;grid-template-columns:1fr 1fr;gap:18px;margin-bottom:18px;">
+            <div class="form-group">
+              <label class="form-label">Nom complet *</label>
+              <input type="text" class="form-input" name="name" placeholder="Votre nom et prénom" required />
+            </div>
+            <div class="form-group">
+              <label class="form-label">Téléphone *</label>
+              <input type="tel" class="form-input" name="phone" placeholder="0XX XX XX XX XX" required pattern="[0-9]{10,13}" />
+            </div>
+          </div>
+
+          <div style="display:grid;grid-template-columns:1fr 1fr;gap:18px;margin-bottom:18px;">
+            <div class="form-group">
+              <label class="form-label">Wilaya *</label>
+              <select class="form-input form-select" name="wilaya" required onchange="updateCommunes()">
+                <option value="">-- Choisir une wilaya --</option>
+              </select>
+            </div>
+            <div class="form-group">
+              <label class="form-label">Commune *</label>
+              <select class="form-input form-select" name="commune" required>
+                <option value="">-- Choisir une commune --</option>
+              </select>
+            </div>
+          </div>
+
+          <div class="form-group" style="margin-bottom:18px;">
+            <label class="form-label">Adresse complète *</label>
+            <input type="text" class="form-input" name="address" placeholder="Rue, numéro, cité, bloc..." required />
+          </div>
+
+          <div style="font-size:12px;font-weight:600;letter-spacing:3px;text-transform:uppercase;color:var(--gold);margin:28px 0 20px;padding-top:20px;border-top:1px solid var(--border);">
+            Détails de la Commande
+          </div>
+
+          <div class="form-group" style="margin-bottom:18px;">
+            <label class="form-label">Produit souhaité *</label>
+            <select class="form-input form-select" name="product" id="orderProduct" required>
+              <option value="">-- Choisir un produit --</option>
+            </select>
+          </div>
+
+          <div style="display:grid;grid-template-columns:1fr 1fr;gap:18px;margin-bottom:18px;">
+            <div class="form-group">
+              <label class="form-label">Quantité</label>
+              <input type="number" class="form-input" name="quantity" value="1" min="1" max="50" />
+            </div>
+            <div class="form-group">
+              <label class="form-label">Couleur / Finition</label>
+              <input type="text" class="form-input" name="color" placeholder="Ex: Chêne, Blanc mat..." />
+            </div>
+          </div>
+
+          <div class="form-group" style="margin-bottom:28px;">
+            <label class="form-label">Notes / Demandes spéciales</label>
+            <textarea class="form-input" name="notes" rows="3" placeholder="Dimensions personnalisées, options, questions..." style="resize:vertical;min-height:80px;"></textarea>
+          </div>
+
+          <!-- Source tracking (hidden) -->
+          <input type="hidden" name="source" value="website" />
+          <input type="hidden" name="utm_source" id="utmSource" />
+          <input type="hidden" name="timestamp" id="orderTimestamp" />
+
+          <button type="submit" class="btn btn-gold" style="width:100%;padding:20px;font-size:14px;letter-spacing:3px;border-radius:var(--radius-lg);justify-content:center;">
+            <svg width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg>
+            Confirmer ma Commande (COD)
+          </button>
+
+          <p style="text-align:center;font-size:12px;color:var(--text-muted);margin-top:16px;">
+            ✅ Aucun paiement requis maintenant · Payez à la réception de votre commande
+          </p>
+        </form>
+
+        <!-- Success Message (hidden) -->
+        <div id="orderSuccess" class="hidden" style="background:var(--bg-card);border:1px solid rgba(74,222,128,0.3);border-radius:var(--radius-lg);padding:48px;text-align:center;">
+          <div style="font-size:56px;margin-bottom:24px;">✅</div>
+          <h2 style="font-family:var(--font-serif);font-size:28px;color:var(--green);margin-bottom:12px;">Commande Reçue !</h2>
+          <p style="color:var(--text-secondary);font-size:15px;margin-bottom:24px;">
+            Merci pour votre commande. Notre équipe vous contactera dans les <strong>2 heures</strong> pour confirmer les détails.
+          </p>
+          <div style="display:flex;gap:12px;justify-content:center;flex-wrap:wrap;">
+            <button class="btn btn-gold" onclick="showPage('home')">Retour à l'accueil</button>
+            <a href="https://wa.me/213XXXXXXXXX" target="_blank" class="btn btn-outline">
+              💬 WhatsApp
+            </a>
+          </div>
+        </div>
+
+      </div>
+    </div>
+  </div>
+</div><!-- /page-order -->
+
+<!-- ============================================================
+     PAGE: ABOUT
+     ============================================================ -->
+<div id="page-about" class="page">
+  <div style="padding-top:var(--nav-h);">
+    <div class="container" style="padding-top:60px;padding-bottom:80px;max-width:860px;">
+      <div class="section-label">Notre Histoire</div>
+      <h1 class="section-title" style="margin-bottom:32px;">Porte Prestige Algérie</h1>
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:60px;align-items:center;margin-bottom:60px;">
+        <div>
+          <p style="color:var(--text-secondary);font-size:16px;line-height:1.8;margin-bottom:20px;">
+            Depuis plus de 10 ans, <strong style="color:var(--text-primary);">Porte Prestige</strong> est le leader algérien de la vente et installation de portes premium. Nous accompagnons des milliers de familles et entreprises dans toute l'Algérie.
+          </p>
+          <p style="color:var(--text-secondary);font-size:16px;line-height:1.8;margin-bottom:20px;">
+            Notre engagement : vous offrir des produits de qualité supérieure, une installation professionnelle, et un service après-vente réactif — le tout avec un paiement à la livraison pour votre tranquillité.
+          </p>
+          <p style="color:var(--text-secondary);font-size:16px;line-height:1.8;">
+            Notre réseau couvre les <strong style="color:var(--gold);">58 wilayas</strong> avec des équipes locales formées et certifiées.
+          </p>
+        </div>
+        <div style="background:var(--bg-card);border:1px solid var(--border);border-radius:var(--radius-lg);overflow:hidden;aspect-ratio:4/3;">
+          <img src="steel-door.jpg" alt="Showroom" style="width:100%;height:100%;object-fit:cover;filter:brightness(0.8);" />
+        </div>
+      </div>
+      <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:20px;">
+        <div style="background:var(--bg-card);border:1px solid var(--border);border-radius:var(--radius-lg);padding:28px;text-align:center;">
+          <div style="font-family:var(--font-serif);font-size:36px;color:var(--gold);margin-bottom:8px;">10+</div>
+          <div style="font-size:13px;color:var(--text-secondary);">Années d'expérience</div>
+        </div>
+        <div style="background:var(--bg-card);border:1px solid var(--border);border-radius:var(--radius-lg);padding:28px;text-align:center;">
+          <div style="font-family:var(--font-serif);font-size:36px;color:var(--gold);margin-bottom:8px;">+2000</div>
+          <div style="font-size:13px;color:var(--text-secondary);">Clients satisfaits</div>
+        </div>
+        <div style="background:var(--bg-card);border:1px solid var(--border);border-radius:var(--radius-lg);padding:28px;text-align:center;">
+          <div style="font-family:var(--font-serif);font-size:36px;color:var(--gold);margin-bottom:8px;">58</div>
+          <div style="font-size:13px;color:var(--text-secondary);">Wilayas couvertes</div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ============================================================
+     PAGE: FAQ
+     ============================================================ -->
+<div id="page-faq" class="page">
+  <div style="padding-top:var(--nav-h);">
+    <div class="container" style="padding-top:60px;padding-bottom:80px;max-width:760px;">
+      <div class="section-label">Questions Fréquentes</div>
+      <h1 class="section-title" style="margin-bottom:48px;">FAQ</h1>
+      <div id="faqAccordion"></div>
+    </div>
+  </div>
+</div>
+
+<!-- ============================================================
+     PAGE: CONTACT
+     ============================================================ -->
+<div id="page-contact" class="page">
+  <div style="padding-top:var(--nav-h);">
+    <div class="container" style="padding-top:60px;padding-bottom:80px;max-width:680px;">
+      <div class="section-label">Nous Contacter</div>
+      <h1 class="section-title" style="margin-bottom:48px;">Contactez-nous</h1>
+      <div style="display:grid;gap:16px;margin-bottom:40px;">
+        <a href="tel:+213XXXXXXXXX" style="display:flex;align-items:center;gap:20px;background:var(--bg-card);border:1px solid var(--border);border-radius:var(--radius-lg);padding:24px;transition:border-color 0.3s;" onmouseenter="this.style.borderColor='var(--gold)'" onmouseleave="this.style.borderColor='var(--border)'" onclick="trackEvent('click_call','contact')">
+          <div style="width:48px;height:48px;background:var(--gold-dim);border-radius:50%;display:flex;align-items:center;justify-content:center;color:var(--gold);flex-shrink:0;">📞</div>
+          <div><div style="font-weight:600;margin-bottom:4px;">Appel / WhatsApp</div><div style="color:var(--text-secondary);font-size:14px;">+213 XX XX XX XX</div></div>
+        </a>
+        <a href="https://wa.me/213XXXXXXXXX" target="_blank" style="display:flex;align-items:center;gap:20px;background:var(--bg-card);border:1px solid var(--border);border-radius:var(--radius-lg);padding:24px;transition:border-color 0.3s;" onmouseenter="this.style.borderColor='#25D366'" onmouseleave="this.style.borderColor='var(--border)'">
+          <div style="width:48px;height:48px;background:rgba(37,211,102,0.1);border-radius:50%;display:flex;align-items:center;justify-content:center;flex-shrink:0;">💬</div>
+          <div><div style="font-weight:600;margin-bottom:4px;">WhatsApp</div><div style="color:var(--text-secondary);font-size:14px;">Réponse rapide garantie</div></div>
+        </a>
+        <div style="display:flex;align-items:center;gap:20px;background:var(--bg-card);border:1px solid var(--border);border-radius:var(--radius-lg);padding:24px;">
+          <div style="width:48px;height:48px;background:var(--gold-dim);border-radius:50%;display:flex;align-items:center;justify-content:center;color:var(--gold);flex-shrink:0;">📍</div>
+          <div><div style="font-weight:600;margin-bottom:4px;">Showroom</div><div style="color:var(--text-secondary);font-size:14px;">Alger, Algérie · Ouvert 8h–18h Dim–Jeu</div></div>
+        </div>
+      </div>
+      <button class="btn btn-gold" style="width:100%;padding:18px;font-size:13px;" onclick="showPage('order')">Passer une Commande</button>
+    </div>
+  </div>
+</div>
+
+<!-- ============================================================
+     PRODUCT MODAL
+     ============================================================ -->
+<div id="productModal" style="display:none;position:fixed;inset:0;z-index:2000;background:rgba(0,0,0,0.85);backdrop-filter:blur(8px);overflow-y:auto;" onclick="closeModal(event)">
+  <div id="modalContent" style="max-width:900px;margin:5vh auto;background:var(--bg-card);border:1px solid var(--border);border-radius:var(--radius-lg);overflow:hidden;position:relative;" onclick="event.stopPropagation()">
+    <button onclick="document.getElementById('productModal').style.display='none'" style="position:absolute;top:16px;right:16px;z-index:10;width:36px;height:36px;background:var(--bg-elevated);border:1px solid var(--border);border-radius:50%;color:var(--text-secondary);font-size:18px;display:flex;align-items:center;justify-content:center;cursor:pointer;">✕</button>
+    <div style="display:grid;grid-template-columns:1fr 1fr;min-height:500px;">
+      <div id="modalImg" style="overflow:hidden;"></div>
+      <div style="padding:40px;overflow-y:auto;max-height:90vh;">
+        <div id="modalBody"></div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ============================================================
+     FIXED: WHATSAPP BUBBLE
+     ============================================================ -->
+<a href="https://wa.me/213XXXXXXXXX?text=Bonjour, je suis intéressé par vos portes premium. Pouvez-vous m'aider ?"
+   target="_blank" id="whatsappBtn" onclick="trackEvent('click_whatsapp','float')"
+   style="position:fixed;bottom:28px;right:28px;z-index:1500;width:60px;height:60px;background:#25D366;border-radius:50%;display:flex;align-items:center;justify-content:center;box-shadow:0 8px 32px rgba(37,211,102,0.4);transition:transform 0.3s,box-shadow 0.3s;"
+   onmouseenter="this.style.transform='scale(1.1)';this.style.boxShadow='0 12px 40px rgba(37,211,102,0.5)'"
+   onmouseleave="this.style.transform='scale(1)';this.style.boxShadow='0 8px 32px rgba(37,211,102,0.4)'">
+  <svg width="28" height="28" viewBox="0 0 24 24" fill="white"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413Z"/></svg>
+</a>
+
+<!-- ============================================================
+     STICKY BOTTOM CTA (Mobile)
+     ============================================================ -->
+<div id="stickyCta" style="display:none;position:fixed;bottom:0;left:0;right:0;z-index:1400;background:rgba(8,8,10,0.97);backdrop-filter:blur(16px);border-top:1px solid var(--border);padding:12px 20px;flex-direction:column;gap:8px;">
+  <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;">
+    <a href="tel:+213XXXXXXXXX" class="btn btn-outline" style="padding:14px;font-size:11px;" onclick="trackEvent('click_call','sticky')">📞 Appeler</a>
+    <button class="btn btn-gold" style="padding:14px;font-size:11px;" onclick="showPage('order')">🛒 Commander</button>
+  </div>
+</div>
+
+<!-- ============================================================
+     FOOTER
+     ============================================================ -->
+<footer style="background:var(--bg-card);border-top:1px solid var(--border);padding:60px 0 32px;">
+  <div class="container">
+    <div style="display:grid;grid-template-columns:2fr 1fr 1fr 1fr;gap:48px;margin-bottom:48px;">
+      <div>
+        <div style="display:flex;align-items:center;gap:12px;margin-bottom:20px;cursor:pointer;" onclick="showPage('home')">
+          <div class="nav-logo-mark">P</div>
+          <div class="nav-logo-text">Porte Prestige</div>
+        </div>
+        <p style="color:var(--text-muted);font-size:14px;line-height:1.7;max-width:280px;margin-bottom:20px;">
+          Votre spécialiste portes premium en Algérie. Livraison et installation dans toutes les 58 wilayas.
+        </p>
+        <a href="https://wa.me/213XXXXXXXXX" target="_blank" style="display:inline-flex;align-items:center;gap:8px;background:rgba(37,211,102,0.1);border:1px solid rgba(37,211,102,0.3);border-radius:4px;padding:10px 16px;font-size:12px;color:#25D366;font-weight:600;">
+          💬 WhatsApp
+        </a>
+      </div>
+      <div>
+        <div style="font-size:11px;letter-spacing:3px;text-transform:uppercase;color:var(--text-muted);margin-bottom:20px;">Navigation</div>
+        <div style="display:flex;flex-direction:column;gap:10px;">
+          <span style="font-size:14px;color:var(--text-secondary);cursor:pointer;transition:color 0.2s;" onmouseenter="this.style.color='var(--gold)'" onmouseleave="this.style.color='var(--text-secondary)'" onclick="showPage('home')">Showroom</span>
+          <span style="font-size:14px;color:var(--text-secondary);cursor:pointer;transition:color 0.2s;" onmouseenter="this.style.color='var(--gold)'" onmouseleave="this.style.color='var(--text-secondary)'" onclick="showPage('shop')">Catalogue</span>
+          <span style="font-size:14px;color:var(--text-secondary);cursor:pointer;transition:color 0.2s;" onmouseenter="this.style.color='var(--gold)'" onmouseleave="this.style.color='var(--text-secondary)'" onclick="showPage('order')">Commander</span>
+          <span style="font-size:14px;color:var(--text-secondary);cursor:pointer;transition:color 0.2s;" onmouseenter="this.style.color='var(--gold)'" onmouseleave="this.style.color='var(--text-secondary)'" onclick="showPage('about')">À Propos</span>
+        </div>
+      </div>
+      <div>
+        <div style="font-size:11px;letter-spacing:3px;text-transform:uppercase;color:var(--text-muted);margin-bottom:20px;">Catégories</div>
+        <div style="display:flex;flex-direction:column;gap:10px;">
+          <span style="font-size:14px;color:var(--text-secondary);cursor:pointer;transition:color 0.2s;" onmouseenter="this.style.color='var(--gold)'" onmouseleave="this.style.color='var(--text-secondary)'" onclick="showPage('shop','blindées')">Portes Blindées</span>
+          <span style="font-size:14px;color:var(--text-secondary);cursor:pointer;transition:color 0.2s;" onmouseenter="this.style.color='var(--gold)'" onmouseleave="this.style.color='var(--text-secondary)'" onclick="showPage('shop','entrée')">Portes d'Entrée</span>
+          <span style="font-size:14px;color:var(--text-secondary);cursor:pointer;transition:color 0.2s;" onmouseenter="this.style.color='var(--gold)'" onmouseleave="this.style.color='var(--text-secondary)'" onclick="showPage('shop','intérieure')">Portes Intérieures</span>
+          <span style="font-size:14px;color:var(--text-secondary);cursor:pointer;transition:color 0.2s;" onmouseenter="this.style.color='var(--gold)'" onmouseleave="this.style.color='var(--text-secondary)'" onclick="showPage('shop','verre')">Portes Vitrées</span>
+        </div>
+      </div>
+      <div>
+        <div style="font-size:11px;letter-spacing:3px;text-transform:uppercase;color:var(--text-muted);margin-bottom:20px;">Contact</div>
+        <div style="display:flex;flex-direction:column;gap:12px;">
+          <a href="tel:+213XXXXXXXXX" style="font-size:14px;color:var(--text-secondary);" onclick="trackEvent('click_call','footer')">📞 +213 XX XX XX XX</a>
+          <a href="https://wa.me/213XXXXXXXXX" target="_blank" style="font-size:14px;color:var(--text-secondary);">💬 WhatsApp</a>
+          <div style="font-size:14px;color:var(--text-secondary);">📍 Alger, Algérie</div>
+          <div style="font-size:14px;color:var(--text-secondary);">🕐 Dim–Jeu 8h–18h</div>
+        </div>
+      </div>
+    </div>
+    <div style="border-top:1px solid var(--border);padding-top:28px;display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:12px;">
+      <div style="font-size:12px;color:var(--text-muted);">© 2024 Porte Prestige Algérie. Tous droits réservés.</div>
+      <div style="display:flex;gap:20px;">
+        <span style="font-size:12px;color:var(--text-muted);cursor:pointer;">Mentions légales</span>
+        <span style="font-size:12px;color:var(--text-muted);cursor:pointer;">Politique de confidentialité</span>
+        <span style="font-size:12px;color:var(--text-muted);cursor:pointer;">CGV</span>
+      </div>
+    </div>
+  </div>
+</footer>
+
+<!-- ============================================================
+     TOAST NOTIFICATION
+     ============================================================ -->
+<div id="toast" style="position:fixed;bottom:100px;left:50%;transform:translateX(-50%) translateY(20px);background:var(--bg-elevated);border:1px solid var(--border);border-radius:8px;padding:14px 24px;font-size:13px;font-weight:500;z-index:3000;opacity:0;transition:opacity 0.3s,transform 0.3s;pointer-events:none;white-space:nowrap;"></div>
+
+<style>
+/* ============================================================
+   ADDITIONAL CSS
+   ============================================================ */
+
+/* Filter buttons */
+.filter-btn {
+  padding: 8px 18px; border-radius: 20px; font-size: 11px;
+  font-weight: 600; letter-spacing: 1.5px; text-transform: uppercase;
+  background: transparent; color: var(--text-secondary);
+  border: 1px solid var(--border); cursor: pointer;
+  transition: var(--transition);
+}
+.filter-btn:hover { color: var(--text-primary); border-color: var(--border-hover); }
+.filter-btn.active { background: var(--gold); color: #0a0800; border-color: var(--gold); }
+
+/* Form elements */
+.form-group { display: flex; flex-direction: column; gap: 6px; }
+.form-label { font-size: 11px; font-weight: 600; letter-spacing: 1.5px; text-transform: uppercase; color: var(--text-secondary); }
+.form-input {
+  background: var(--bg-elevated); border: 1px solid var(--border);
+  border-radius: var(--radius); color: var(--text-primary);
+  padding: 12px 14px; font-size: 14px;
+  transition: border-color 0.2s, box-shadow 0.2s;
+  outline: none; width: 100%;
+}
+.form-input:focus { border-color: var(--gold); box-shadow: 0 0 0 3px rgba(201,168,76,0.1); }
+.form-input::placeholder { color: var(--text-muted); }
+.form-select { appearance: none; cursor: pointer;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 24 24' fill='none' stroke='%23666' stroke-width='2'%3E%3Cpolyline points='6 9 12 15 18 9'/%3E%3C/svg%3E");
+  background-repeat: no-repeat; background-position: right 12px center;
+  padding-right: 36px;
+}
+.form-select option { background: #1a1a1e; }
+
+/* FAQ Accordion */
+.faq-item {
+  border: 1px solid var(--border); border-radius: var(--radius-lg);
+  margin-bottom: 12px; overflow: hidden; transition: border-color 0.3s;
+}
+.faq-item.open { border-color: rgba(201,168,76,0.3); }
+.faq-question {
+  display: flex; align-items: center; justify-content: space-between;
+  padding: 20px 24px; cursor: pointer; font-weight: 500; font-size: 15px;
+  transition: color 0.2s;
+}
+.faq-question:hover { color: var(--gold); }
+.faq-icon {
+  width: 28px; height: 28px; flex-shrink: 0;
+  border: 1px solid var(--border); border-radius: 50%;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 16px; transition: transform 0.3s, background 0.3s;
+}
+.faq-item.open .faq-icon { transform: rotate(45deg); background: var(--gold-dim); border-color: var(--gold); color: var(--gold); }
+.faq-answer {
+  max-height: 0; overflow: hidden;
+  transition: max-height 0.4s cubic-bezier(0.4,0,0.2,1), padding 0.3s;
+  color: var(--text-secondary); font-size: 14px; line-height: 1.8;
+  padding: 0 24px;
+}
+.faq-item.open .faq-answer { max-height: 300px; padding-bottom: 24px; }
+
+/* Responsive */
+@media (max-width: 768px) {
+  .nav-links { display: none; }
+  .nav-mobile-toggle { display: flex; }
+  .hero-inner { grid-template-columns: 1fr; gap: 40px; padding: 40px 20px; }
+  .hero-showroom { height: 320px; }
+  .door-zone-main { right: 0; }
+  .door-zone-right, .door-zone-small { display: none; }
+  .stats-grid { grid-template-columns: repeat(2,1fr); }
+  .stat-item:nth-child(2) { border-right: none; }
+  .categories-grid { grid-template-columns: 1fr; }
+  .category-card-wide { grid-column: span 1; }
+  .products-grid { grid-template-columns: 1fr 1fr; }
+  .conversion-strip-inner { grid-template-columns: 1fr; gap: 28px; }
+  .conversion-strip-cta { align-items: stretch; }
+  #modalContent { margin: 0; border-radius: 0; }
+  #modalContent > div { grid-template-columns: 1fr !important; }
+  #modalImg { aspect-ratio: 16/9; }
+  footer .container > div:first-child { grid-template-columns: 1fr 1fr !important; }
+  #stickyCta { display: flex !important; }
+  #whatsappBtn { bottom: 88px; }
+  .form-group + .form-group { margin-top: 0; }
+  #codForm > div[style*="grid-template-columns:1fr 1fr"] { grid-template-columns: 1fr !important; }
+}
+@media (max-width: 480px) {
+  .products-grid { grid-template-columns: 1fr; }
+  .hero-title { font-size: 32px; }
+  footer .container > div:first-child { grid-template-columns: 1fr !important; }
+}
+@media (min-width: 769px) {
+  #stickyCta { display: none !important; }
+}
+
+/* Fade in animation */
+@keyframes fadeInUp {
+  from { opacity: 0; transform: translateY(20px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+.fade-in { animation: fadeInUp 0.5s ease forwards; }
+.fade-in-delay-1 { animation-delay: 0.1s; opacity: 0; animation-fill-mode: forwards; }
+.fade-in-delay-2 { animation-delay: 0.2s; opacity: 0; animation-fill-mode: forwards; }
+.fade-in-delay-3 { animation-delay: 0.3s; opacity: 0; animation-fill-mode: forwards; }
+
+/* Pulse animation on CTA */
+@keyframes pulse-gold {
+  0%, 100% { box-shadow: 0 4px 24px rgba(201,168,76,0.3); }
+  50% { box-shadow: 0 4px 40px rgba(201,168,76,0.6); }
+}
+.btn-gold { animation: pulse-gold 3s ease-in-out infinite; }
+.btn-gold:hover { animation: none; }
+
+/* Loading skeleton */
+@keyframes shimmer {
+  0% { background-position: -200% 0; }
+  100% { background-position: 200% 0; }
+}
+</style>
+
+<script>
+// ============================================================
+// DATA
+// ============================================================
+const PRODUCTS = [
+  { id:1, name:'Porte Blindée Fortis Pro', category:'blindées', price:85000, img:'steel-door.jpg', badge:'Bestseller',
+    desc:'Porte blindée certifiée classe 4. Serrures multipoints, vitrage anti-effraction, isolation thermique et phonique maximale.',
+    specs:['Certification Classe 4','Serrure 7 points','Épaisseur 70mm','Garantie 5 ans','Dimensions standard: 200x90cm'],
+    colors:['Gris anthracite','Blanc cassé','Noir mat'] },
+  { id:2, name:"Porte d'Entrée Prestige Oak", category:'entrée', price:62000, img:'wooden-door.jpg', badge:'',
+    desc:"Porte d'entrée en bois massif de chêne. Design contemporain avec finitions haut de gamme. Isolation excellente.",
+    specs:['Chêne massif certifié','Isolation Uw 1.1','Serrure 3 points','Garantie 3 ans','Dimensions sur mesure'],
+    colors:['Chêne naturel','Chêne fumé','Wengé'] },
+  { id:3, name:'Porte Vitrée Milano', category:'verre', price:48000, img:'glass-door.jpg', badge:'Nouveau',
+    desc:'Porte intérieure vitrée avec cadre en aluminium anodisé. Verre trempé 8mm. Apporte lumière et modernité.',
+    specs:['Verre trempé 8mm','Cadre aluminium','Hauteur 220cm','Garantie 2 ans','Pose incluse'],
+    colors:['Noir mat','Argent brossé','Or champagne'] },
+  { id:4, name:'Porte Intérieure Élégance', category:'intérieure', price:28000, img:'panel-door.jpg', badge:'',
+    desc:'Porte intérieure à panneaux. Bois composite HDF, finition laquée. Idéale pour chambres et salons.',
+    specs:['HDF 35mm','Laque satinée','Largeur: 70-90cm','Garantie 2 ans','Disponible en lot'],
+    colors:['Blanc mat','Gris perle','Chêne clair'] },
+  { id:5, name:'Porte Blindée Titan Max', category:'blindées', price:115000, img:'steel-door.jpg', badge:'Premium',
+    desc:'Notre porte blindée haut de gamme. Classe 6, serrures biométriques optionnelles, isolation phonique 52dB.',
+    specs:['Certification Classe 6','Serrure 9 points','Épaisseur 90mm','Garantie 10 ans','Biométrie optionnelle'],
+    colors:['Gris anthracite','Noir mat','Acier brossé'] },
+  { id:6, name:'Porte Aluminium Design', category:'aluminium', price:54000, img:'glass-door.jpg', badge:'',
+    desc:"Porte d'entrée en aluminium thermolaqué. Légèreté et résistance maximales. Idéale pour appartements modernes.",
+    specs:['Aluminium 2mm','Thermolaquage','Isolation Uw 1.3','Garantie 5 ans','Large choix RAL'],
+    colors:['RAL 7016','RAL 9005','RAL 9010'] },
+  { id:7, name:"Porte d'Entrée Rustique", category:'entrée', price:41000, img:'wooden-door.jpg', badge:'',
+    desc:'Porte en bois travaillé à la main. Style rustique méditerranéen. Traitement anti-humidité et anti-insectes.',
+    specs:['Bois traité','Ferronnerie forgée','Hauteur 210cm','Garantie 3 ans','Sur mesure possible'],
+    colors:['Bois naturel','Bois teinté foncé'] },
+  { id:8, name:'Porte Vitrée Loft', category:'verre', price:36000, img:'glass-door.jpg', badge:'',
+    desc:'Porte coulissante vitrée style loft industriel. Rail inox, verre dépoli. Gain de place garanti.',
+    specs:['Verre dépoli 6mm','Rail inox','Largeur 90cm','Garantie 2 ans','Coulissante'],
+    colors:['Noir mat','Chrome'] },
+  { id:9, name:'Porte Intérieure Premium Panel', category:'intérieure', price:34000, img:'panel-door.jpg', badge:'',
+    desc:"Porte à panneaux surélevés. Finition laque brillante premium. Style classique qui s'adapte à tout intérieur.",
+    specs:['Panneau surélevé','Laque brillante','Largeur 80-90cm','Garantie 2 ans'],
+    colors:['Blanc brillant','Ivoire','Taupe'] },
+];
+
+const WILAYAS = [
+  {id:1,name:"Adrar"},{id:2,name:"Chlef"},{id:3,name:"Laghouat"},{id:4,name:"Oum El Bouaghi"},
+  {id:5,name:"Batna"},{id:6,name:"Béjaïa"},{id:7,name:"Biskra"},{id:8,name:"Béchar"},
+  {id:9,name:"Blida"},{id:10,name:"Bouira"},{id:11,name:"Tamanrasset"},{id:12,name:"Tébessa"},
+  {id:13,name:"Tlemcen"},{id:14,name:"Tiaret"},{id:15,name:"Tizi Ouzou"},{id:16,name:"Alger"},
+  {id:17,name:"Djelfa"},{id:18,name:"Jijel"},{id:19,name:"Sétif"},{id:20,name:"Saïda"},
+  {id:21,name:"Skikda"},{id:22,name:"Sidi Bel Abbès"},{id:23,name:"Annaba"},{id:24,name:"Guelma"},
+  {id:25,name:"Constantine"},{id:26,name:"Médéa"},{id:27,name:"Mostaganem"},{id:28,name:"M'Sila"},
+  {id:29,name:"Mascara"},{id:30,name:"Ouargla"},{id:31,name:"Oran"},{id:32,name:"El Bayadh"},
+  {id:33,name:"Illizi"},{id:34,name:"Bordj Bou Arréridj"},{id:35,name:"Boumerdès"},{id:36,name:"El Tarf"},
+  {id:37,name:"Tindouf"},{id:38,name:"Tissemsilt"},{id:39,name:"El Oued"},{id:40,name:"Khenchela"},
+  {id:41,name:"Souk Ahras"},{id:42,name:"Tipaza"},{id:43,name:"Mila"},{id:44,name:"Aïn Defla"},
+  {id:45,name:"Naâma"},{id:46,name:"Aïn Témouchent"},{id:47,name:"Ghardaïa"},{id:48,name:"Relizane"},
+  {id:49,name:"El M'Ghair"},{id:50,name:"El Menia"},{id:51,name:"Ouled Djellal"},{id:52,name:"Bordj Baji Mokhtar"},
+  {id:53,name:"Béni Abbès"},{id:54,name:"Timimoun"},{id:55,name:"Touggourt"},{id:56,name:"Djanet"},
+  {id:57,name:"In Salah"},{id:58,name:"In Guezzam"}
+];
+
+const FAQ_DATA = [
+  { q:"Comment fonctionne le paiement à la livraison ?", a:"Vous commandez en ligne ou par téléphone. Notre équipe vous contacte pour confirmer les détails. Vous payez uniquement à la réception de votre porte, une fois que vous l'avez vérifiée et acceptée." },
+  { q:"Dans quelles wilayas livrez-vous ?", a:"Nous livrons dans les 58 wilayas d'Algérie. Les délais varient de 48h à 7 jours selon votre localisation. Alger, Oran, Constantine et les grandes villes sont livrées en 48h." },
+  { q:"L'installation est-elle incluse dans le prix ?", a:"Oui ! L'installation par nos techniciens qualifiés est incluse dans le prix affiché. Aucun frais caché. Nos équipes sont disponibles dans toute l'Algérie." },
+  { q:"Quels sont vos délais de livraison ?", a:"48h pour Alger et les grandes villes. 3 à 5 jours pour les autres wilayas. 5 à 7 jours pour les wilayas du sud. Les portes sur mesure nécessitent 15 à 20 jours supplémentaires." },
+  { q:"Puis-je commander des dimensions sur mesure ?", a:"Absolument ! Nous proposons la fabrication sur mesure pour toutes nos gammes. Contactez-nous directement par WhatsApp ou téléphone avec vos mesures et nous vous envoyons un devis gratuit sous 24h." },
+  { q:"Quelle est la durée de la garantie ?", a:"Selon les gammes : 2 ans pour les portes intérieures, 3 ans pour les portes d'entrée bois, 5 ans pour les portes blindées standard, 10 ans pour la gamme Titan. Le SAV est assuré dans toute l'Algérie." },
+  { q:"Puis-je voir les portes avant d'acheter ?", a:"Oui ! Nous avons des showrooms à Alger. Vous pouvez aussi demander à notre équipe de vous envoyer des photos ou vidéos détaillées par WhatsApp avant de commander." },
+  { q:"Comment suivre ma commande ?", a:"Après confirmation, vous recevez un SMS avec votre numéro de commande. Vous pouvez nous contacter à tout moment par téléphone ou WhatsApp pour avoir des nouvelles de votre livraison." },
+];
+
+// ============================================================
+// STATE
+// ============================================================
+let currentPage = 'home';
+let currentFilter = 'all';
+let currentSort = 'default';
+let selectedProduct = null;
+
+// ============================================================
+// ROUTING
+// ============================================================
+function showPage(page, filter) {
+  // Hide all pages
+  document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
+  const el = document.getElementById('page-' + page);
+  if (!el) return;
+  el.classList.add('active');
+  currentPage = page;
+
+  // Update nav active states
+  document.querySelectorAll('.nav-link').forEach(l => l.classList.remove('active'));
+  const activeLink = document.querySelector(`[data-page="${page}"]`);
+  if (activeLink) activeLink.classList.add('active');
+
+  // Scroll to top
+  window.scrollTo({ top: 0, behavior: 'smooth' });
+
+  // Page-specific init
+  if (page === 'home') { renderFeaturedProducts(); }
+  if (page === 'shop') { if (filter) { filterProducts(filter); } else { renderShopProducts(); } }
+  if (page === 'order') { populateOrderForm(); trackEvent('view_content', 'order_page'); }
+  if (page === 'faq') { renderFAQ(); }
+
+  // Tracking
+  trackPageView(page);
+}
+
+// ============================================================
+// PRODUCTS RENDERING
+// ============================================================
+function productCardHTML(p, featured) {
+  const priceFormatted = p.price.toLocaleString('fr-DZ') + ' DZD';
+  return `
+    <div class="product-card fade-in" onclick="openProduct(${p.id})" style="animation-delay:${featured?0:Math.random()*0.3}s">
+      <div class="product-card-image">
+        <img src="${p.img}" alt="${p.name}" loading="lazy" />
+        ${p.badge ? `<div class="product-card-badge"><span class="badge badge-gold">${p.badge}</span></div>` : ''}
+      </div>
+      <div class="product-card-body">
+        <div class="product-card-category">${p.category}</div>
+        <div class="product-card-name">${p.name}</div>
+        <div class="product-card-desc">${p.desc.substring(0,80)}...</div>
+        <div class="product-card-footer">
+          <div class="product-card-price">${priceFormatted}<span>TTC</span></div>
+          <div class="product-card-action">
+            <svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><line x1="7" y1="17" x2="17" y2="7"/><polyline points="7 7 17 7 17 17"/></svg>
+          </div>
+        </div>
+      </div>
+    </div>`;
+}
+
+function renderFeaturedProducts() {
+  const featured = PRODUCTS.filter(p => p.badge || p.id <= 4).slice(0, 6);
+  document.getElementById('featuredProducts').innerHTML = featured.map(p => productCardHTML(p, true)).join('');
+}
+
+function renderShopProducts(products) {
+  const list = products || PRODUCTS;
+  const grid = document.getElementById('shopProducts');
+  const noRes = document.getElementById('noResults');
+  if (list.length === 0) { grid.innerHTML = ''; noRes.classList.remove('hidden'); return; }
+  noRes.classList.add('hidden');
+  grid.innerHTML = list.map(p => productCardHTML(p)).join('');
+}
+
+function filterProducts(filter) {
+  currentFilter = filter;
+  // Update filter button states
+  document.querySelectorAll('.filter-btn').forEach(b => {
+    b.classList.toggle('active', b.dataset.filter === filter);
+  });
+  const filtered = filter === 'all' ? PRODUCTS : PRODUCTS.filter(p => p.category === filter);
+  applySort(filtered);
+  trackEvent('search', filter);
+}
+
+function sortProducts() {
+  currentSort = document.getElementById('sortSelect').value;
+  filterProducts(currentFilter);
+}
+
+function applySort(list) {
+  let sorted = [...list];
+  if (currentSort === 'price-asc') sorted.sort((a,b) => a.price - b.price);
+  else if (currentSort === 'price-desc') sorted.sort((a,b) => b.price - a.price);
+  else if (currentSort === 'name') sorted.sort((a,b) => a.name.localeCompare(b.name));
+  renderShopProducts(sorted);
+}
+
+// ============================================================
+// PRODUCT MODAL
+// ============================================================
+function openProduct(id) {
+  const p = PRODUCTS.find(x => x.id === id);
+  if (!p) return;
+  selectedProduct = p;
+  const priceFormatted = p.price.toLocaleString('fr-DZ') + ' DZD';
+  const colorsHTML = p.colors.map(c => `<span style="background:var(--bg-elevated);border:1px solid var(--border);border-radius:4px;padding:4px 10px;font-size:12px;">${c}</span>`).join('');
+  const specsHTML = p.specs.map(s => `<div style="display:flex;align-items:center;gap:8px;font-size:13px;color:var(--text-secondary);padding:6px 0;border-bottom:1px solid var(--border);">
+    <span style="color:var(--gold);font-size:10px;">✦</span>${s}</div>`).join('');
+
+  document.getElementById('modalImg').innerHTML = `<img src="${p.img}" alt="${p.name}" style="width:100%;height:100%;object-fit:cover;min-height:300px;" />`;
+  document.getElementById('modalBody').innerHTML = `
+    <div style="margin-bottom:8px;"><span class="badge badge-gold">${p.category}</span>${p.badge ? `<span class="badge badge-green" style="margin-left:8px;">${p.badge}</span>` : ''}</div>
+    <h2 style="font-family:var(--font-serif);font-size:26px;font-weight:500;margin:12px 0;">${p.name}</h2>
+    <div style="font-family:var(--font-serif);font-size:32px;color:var(--gold);font-weight:500;margin-bottom:20px;">${priceFormatted}</div>
+    <p style="color:var(--text-secondary);font-size:14px;line-height:1.7;margin-bottom:24px;">${p.desc}</p>
+    <div style="margin-bottom:24px;">${specsHTML}</div>
+    <div style="margin-bottom:24px;">
+      <div style="font-size:11px;letter-spacing:2px;text-transform:uppercase;color:var(--text-muted);margin-bottom:10px;">Couleurs disponibles</div>
+      <div style="display:flex;flex-wrap:wrap;gap:8px;">${colorsHTML}</div>
+    </div>
+    <div style="display:flex;flex-direction:column;gap:10px;">
+      <button class="btn btn-gold" style="width:100%;padding:16px;font-size:13px;justify-content:center;" onclick="orderProduct(${p.id})">
+        🛒 Commander ce Produit (COD)
+      </button>
+      <a href="https://wa.me/213XXXXXXXXX?text=Bonjour, je suis intéressé par: ${encodeURIComponent(p.name)}" target="_blank" class="btn btn-outline" style="width:100%;padding:14px;font-size:13px;justify-content:center;" onclick="trackEvent('click_whatsapp','product_modal')">
+        💬 Demander un devis WhatsApp
+      </a>
+    </div>
+    <div style="margin-top:16px;padding:12px;background:var(--bg-elevated);border-radius:var(--radius);text-align:center;">
+      <div style="font-size:12px;color:var(--text-muted);">🚚 Livraison 48h · 🔧 Installation incluse · 🔒 Paiement à la livraison</div>
+    </div>`;
+
+  document.getElementById('productModal').style.display = 'block';
+  document.body.style.overflow = 'hidden';
+  trackEvent('view_content', p.name);
+}
+
+function orderProduct(id) {
+  const p = PRODUCTS.find(x => x.id === id);
+  closeModalDirect();
+  showPage('order');
+  setTimeout(() => {
+    const sel = document.getElementById('orderProduct');
+    if (sel) { for(let o of sel.options) { if(o.value === p.name) { o.selected = true; break; } } }
+  }, 300);
+}
+
+function closeModal(e) {
+  if (e.target === document.getElementById('productModal')) closeModalDirect();
+}
+function closeModalDirect() {
+  document.getElementById('productModal').style.display = 'none';
+  document.body.style.overflow = '';
+}
+
+// ============================================================
+// ORDER FORM
+// ============================================================
+function populateOrderForm() {
+  // Wilayas
+  const wSel = document.querySelector('[name="wilaya"]');
+  if (wSel && wSel.options.length <= 1) {
+    WILAYAS.forEach(w => {
+      const o = document.createElement('option');
+      o.value = w.name; o.textContent = `${w.id < 10 ? '0'+w.id : w.id} - ${w.name}`;
+      wSel.appendChild(o);
+    });
+  }
+  // Products
+  const pSel = document.getElementById('orderProduct');
+  if (pSel && pSel.options.length <= 1) {
+    PRODUCTS.forEach(p => {
+      const o = document.createElement('option');
+      o.value = p.name; o.textContent = `${p.name} — ${p.price.toLocaleString('fr-DZ')} DZD`;
+      pSel.appendChild(o);
+    });
+  }
+  // Pre-select product if one was selected in modal
+  if (selectedProduct) {
+    for(let o of pSel.options) { if(o.value === selectedProduct.name) { o.selected = true; break; } }
+  }
+  // Set tracking fields
+  document.getElementById('orderTimestamp').value = new Date().toISOString();
+  document.getElementById('utmSource').value = new URLSearchParams(window.location.search).get('utm_source') || 'direct';
+}
+
+function updateCommunes() {
+  // Simple placeholder: in production connect to a communes API or hardcoded list
+  const wilaya = document.querySelector('[name="wilaya"]').value;
+  const cSel = document.querySelector('[name="commune"]');
+  cSel.innerHTML = '<option value="">-- Choisir une commune --</option>';
+  if (wilaya) {
+    // Add generic communes (replace with real data)
+    ['Centre-ville', 'Bab Ezzouar', 'Bordj El Kiffan', 'Hussein Dey', 'El Harrach'].forEach(c => {
+      const o = document.createElement('option'); o.value = c; o.textContent = c; cSel.appendChild(o);
+    });
+  }
+}
+
+function submitOrder(e) {
+  e.preventDefault();
+  const form = document.getElementById('codForm');
+  const data = Object.fromEntries(new FormData(form));
+
+  // Validate
+  if (!data.name || !data.phone || !data.wilaya || !data.product) {
+    showToast('⚠️ Veuillez remplir tous les champs obligatoires');
+    return;
+  }
+
+  // Track
+  trackEvent('lead_submit', data.product);
+
+  // Show loading state
+  const btn = form.querySelector('button[type="submit"]');
+  const origText = btn.innerHTML;
+  btn.innerHTML = '⏳ Envoi en cours...';
+  btn.disabled = true;
+
+  // Simulate submission (replace with real API endpoint)
+  setTimeout(() => {
+    // In production: POST to your backend/webhook here
+    // Example: fetch('/api/orders', { method:'POST', body: JSON.stringify(data) })
+
+    form.classList.add('hidden');
+    document.getElementById('orderSuccess').classList.remove('hidden');
+
+    // Track successful lead
+    if (window.fbq) fbq('track', 'Lead', { content_name: data.product, value: 0, currency: 'DZD' });
+    if (window.ttq) ttq.track('SubmitForm');
+    if (window.gtag) gtag('event', 'generate_lead', { currency: 'DZD', value: 0 });
+
+    // Store locally for dashboard
+    saveOrderLocally(data);
+  }, 1500);
+}
+
+function saveOrderLocally(data) {
+  const orders = JSON.parse(localStorage.getItem('pp_orders') || '[]');
+  orders.unshift({ ...data, id: Date.now(), status: 'Nouveau', createdAt: new Date().toISOString() });
+  localStorage.setItem('pp_orders', JSON.stringify(orders.slice(0, 100)));
+}
+
+// ============================================================
+// FAQ
+// ============================================================
+function renderFAQ() {
+  const container = document.getElementById('faqAccordion');
+  if (container.children.length > 0) return; // already rendered
+  container.innerHTML = FAQ_DATA.map((item, i) => `
+    <div class="faq-item" id="faq-${i}">
+      <div class="faq-question" onclick="toggleFAQ(${i})">
+        <span>${item.q}</span>
+        <div class="faq-icon">+</div>
+      </div>
+      <div class="faq-answer">${item.a}</div>
+    </div>`).join('');
+}
+
+function toggleFAQ(i) {
+  const item = document.getElementById('faq-' + i);
+  const isOpen = item.classList.contains('open');
+  document.querySelectorAll('.faq-item').forEach(el => el.classList.remove('open'));
+  if (!isOpen) item.classList.add('open');
+}
+
+// ============================================================
+// TRACKING
+// ============================================================
+function trackEvent(event, label) {
+  // GA4
+  if (window.gtag) gtag('event', event, { event_label: label });
+  // Meta
+  const metaEvents = { 'view_content':'ViewContent', 'lead_submit':'Lead', 'click_call':'Contact', 'search':'Search' };
+  if (window.fbq && metaEvents[event]) fbq('track', metaEvents[event]);
+  // TikTok
+  if (window.ttq) ttq.track(event === 'click_call' ? 'ClickButton' : 'ViewContent');
+}
+
+function trackPageView(page) {
+  if (window.gtag) gtag('event', 'page_view', { page_title: page });
+  if (window.fbq) fbq('track', 'PageView');
+  if (window.ttq) ttq.page();
+}
+
+// ============================================================
+// NAV / UX
+// ============================================================
+let mobileMenuOpen = false;
+function toggleMobileMenu() {
+  mobileMenuOpen = !mobileMenuOpen;
+  document.getElementById('mobileMenu').classList.toggle('open', mobileMenuOpen);
+  const spans = document.querySelectorAll('.nav-mobile-toggle span');
+  if (mobileMenuOpen) {
+    spans[0].style.transform = 'rotate(45deg) translate(5px,5px)';
+    spans[1].style.opacity = '0';
+    spans[2].style.transform = 'rotate(-45deg) translate(5px,-5px)';
+  } else {
+    spans.forEach(s => { s.style.transform = ''; s.style.opacity = ''; });
+  }
+}
+
+// Navbar scroll effect
+window.addEventListener('scroll', () => {
+  document.getElementById('navbar').classList.toggle('scrolled', window.scrollY > 40);
+});
+
+// Keyboard escape for modal
+document.addEventListener('keydown', e => {
+  if (e.key === 'Escape') closeModalDirect();
+});
+
+// ============================================================
+// TOAST
+// ============================================================
+function showToast(msg, color) {
+  const t = document.getElementById('toast');
+  t.textContent = msg;
+  t.style.borderColor = color || 'var(--border-hover)';
+  t.style.opacity = '1';
+  t.style.transform = 'translateX(-50%) translateY(0)';
+  setTimeout(() => {
+    t.style.opacity = '0';
+    t.style.transform = 'translateX(-50%) translateY(20px)';
+  }, 3000);
+}
+
+// ============================================================
+// INIT
+// ============================================================
+document.addEventListener('DOMContentLoaded', () => {
+  renderFeaturedProducts();
+  renderShopProducts();
+
+  // Show sticky CTA on mobile after scroll
+  if (window.innerWidth <= 768) {
+    window.addEventListener('scroll', () => {
+      const sticky = document.getElementById('stickyCta');
+      if (window.scrollY > 300) sticky.style.display = 'flex';
+    }, { passive: true });
+  }
+
+  // Handle hash routing
+  const hash = window.location.hash.slice(1);
+  if (hash && ['shop','order','about','faq','contact'].includes(hash)) showPage(hash);
+});
+</script>
+
+
+
+<!-- ============================================================
+     3D SHOWROOM — MODULE INIT
+     Uses the same importmap as showroom-360.html (Three 0.160)
+     ============================================================ -->
+<script type="module">
+  import { initShowroom, DEFAULT_WALLS } from './showroom.js';
+
+  let showroomInstance = null;
+
+  function handleShowroomNavigate(category) {
+    // showPage() is in the non-module script block below
+    if (typeof showPage === 'function') {
+      showPage('shop', category);
+    }
+  }
+
+  // ── Load both walls AND room config from localStorage ─────
+  function _loadShowroomConfig() {
+    let walls, room;
+    try { const s = localStorage.getItem('pp_showroom_walls'); if (s) walls = JSON.parse(s); } catch(e) {}
+    try { const s = localStorage.getItem('pp_showroom_room');  if (s) room  = JSON.parse(s); } catch(e) {}
+    return { walls, room };
+  }
+
+  function bootShowroom() {
+    const container = document.getElementById('showroom-canvas-wrap');
+    if (!container) return;
+    const { walls, room } = _loadShowroomConfig();
+    const opts = {};
+    if (walls) opts.walls = walls;
+    if (room)  opts.room  = room;   // ← floor/ceiling textures now applied
+    showroomInstance = initShowroom(container, handleShowroomNavigate, opts);
+  }
+
+  // Boot immediately on DOMContentLoaded
+  if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', bootShowroom);
+  } else {
+    bootShowroom();
+  }
+
+  // Expose for admin live-reload: window.__reloadShowroom(newWalls, newRoom?)
+  window.__reloadShowroom = function(newWalls, newRoom) {
+    if (showroomInstance) showroomInstance.destroy();
+    const container = document.getElementById('showroom-canvas-wrap');
+    if (!container) return;
+    container.innerHTML = '';
+    const { room: savedRoom } = _loadShowroomConfig();
+    const opts = { walls: newWalls };
+    if (newRoom)        opts.room = newRoom;
+    else if (savedRoom) opts.room = savedRoom;
+    showroomInstance = initShowroom(container, handleShowroomNavigate, opts);
+  };
+</script>
+
+</body>
+</html>

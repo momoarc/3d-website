@@ -1,0 +1,989 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1.0"/>
+<title>Porte Prestige — Espace Agent</title>
+<link rel="preconnect" href="https://fonts.googleapis.com"/>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Playfair+Display:wght@500&display=swap" rel="stylesheet"/>
+<style>
+:root{
+  --bg:#09090b;--bg-card:#111113;--bg-elev:#1a1a1e;
+  --border:rgba(255,255,255,0.07);--border-h:rgba(255,255,255,0.14);
+  --gold:#c9a84c;--gold-dim:rgba(201,168,76,0.12);--gold-light:#e4c06a;
+  --text:#f0ede8;--text-2:#9a9a94;--text-3:#555550;
+  --green:#4ade80;--red:#f87171;--amber:#fb923c;--blue:#60a5fa;--purple:#a78bfa;
+  --r:8px;--font:'Inter',system-ui,sans-serif;--serif:'Playfair Display',Georgia,serif;
+  --sidebar-w:220px;--topbar-h:58px;
+}
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+html,body{height:100%;-webkit-font-smoothing:antialiased}
+body{font-family:var(--font);background:var(--bg);color:var(--text);font-size:14px;line-height:1.6}
+::-webkit-scrollbar{width:4px}::-webkit-scrollbar-track{background:var(--bg)}::-webkit-scrollbar-thumb{background:#333;border-radius:3px}
+a{color:inherit;text-decoration:none}button{cursor:pointer;border:none;font-family:inherit;background:none}
+input,select,textarea{font-family:inherit}
+.hidden{display:none!important}
+
+/* ======== LOGIN ======== */
+#login-screen{position:fixed;inset:0;z-index:9999;background:var(--bg);display:flex;align-items:center;justify-content:center;padding:20px}
+.login-wrap{width:100%;max-width:400px}
+.login-brand{text-align:center;margin-bottom:32px}
+.login-brand-logo{font-family:var(--serif);font-size:32px;color:var(--gold);display:block;margin-bottom:4px}
+.login-brand-sub{font-size:10px;letter-spacing:4px;text-transform:uppercase;color:var(--text-3)}
+.login-card{background:var(--bg-card);border:1px solid var(--border);border-radius:12px;padding:36px}
+.login-title{font-size:14px;font-weight:600;color:var(--text-2);margin-bottom:24px;text-align:center;letter-spacing:1px;text-transform:uppercase}
+.login-field{margin-bottom:14px}
+.login-label{display:block;font-size:10px;font-weight:600;letter-spacing:1.5px;text-transform:uppercase;color:var(--text-3);margin-bottom:5px}
+.login-input{width:100%;padding:11px 14px;background:var(--bg-elev);border:1px solid var(--border);border-radius:6px;color:var(--text);font-size:14px;outline:none;transition:border-color 0.2s}
+.login-input:focus{border-color:var(--gold)}
+.login-btn{width:100%;padding:14px;background:var(--gold);color:#0a0800;font-weight:700;font-size:11px;letter-spacing:2px;text-transform:uppercase;border-radius:6px;margin-top:8px;transition:background 0.2s}
+.login-btn:hover{background:var(--gold-light)}
+.login-error{color:var(--red);font-size:12px;text-align:center;margin-bottom:10px;min-height:16px}
+.login-footer{text-align:center;margin-top:20px;font-size:11px;color:var(--text-3)}
+
+/* ======== APP SHELL ======== */
+#app{display:none;height:100vh;flex-direction:column}
+#app.visible{display:flex}
+
+/* Topbar */
+#topbar{height:var(--topbar-h);background:rgba(9,9,11,0.97);backdrop-filter:blur(20px);border-bottom:1px solid var(--border);display:flex;align-items:center;justify-content:space-between;padding:0 20px;flex-shrink:0;position:sticky;top:0;z-index:100}
+.tb-brand{font-family:var(--serif);font-size:17px;color:var(--gold);display:flex;align-items:center;gap:10px}
+.tb-mark{width:28px;height:28px;background:var(--gold);color:#0a0800;display:flex;align-items:center;justify-content:center;font-size:13px;font-weight:700;border-radius:3px}
+.tb-right{display:flex;align-items:center;gap:10px}
+.tb-badge{padding:4px 12px;border-radius:20px;font-size:10px;font-weight:700;letter-spacing:1px;text-transform:uppercase;border:1px solid}
+.tb-badge.confirmation{background:rgba(96,165,250,0.1);color:var(--blue);border-color:rgba(96,165,250,0.3)}
+.tb-badge.livraison{background:rgba(167,139,250,0.1);color:var(--purple);border-color:rgba(167,139,250,0.3)}
+.tb-badge.superviseur{background:rgba(201,168,76,0.1);color:var(--gold);border-color:rgba(201,168,76,0.3)}
+.tb-user{display:flex;align-items:center;gap:7px;padding:5px 10px;background:var(--bg-elev);border:1px solid var(--border);border-radius:20px;cursor:pointer;font-size:12px}
+.tb-avatar{width:22px;height:22px;background:var(--gold);border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:10px;font-weight:700;color:#0a0800}
+
+/* Main */
+#main-layout{display:flex;flex:1;overflow:hidden}
+
+/* Sidebar */
+#sidebar{width:var(--sidebar-w);background:var(--bg-card);border-right:1px solid var(--border);flex-shrink:0;overflow-y:auto;padding:16px 0}
+.nav-section{padding:5px 14px 3px;font-size:9px;font-weight:700;letter-spacing:3px;text-transform:uppercase;color:var(--text-3)}
+.nav-item{display:flex;align-items:center;gap:9px;padding:9px 14px;margin:1px 8px;border-radius:6px;cursor:pointer;color:var(--text-2);font-size:13px;font-weight:500;transition:all 0.15s}
+.nav-item:hover{background:var(--bg-elev);color:var(--text)}
+.nav-item.active{background:var(--gold-dim);color:var(--gold);border:1px solid rgba(201,168,76,0.2)}
+.nav-icon{font-size:14px;width:18px;text-align:center;flex-shrink:0}
+.nav-badge{margin-left:auto;background:var(--red);color:#fff;font-size:9px;font-weight:700;padding:1px 5px;border-radius:8px}
+
+/* Content */
+#content{flex:1;overflow-y:auto;padding:24px}
+.crm-page{display:block}
+.page-header{margin-bottom:24px}
+.page-title{font-family:var(--serif);font-size:22px;font-weight:500;margin-bottom:3px}
+.page-sub{font-size:12px;color:var(--text-2)}
+
+/* Cards / components */
+.kpi-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:14px;margin-bottom:24px}
+.kpi-card{background:var(--bg-card);border:1px solid var(--border);border-radius:var(--r);padding:18px}
+.kpi-label{font-size:9px;font-weight:700;letter-spacing:2px;text-transform:uppercase;color:var(--text-3);margin-bottom:8px}
+.kpi-value{font-size:26px;font-weight:700;line-height:1;margin-bottom:4px}
+.kpi-sub{font-size:11px;color:var(--text-2)}
+.section-card{background:var(--bg-card);border:1px solid var(--border);border-radius:var(--r);overflow:hidden;margin-bottom:18px}
+.sc-header{padding:14px 18px;border-bottom:1px solid var(--border);display:flex;align-items:center;justify-content:space-between}
+.sc-title{font-size:12px;font-weight:600;letter-spacing:.5px}
+
+/* Button */
+.btn{display:inline-flex;align-items:center;justify-content:center;gap:5px;padding:7px 14px;border-radius:6px;font-size:10px;font-weight:600;letter-spacing:1.5px;text-transform:uppercase;transition:all 0.2s;cursor:pointer;white-space:nowrap}
+.btn-gold{background:var(--gold);color:#0a0800}.btn-gold:hover{background:var(--gold-light)}
+.btn-outline{background:transparent;color:var(--text);border:1px solid var(--border-h)}.btn-outline:hover{border-color:var(--gold);color:var(--gold)}
+.btn-ghost{background:transparent;color:var(--text-2)}.btn-ghost:hover{color:var(--text)}
+.btn-red{background:rgba(248,113,113,0.1);color:var(--red);border:1px solid rgba(248,113,113,0.2)}
+.btn-green{background:rgba(74,222,128,0.1);color:var(--green);border:1px solid rgba(74,222,128,0.2)}
+.btn-blue{background:rgba(96,165,250,0.1);color:var(--blue);border:1px solid rgba(96,165,250,0.2)}
+.btn-sm{padding:4px 10px;font-size:9px}
+
+/* Status badges */
+.status{display:inline-flex;align-items:center;gap:4px;padding:2px 8px;border-radius:20px;font-size:9px;font-weight:700;letter-spacing:1px;text-transform:uppercase}
+.status::before{content:'';width:5px;height:5px;border-radius:50%;flex-shrink:0}
+.s-new{background:rgba(96,165,250,0.12);color:var(--blue);border:1px solid rgba(96,165,250,0.25)}.s-new::before{background:var(--blue)}
+.s-called{background:rgba(251,146,60,0.12);color:var(--amber);border:1px solid rgba(251,146,60,0.25)}.s-called::before{background:var(--amber)}
+.s-confirmed{background:rgba(201,168,76,0.12);color:var(--gold);border:1px solid rgba(201,168,76,0.25)}.s-confirmed::before{background:var(--gold)}
+.s-shipped{background:rgba(167,139,250,0.12);color:var(--purple);border:1px solid rgba(167,139,250,0.25)}.s-shipped::before{background:var(--purple)}
+.s-transit{background:rgba(56,189,248,0.12);color:#38bdf8;border:1px solid rgba(56,189,248,0.25)}.s-transit::before{background:#38bdf8}
+.s-delivered{background:rgba(74,222,128,0.12);color:var(--green);border:1px solid rgba(74,222,128,0.25)}.s-delivered::before{background:var(--green)}
+.s-returned{background:rgba(248,113,113,0.12);color:var(--red);border:1px solid rgba(248,113,113,0.25)}.s-returned::before{background:var(--red)}
+.s-cancelled{background:rgba(100,100,100,0.12);color:#666;border:1px solid rgba(100,100,100,0.2)}.s-cancelled::before{background:#666}
+
+/* Table */
+.data-table{width:100%;border-collapse:collapse}
+.data-table th{padding:9px 12px;text-align:left;font-size:9px;font-weight:700;letter-spacing:2px;text-transform:uppercase;color:var(--text-3);border-bottom:1px solid var(--border)}
+.data-table td{padding:11px 12px;border-bottom:1px solid var(--border);font-size:13px;vertical-align:middle}
+.data-table tr:last-child td{border-bottom:none}
+.data-table tr:hover td{background:rgba(255,255,255,0.02)}
+.data-table a{color:var(--gold);cursor:pointer}
+
+/* Order card (mobile) */
+.order-card{background:var(--bg-card);border:1px solid var(--border);border-radius:var(--r);padding:16px;margin-bottom:10px;cursor:pointer;transition:border-color 0.2s}
+.order-card:hover{border-color:var(--gold)}
+.oc-name{font-weight:600;font-size:14px;margin-bottom:3px}
+.oc-meta{font-size:11px;color:var(--text-2);margin-bottom:8px}
+.oc-actions{display:flex;gap:7px;flex-wrap:wrap;margin-top:10px}
+
+/* Search */
+.search-row{padding:12px 16px;border-bottom:1px solid var(--border);display:flex;gap:8px;align-items:center;flex-wrap:wrap}
+.search-input{flex:1;min-width:180px;padding:8px 12px;background:var(--bg-elev);border:1px solid var(--border);border-radius:6px;color:var(--text);font-size:13px;outline:none}
+.search-input:focus{border-color:var(--gold)}
+.filter-chip{padding:5px 12px;border-radius:20px;font-size:9px;font-weight:700;letter-spacing:1px;text-transform:uppercase;background:transparent;color:var(--text-2);border:1px solid var(--border);cursor:pointer;transition:all 0.2s}
+.filter-chip.active{background:var(--gold-dim);color:var(--gold);border-color:rgba(201,168,76,0.3)}
+
+/* Modal */
+.modal-bg{position:fixed;inset:0;background:rgba(0,0,0,0.8);backdrop-filter:blur(8px);z-index:500;display:flex;align-items:center;justify-content:center;padding:16px}
+.modal-box{background:var(--bg-card);border:1px solid var(--border);border-radius:var(--r);width:100%;max-width:560px;max-height:92vh;overflow-y:auto}
+.modal-header{padding:18px 20px;border-bottom:1px solid var(--border);display:flex;align-items:center;justify-content:space-between}
+.modal-title{font-size:14px;font-weight:600}
+.modal-close{width:28px;height:28px;background:var(--bg-elev);border:1px solid var(--border);border-radius:50%;display:flex;align-items:center;justify-content:center;cursor:pointer;font-size:12px;color:var(--text-2)}
+.modal-body{padding:20px}
+.modal-footer{padding:14px 20px;border-top:1px solid var(--border);display:flex;gap:8px;justify-content:flex-end}
+
+/* Call timer */
+.call-timer{font-size:13px;font-weight:700;color:var(--green);font-variant-numeric:tabular-nums}
+
+/* Performance mini chart */
+.perf-bar-row{display:flex;align-items:center;gap:10px;margin-bottom:8px}
+.perf-bar-label{width:100px;font-size:11px;color:var(--text-2);flex-shrink:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.perf-bar-track{flex:1;background:var(--bg-elev);border-radius:3px;height:6px;overflow:hidden}
+.perf-bar-fill{height:100%;border-radius:3px;transition:width 0.6s}
+.perf-bar-val{width:28px;font-size:11px;font-weight:700;text-align:right;flex-shrink:0}
+
+/* Activity log */
+.activity-item{display:flex;gap:12px;padding:10px 0;border-bottom:1px solid var(--border)}
+.activity-item:last-child{border-bottom:none}
+.activity-dot{width:8px;height:8px;border-radius:50%;flex-shrink:0;margin-top:5px}
+.activity-content{flex:1}
+.activity-text{font-size:12px;line-height:1.5}
+.activity-time{font-size:10px;color:var(--text-3);margin-top:2px}
+
+/* Access denied banner */
+.access-denied{background:rgba(248,113,113,0.07);border:1px solid rgba(248,113,113,0.2);border-radius:var(--r);padding:20px;text-align:center;color:var(--red);margin-bottom:20px}
+
+/* Responsive */
+@media(max-width:700px){
+  #sidebar{display:none}
+  .kpi-grid{grid-template-columns:1fr 1fr}
+  #content{padding:16px}
+  .data-table{display:none}
+  .mobile-cards{display:block}
+}
+@media(min-width:701px){
+  .mobile-cards{display:none}
+}
+
+/* Toast */
+#crm-toast{position:fixed;bottom:20px;left:50%;transform:translateX(-50%) translateY(20px);background:var(--bg-elev);border:1px solid var(--border-h);border-radius:8px;padding:10px 18px;font-size:13px;font-weight:500;z-index:9000;opacity:0;transition:opacity 0.3s,transform 0.3s;pointer-events:none;white-space:nowrap}
+
+/* Mobile hamburger */
+.ham-btn{display:none;width:36px;height:36px;background:var(--bg-elev);border:1px solid var(--border);border-radius:6px;align-items:center;justify-content:center;cursor:pointer;font-size:16px}
+@media(max-width:700px){.ham-btn{display:flex}}
+.mobile-nav{position:fixed;inset:0;z-index:200;background:rgba(0,0,0,0.7);display:none}
+.mobile-nav.open{display:block}
+.mobile-nav-panel{position:absolute;left:0;top:0;bottom:0;width:240px;background:var(--bg-card);border-right:1px solid var(--border);padding:16px 0;overflow-y:auto}
+</style>
+</head>
+<body>
+
+<!-- ===================== LOGIN ===================== -->
+<div id="login-screen">
+  <div class="login-wrap">
+    <div class="login-brand">
+      <span class="login-brand-logo">Porte Prestige</span>
+      <span class="login-brand-sub">Espace Agent</span>
+    </div>
+    <div class="login-card">
+      <div class="login-title">Connexion Agent</div>
+      <div id="login-error" class="login-error"></div>
+      <div class="login-field">
+        <label class="login-label">Identifiant</label>
+        <input type="text" class="login-input" id="login-id" placeholder="Votre identifiant" autocomplete="username" />
+      </div>
+      <div class="login-field">
+        <label class="login-label">Mot de Passe</label>
+        <input type="password" class="login-input" id="login-pw" placeholder="••••••••" autocomplete="current-password" onkeydown="if(event.key==='Enter')doLogin()" />
+      </div>
+      <button class="login-btn" onclick="doLogin()">Se Connecter</button>
+    </div>
+    <div class="login-footer">Accès réservé au personnel · <a href="admin.html" style="color:var(--gold)">Admin →</a></div>
+  </div>
+</div>
+
+<!-- ===================== APP ===================== -->
+<div id="app">
+
+  <!-- TOPBAR -->
+  <header id="topbar">
+    <div style="display:flex;align-items:center;gap:10px;">
+      <button class="ham-btn" onclick="toggleMobileNav()">☰</button>
+      <div class="tb-brand">
+        <div class="tb-mark">P</div>
+        Porte Prestige
+        <span style="font-family:var(--font);font-size:9px;letter-spacing:2px;color:var(--text-3);text-transform:uppercase;margin-left:4px;">Agent</span>
+      </div>
+    </div>
+    <div class="tb-right">
+      <span class="tb-badge" id="tb-role-badge">—</span>
+      <div class="tb-user" onclick="doLogout()">
+        <div class="tb-avatar" id="tb-avatar">?</div>
+        <span id="tb-name">Agent</span>
+        <span style="color:var(--text-3);font-size:10px;">↗</span>
+      </div>
+    </div>
+  </header>
+
+  <!-- LAYOUT -->
+  <div id="main-layout">
+
+    <!-- SIDEBAR desktop -->
+    <nav id="sidebar">
+      <div style="padding:12px 14px 14px;">
+        <div style="font-size:10px;color:var(--text-3);">Connecté en tant que</div>
+        <div style="font-size:13px;font-weight:600;margin-top:1px;" id="sb-name-display">—</div>
+        <div style="margin-top:6px;" id="sb-role-display"></div>
+      </div>
+      <div class="nav-section">Mon Travail</div>
+      <div class="nav-item active" data-page="dashboard" onclick="crmPage('dashboard')">
+        <span class="nav-icon">🏠</span> Tableau de Bord
+      </div>
+      <div class="nav-item" data-page="my-orders" onclick="crmPage('my-orders')">
+        <span class="nav-icon">📋</span> Mes Commandes
+        <span class="nav-badge" id="sb-urgent">0</span>
+      </div>
+      <div class="nav-item" data-page="pipeline" onclick="crmPage('pipeline')">
+        <span class="nav-icon">🔄</span> Pipeline
+      </div>
+      <div class="nav-section" style="margin-top:8px;">Personnel</div>
+      <div class="nav-item" data-page="my-perf" onclick="crmPage('my-perf')">
+        <span class="nav-icon">📊</span> Mes Performances
+      </div>
+      <div class="nav-item" data-page="log" onclick="crmPage('log')">
+        <span class="nav-icon">📝</span> Mon Activité
+      </div>
+      <div class="nav-section" style="margin-top:8px;">Système</div>
+      <div class="nav-item" onclick="doLogout()">
+        <span class="nav-icon">🚪</span> Déconnexion
+      </div>
+    </nav>
+
+    <!-- MOBILE NAV -->
+    <div class="mobile-nav" id="mobile-nav" onclick="closeMobileNav(event)">
+      <div class="mobile-nav-panel">
+        <div style="padding:16px 14px 14px;">
+          <div style="font-size:10px;color:var(--text-3);">Connecté</div>
+          <div style="font-size:14px;font-weight:600;margin-top:1px;" id="sb-name-m">—</div>
+        </div>
+        <div class="nav-item" onclick="crmPage('dashboard');closeMobileNav()"><span class="nav-icon">🏠</span> Tableau de Bord</div>
+        <div class="nav-item" onclick="crmPage('my-orders');closeMobileNav()"><span class="nav-icon">📋</span> Mes Commandes</div>
+        <div class="nav-item" onclick="crmPage('pipeline');closeMobileNav()"><span class="nav-icon">🔄</span> Pipeline</div>
+        <div class="nav-item" onclick="crmPage('my-perf');closeMobileNav()"><span class="nav-icon">📊</span> Mes Performances</div>
+        <div class="nav-item" onclick="crmPage('log');closeMobileNav()"><span class="nav-icon">📝</span> Mon Activité</div>
+        <div class="nav-item" onclick="doLogout()"><span class="nav-icon">🚪</span> Déconnexion</div>
+      </div>
+    </div>
+
+    <!-- CONTENT -->
+    <main id="content">
+
+      <!-- DASHBOARD -->
+      <div id="page-dashboard" class="crm-page">
+        <div class="page-header">
+          <div class="page-title" id="dash-greeting">Bonjour 👋</div>
+          <div class="page-sub" id="dash-date"></div>
+        </div>
+        <div class="kpi-grid" id="agent-kpis"></div>
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:18px;">
+          <div class="section-card">
+            <div class="sc-header"><span class="sc-title">⚡ Actions Urgentes</span></div>
+            <div id="urgent-actions" style="padding:0;"></div>
+          </div>
+          <div class="section-card">
+            <div class="sc-header"><span class="sc-title">📈 Activité Récente</span></div>
+            <div id="recent-activity" style="padding:12px 16px;"></div>
+          </div>
+        </div>
+      </div>
+
+      <!-- MY ORDERS -->
+      <div id="page-my-orders" class="crm-page hidden">
+        <div class="page-header">
+          <div class="page-title">📋 Mes Commandes</div>
+          <div class="page-sub" id="orders-page-sub">Commandes assignées à votre rôle</div>
+        </div>
+        <div class="section-card">
+          <div class="search-row">
+            <input class="search-input" id="crm-search" placeholder="🔍 Chercher par nom, téléphone..." oninput="renderMyOrders()"/>
+            <button class="filter-chip active" data-f="all" onclick="setFilter('all')">Tous</button>
+            <div id="role-filters"></div>
+          </div>
+          <!-- Desktop table -->
+          <table class="data-table" id="crm-orders-table">
+            <thead><tr><th>#</th><th>Client</th><th>Téléphone</th><th>Produit</th><th>Wilaya</th><th>Statut</th><th>Actions</th></tr></thead>
+            <tbody id="crm-orders-body"></tbody>
+          </table>
+          <!-- Mobile cards -->
+          <div class="mobile-cards" id="crm-orders-mobile"></div>
+          <div id="crm-orders-empty" class="hidden" style="padding:40px;text-align:center;color:var(--text-3);">Aucune commande à afficher.</div>
+        </div>
+      </div>
+
+      <!-- PIPELINE -->
+      <div id="page-pipeline" class="crm-page hidden">
+        <div class="page-header">
+          <div class="page-title">🔄 Pipeline</div>
+          <div class="page-sub">Vue d'ensemble de l'avancement des commandes</div>
+        </div>
+        <div class="section-card" style="overflow:hidden;">
+          <div id="crm-pipeline" style="display:grid;gap:0;overflow-x:auto;"></div>
+        </div>
+      </div>
+
+      <!-- MY PERFORMANCE -->
+      <div id="page-my-perf" class="crm-page hidden">
+        <div class="page-header">
+          <div class="page-title">📊 Mes Performances</div>
+          <div class="page-sub">Vos statistiques personnelles</div>
+        </div>
+        <div class="kpi-grid" id="perf-kpis"></div>
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:18px;">
+          <div class="section-card">
+            <div class="sc-header"><span class="sc-title">📅 Activité des 14 derniers jours</span></div>
+            <div style="padding:16px;" id="perf-daily-chart"></div>
+          </div>
+          <div class="section-card">
+            <div class="sc-header"><span class="sc-title">🎯 Objectifs du Mois</span></div>
+            <div style="padding:16px;" id="perf-goals"></div>
+          </div>
+        </div>
+      </div>
+
+      <!-- ACTIVITY LOG -->
+      <div id="page-log" class="crm-page hidden">
+        <div class="page-header">
+          <div class="page-title">📝 Mon Activité</div>
+          <div class="page-sub">Historique de vos actions</div>
+        </div>
+        <div class="section-card">
+          <div class="sc-header">
+            <span class="sc-title">Journal d'activité</span>
+            <select id="log-filter" class="btn btn-outline btn-sm" onchange="renderLog()" style="text-transform:none;letter-spacing:0;font-size:12px;">
+              <option value="7">7 derniers jours</option>
+              <option value="30" selected>30 derniers jours</option>
+              <option value="all">Tout</option>
+            </select>
+          </div>
+          <div style="padding:12px 16px;" id="activity-log-list"></div>
+        </div>
+      </div>
+
+    </main>
+  </div>
+</div>
+
+<!-- ORDER MODAL -->
+<div id="order-modal" class="modal-bg hidden" onclick="closeModal(event)">
+  <div class="modal-box" onclick="event.stopPropagation()">
+    <div class="modal-header">
+      <div class="modal-title" id="om-title">Commande</div>
+      <div class="modal-close" onclick="document.getElementById('order-modal').classList.add('hidden')">✕</div>
+    </div>
+    <div class="modal-body" id="om-body"></div>
+    <div class="modal-footer" id="om-footer"></div>
+  </div>
+</div>
+
+<!-- TOAST -->
+<div id="crm-toast"></div>
+
+<script>
+// ============================================================
+// STATE
+// ============================================================
+let currentEmployee = null;  // { id, name, role, loginId }
+let crmFilter = 'all';
+let currentPage = 'dashboard';
+
+const STATUS_LIST = ['Nouveau','Appelé','Confirmé','Expédié','En transit','Livré','Retourné','Annulé'];
+const STATUS_CSS  = {
+  'Nouveau':'s-new','Appelé':'s-called','Confirmé':'s-confirmed',
+  'Expédié':'s-shipped','En transit':'s-transit',
+  'Livré':'s-delivered','Retourné':'s-returned','Annulé':'s-cancelled',
+};
+
+// Role definitions: what statuses each role CAN SEE and CAN SET
+const ROLE_CONFIG = {
+  confirmation: {
+    label: 'Agent Confirmation',
+    color: 'var(--blue)',
+    badge: 'confirmation',
+    canSeeStatuses: ['Nouveau','Appelé','Confirmé','Annulé'],
+    canSetStatuses: ['Appelé','Confirmé','Annulé'],
+    filterBtns: [
+      {key:'Nouveau', label:'Nouveaux'},
+      {key:'Appelé', label:'Appelés'},
+      {key:'Confirmé', label:'Confirmés'},
+    ],
+    kpiDesc: 'Appeler les nouveaux leads et confirmer les commandes',
+  },
+  livraison: {
+    label: 'Agent Livraison',
+    color: 'var(--purple)',
+    badge: 'livraison',
+    canSeeStatuses: ['Confirmé','Expédié','En transit','Livré','Retourné'],
+    canSetStatuses: ['Expédié','En transit','Livré','Retourné'],
+    filterBtns: [
+      {key:'Confirmé', label:'À Expédier'},
+      {key:'Expédié', label:'Expédiés'},
+      {key:'En transit', label:'En transit'},
+      {key:'Livré', label:'Livrés'},
+    ],
+    kpiDesc: 'Coordonner les expéditions et suivre les livraisons',
+  },
+  superviseur: {
+    label: 'Superviseur',
+    color: 'var(--gold)',
+    badge: 'superviseur',
+    canSeeStatuses: STATUS_LIST,
+    canSetStatuses: STATUS_LIST,
+    filterBtns: [
+      {key:'Nouveau', label:'Nouveaux'},
+      {key:'Appelé', label:'Appelés'},
+      {key:'Confirmé', label:'Confirmés'},
+      {key:'Expédié', label:'Expédiés'},
+      {key:'Livré', label:'Livrés'},
+    ],
+    kpiDesc: 'Accès complet au pipeline de commandes',
+  }
+};
+
+// ============================================================
+// DATA ACCESS (localStorage shared with admin.html)
+// ============================================================
+function getOrders()     { return JSON.parse(localStorage.getItem('pp_orders')    || '[]'); }
+function getEmployees()  { return JSON.parse(localStorage.getItem('pp_employees') || '[]'); }
+function saveOrders(o)   { localStorage.setItem('pp_orders', JSON.stringify(o)); }
+function getActivityLog(){ return JSON.parse(localStorage.getItem('pp_activity_log') || '[]'); }
+function saveActivityLog(l){ localStorage.setItem('pp_activity_log', JSON.stringify(l)); }
+
+// ============================================================
+// LOGIN / LOGOUT
+// ============================================================
+function doLogin() {
+  const loginId = document.getElementById('login-id').value.trim().toLowerCase();
+  const pw      = document.getElementById('login-pw').value;
+  if (!loginId || !pw) {
+    showLoginError('Remplissez tous les champs.');
+    return;
+  }
+
+  // Check against employee list (set by admin)
+  const employees = getEmployees();
+  const emp = employees.find(e => e.loginId && e.loginId.toLowerCase() === loginId && e.password === pw && e.active !== false);
+
+  if (!emp) {
+    showLoginError('Identifiant ou mot de passe incorrect.');
+    return;
+  }
+
+  currentEmployee = emp;
+  sessionStorage.setItem('crm_session', JSON.stringify({ id: emp.id, loginId: emp.loginId, name: emp.name, role: emp.role }));
+  startApp();
+}
+
+function showLoginError(msg) {
+  const el = document.getElementById('login-error');
+  el.textContent = msg;
+  setTimeout(() => { el.textContent = ''; }, 4000);
+}
+
+function doLogout() {
+  if (!confirm('Se déconnecter ?')) return;
+  sessionStorage.removeItem('crm_session');
+  currentEmployee = null;
+  document.getElementById('app').classList.remove('visible');
+  document.getElementById('login-screen').style.display = 'flex';
+  document.getElementById('login-id').value = '';
+  document.getElementById('login-pw').value = '';
+}
+
+// Resume session on page reload
+function checkSession() {
+  const s = sessionStorage.getItem('crm_session');
+  if (!s) return false;
+  try {
+    const sess = JSON.parse(s);
+    // Re-validate against current employees list
+    const employees = getEmployees();
+    const emp = employees.find(e => e.id === sess.id && e.active !== false);
+    if (!emp) return false;
+    currentEmployee = emp;
+    return true;
+  } catch(e) { return false; }
+}
+
+// ============================================================
+// APP INIT
+// ============================================================
+function startApp() {
+  const emp  = currentEmployee;
+  const role = ROLE_CONFIG[emp.role] || ROLE_CONFIG.confirmation;
+
+  // Update UI elements with employee info
+  document.getElementById('tb-name').textContent    = emp.name;
+  document.getElementById('tb-avatar').textContent  = emp.name.charAt(0).toUpperCase();
+  document.getElementById('tb-role-badge').textContent  = role.label;
+  document.getElementById('tb-role-badge').className     = `tb-badge ${role.badge}`;
+  document.getElementById('sb-name-display').textContent = emp.name;
+  document.getElementById('sb-name-m').textContent       = emp.name;
+  document.getElementById('sb-role-display').innerHTML   = `<span class="tb-badge ${role.badge}">${role.label}</span>`;
+
+  // Role filter buttons in orders page
+  document.getElementById('role-filters').innerHTML = role.filterBtns.map(f =>
+    `<button class="filter-chip" data-f="${f.key}" onclick="setFilter('${f.key}')">${f.label}</button>`
+  ).join('');
+
+  document.getElementById('login-screen').style.display = 'none';
+  document.getElementById('app').classList.add('visible');
+  crmPage('dashboard');
+  setInterval(() => { if (currentPage === 'dashboard') renderDashboard(); }, 30000);
+}
+
+// ============================================================
+// NAVIGATION
+// ============================================================
+function crmPage(page) {
+  document.querySelectorAll('.crm-page').forEach(el => el.classList.add('hidden'));
+  document.querySelectorAll('.nav-item[data-page]').forEach(el => el.classList.remove('active'));
+  const el = document.getElementById('page-' + page);
+  if (el) el.classList.remove('hidden');
+  const nav = document.querySelector(`.nav-item[data-page="${page}"]`);
+  if (nav) nav.classList.add('active');
+  currentPage = page;
+  switch(page) {
+    case 'dashboard': renderDashboard(); break;
+    case 'my-orders': renderMyOrders(); break;
+    case 'pipeline':  renderPipeline(); break;
+    case 'my-perf':   renderMyPerf(); break;
+    case 'log':       renderLog(); break;
+  }
+}
+
+// ============================================================
+// DASHBOARD
+// ============================================================
+function renderDashboard() {
+  const emp    = currentEmployee;
+  const role   = ROLE_CONFIG[emp.role] || ROLE_CONFIG.confirmation;
+  const orders = getOrders();
+  const now    = new Date();
+
+  document.getElementById('dash-greeting').textContent = `Bonjour, ${emp.name.split(' ')[0]} 👋`;
+  document.getElementById('dash-date').textContent = now.toLocaleDateString('fr-DZ',{weekday:'long',day:'numeric',month:'long',year:'numeric'});
+
+  // My orders (filtered by role)
+  const myOrders = orders.filter(o => role.canSeeStatuses.includes(o.status || 'Nouveau'));
+  const urgent   = myOrders.filter(o => ['Nouveau','Confirmé'].includes(o.status || 'Nouveau'));
+  const todayOrders = myOrders.filter(o => o.createdAt && new Date(o.createdAt).toDateString() === now.toDateString());
+
+  // Get my activity today
+  const log    = getActivityLog();
+  const myLog  = log.filter(l => l.employeeId === emp.id);
+  const todayLog = myLog.filter(l => new Date(l.timestamp).toDateString() === now.toDateString());
+
+  // Update sidebar badge
+  document.getElementById('sb-urgent').textContent = urgent.length;
+
+  // KPIs
+  const kpiData = emp.role === 'confirmation' ? [
+    { label: "À Appeler", value: orders.filter(o=>o.status==='Nouveau').length, color:'var(--blue)', delta: 'Nouveaux leads' },
+    { label: "Confirmés Aujourd'hui", value: todayLog.filter(l=>l.to==='Confirmé').length, color:'var(--gold)', delta: 'vs hier' },
+    { label: "Mes Actions Aujourd'hui", value: todayLog.length, color:'var(--green)', delta: 'total actions' },
+    { label: "Confirmés ce Mois", value: myLog.filter(l=>{const d=new Date(l.timestamp);return d.getMonth()===now.getMonth()&&d.getFullYear()===now.getFullYear()&&l.to==='Confirmé'}).length, color:'var(--amber)', delta: 'ce mois' },
+  ] : emp.role === 'livraison' ? [
+    { label: "À Expédier", value: orders.filter(o=>o.status==='Confirmé').length, color:'var(--purple)', delta: 'en attente' },
+    { label: "En Transit", value: orders.filter(o=>o.status==='En transit').length, color:'#38bdf8', delta: 'en route' },
+    { label: "Livrés ce Mois", value: myLog.filter(l=>{const d=new Date(l.timestamp);return d.getMonth()===now.getMonth()&&d.getFullYear()===now.getFullYear()&&l.to==='Livré'}).length, color:'var(--green)', delta: 'livraisons' },
+    { label: "Retournés", value: orders.filter(o=>o.status==='Retourné').length, color:'var(--red)', delta: 'à gérer' },
+  ] : [
+    { label: "Total Commandes", value: orders.length, color:'var(--gold)', delta: 'pipeline complet' },
+    { label: "Urgentes", value: urgent.length, color:'var(--red)', delta: 'action requise' },
+    { label: "Livrées", value: orders.filter(o=>o.status==='Livré').length, color:'var(--green)', delta: 'succès' },
+    { label: "Actions Aujourd'hui", value: todayLog.length, color:'var(--blue)', delta: 'mes actions' },
+  ];
+
+  document.getElementById('agent-kpis').innerHTML = kpiData.map(k => `
+    <div class="kpi-card">
+      <div class="kpi-label">${k.label}</div>
+      <div class="kpi-value" style="color:${k.color}">${k.value}</div>
+      <div class="kpi-sub">${k.delta}</div>
+    </div>`).join('');
+
+  // Urgent actions
+  const urgentList = urgent.slice(0, 6);
+  document.getElementById('urgent-actions').innerHTML = urgentList.length
+    ? urgentList.map(o => `
+      <div style="display:flex;align-items:center;justify-content:space-between;padding:11px 16px;border-bottom:1px solid var(--border);">
+        <div>
+          <div style="font-size:13px;font-weight:600;">${o.name}</div>
+          <div style="font-size:11px;color:var(--text-2);">${o.product||''} · ${o.wilaya||''}</div>
+        </div>
+        <div style="display:flex;gap:6px;">
+          ${emp.role !== 'livraison' ? `<a href="tel:${o.phone}" onclick="logCall('${o.id}')" class="btn btn-green btn-sm">📞</a>` : ''}
+          <button class="btn btn-outline btn-sm" onclick="openOrderModal('${o.id}')">Voir</button>
+        </div>
+      </div>`).join('')
+    : '<div style="padding:20px;text-align:center;color:var(--text-3);font-size:13px;">✅ Tout est traité !</div>';
+
+  // Recent activity
+  const recentLog = myLog.slice(0, 6);
+  document.getElementById('recent-activity').innerHTML = recentLog.length
+    ? recentLog.map(l => {
+        const css = STATUS_CSS[l.to] || 's-new';
+        const dotColor = { 'Nouveau':'var(--blue)','Appelé':'var(--amber)','Confirmé':'var(--gold)','Expédié':'var(--purple)','En transit':'#38bdf8','Livré':'var(--green)','Retourné':'var(--red)' };
+        return `<div class="activity-item">
+          <div class="activity-dot" style="background:${dotColor[l.to]||'var(--text-3)'}"></div>
+          <div class="activity-content">
+            <div class="activity-text"><strong>${l.orderName}</strong> → <span class="status ${css}">${l.to}</span></div>
+            <div class="activity-time">${new Date(l.timestamp).toLocaleString('fr-DZ',{day:'2-digit',month:'2-digit',hour:'2-digit',minute:'2-digit'})}</div>
+          </div>
+        </div>`;
+      }).join('')
+    : '<div style="color:var(--text-3);font-size:13px;">Aucune activité récente.</div>';
+}
+
+// ============================================================
+// MY ORDERS
+// ============================================================
+function setFilter(f) {
+  crmFilter = f;
+  document.querySelectorAll('[data-f]').forEach(b => b.classList.toggle('active', b.dataset.f === f));
+  renderMyOrders();
+}
+
+function renderMyOrders() {
+  const emp    = currentEmployee;
+  const role   = ROLE_CONFIG[emp.role] || ROLE_CONFIG.confirmation;
+  const orders = getOrders();
+  const q      = (document.getElementById('crm-search')?.value || '').toLowerCase();
+
+  let filtered = orders.filter(o => {
+    const inRole   = role.canSeeStatuses.includes(o.status || 'Nouveau');
+    const inFilter = crmFilter === 'all' || (o.status || 'Nouveau') === crmFilter;
+    const inSearch = !q || [o.name, o.phone, o.product, o.wilaya].some(v => (v||'').toLowerCase().includes(q));
+    return inRole && inFilter && inSearch;
+  });
+
+  const tbody  = document.getElementById('crm-orders-body');
+  const mobile = document.getElementById('crm-orders-mobile');
+  const empty  = document.getElementById('crm-orders-empty');
+
+  if (!filtered.length) {
+    tbody.innerHTML  = '';
+    mobile.innerHTML = '';
+    empty.classList.remove('hidden');
+    return;
+  }
+  empty.classList.add('hidden');
+
+  // Desktop table
+  tbody.innerHTML = filtered.map(o => {
+    const canSet = role.canSetStatuses;
+    return `<tr>
+      <td style="color:var(--text-3);font-size:10px;">#${(o.id||'').toString().slice(-5)}</td>
+      <td><a onclick="openOrderModal('${o.id}')">${o.name||'—'}</a></td>
+      <td><a href="tel:${o.phone}" onclick="logCall('${o.id}')" style="color:var(--green);">${o.phone||'—'}</a></td>
+      <td style="font-size:12px;color:var(--text-2);">${(o.product||'').substring(0,28)}</td>
+      <td style="font-size:12px;color:var(--text-2);">${o.wilaya||'—'}</td>
+      <td><span class="status ${STATUS_CSS[o.status||'Nouveau']}">${o.status||'Nouveau'}</span></td>
+      <td style="white-space:nowrap;">
+        ${emp.role !== 'livraison' ? `<a href="tel:${o.phone}" onclick="logCall('${o.id}')" class="btn btn-green btn-sm" style="margin-right:4px;">📞</a>` : ''}
+        ${canSet.map(s => s !== (o.status||'Nouveau') ? `<button class="btn btn-outline btn-sm" style="margin-right:2px;" onclick="changeStatus('${o.id}','${s}')">${s}</button>` : '').join('')}
+      </td>
+    </tr>`;
+  }).join('');
+
+  // Mobile cards
+  mobile.innerHTML = filtered.map(o => {
+    const canSet = role.canSetStatuses;
+    return `<div class="order-card">
+      <div class="oc-name">${o.name||'—'}</div>
+      <div class="oc-meta">${o.phone||''} · ${o.wilaya||''}</div>
+      <div style="margin-bottom:6px;">${o.product||''}</div>
+      <span class="status ${STATUS_CSS[o.status||'Nouveau']}">${o.status||'Nouveau'}</span>
+      <div class="oc-actions">
+        ${emp.role !== 'livraison' ? `<a href="tel:${o.phone}" onclick="logCall('${o.id}')" class="btn btn-green btn-sm">📞 Appeler</a>` : ''}
+        <button class="btn btn-outline btn-sm" onclick="openOrderModal('${o.id}')">Détails</button>
+        ${canSet.filter(s => s !== (o.status||'Nouveau')).map(s => `<button class="btn btn-outline btn-sm" onclick="changeStatus('${o.id}','${s}')">→ ${s}</button>`).join('')}
+      </div>
+    </div>`;
+  }).join('');
+}
+
+// ============================================================
+// PIPELINE
+// ============================================================
+function renderPipeline() {
+  const emp    = currentEmployee;
+  const role   = ROLE_CONFIG[emp.role] || ROLE_CONFIG.confirmation;
+  const orders = getOrders();
+  const cols   = role.canSeeStatuses;
+  const colors = { 'Nouveau':'var(--blue)','Appelé':'var(--amber)','Confirmé':'var(--gold)','Expédié':'var(--purple)','En transit':'#38bdf8','Livré':'var(--green)','Retourné':'var(--red)','Annulé':'#555' };
+
+  document.getElementById('crm-pipeline').style.gridTemplateColumns = `repeat(${cols.length},1fr)`;
+  document.getElementById('crm-pipeline').innerHTML = cols.map(status => {
+    const col = orders.filter(o => (o.status||'Nouveau') === status);
+    return `
+      <div style="text-align:center;padding:12px 8px;border-right:1px solid var(--border);min-width:110px;">
+        <div style="font-size:9px;font-weight:700;letter-spacing:2px;text-transform:uppercase;color:var(--text-3);margin-bottom:8px;">${status}</div>
+        <div style="font-size:26px;font-weight:700;color:${colors[status]};margin-bottom:10px;">${col.length}</div>
+        <div style="display:flex;flex-direction:column;gap:5px;max-height:320px;overflow-y:auto;">
+          ${col.slice(0,10).map(o => `
+            <div onclick="openOrderModal('${o.id}')" style="background:var(--bg-elev);border:1px solid var(--border);border-radius:5px;padding:8px;text-align:left;cursor:pointer;transition:border-color 0.2s;" onmouseover="this.style.borderColor='var(--gold)'" onmouseout="this.style.borderColor='var(--border)'">
+              <div style="font-size:11px;font-weight:600;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">${o.name}</div>
+              <div style="font-size:9px;color:var(--text-2);">${o.wilaya||'—'}</div>
+            </div>`).join('')}
+          ${col.length > 10 ? `<div style="font-size:10px;color:var(--text-3);text-align:center;padding:4px;">+${col.length-10} autres</div>` : ''}
+        </div>
+      </div>`;
+  }).join('');
+}
+
+// ============================================================
+// MY PERFORMANCE
+// ============================================================
+function renderMyPerf() {
+  const emp  = currentEmployee;
+  const log  = getActivityLog();
+  const myLog = log.filter(l => l.employeeId === emp.id);
+  const now  = new Date();
+  const thisMonth = myLog.filter(l => { const d=new Date(l.timestamp); return d.getMonth()===now.getMonth()&&d.getFullYear()===now.getFullYear(); });
+  const today     = myLog.filter(l => new Date(l.timestamp).toDateString() === now.toDateString());
+
+  // KPIs
+  const kpis = emp.role === 'confirmation' ? [
+    { label:'Appels Aujourd\'hui',   value: today.filter(l=>l.action==='call').length,     color:'var(--green)' },
+    { label:'Confirmés ce Mois',     value: thisMonth.filter(l=>l.to==='Confirmé').length, color:'var(--gold)'  },
+    { label:'Taux Confirmation',     value: (()=>{ const calls=myLog.filter(l=>l.action==='call').length; const conf=myLog.filter(l=>l.to==='Confirmé').length; return calls ? Math.round(conf/calls*100)+'%' : '—'; })(), color:'var(--amber)' },
+    { label:'Total Actions',         value: myLog.length,                                  color:'var(--blue)'  },
+  ] : emp.role === 'livraison' ? [
+    { label:'Expédiés ce Mois',  value: thisMonth.filter(l=>l.to==='Expédié').length,   color:'var(--purple)' },
+    { label:'Livrés ce Mois',    value: thisMonth.filter(l=>l.to==='Livré').length,     color:'var(--green)'  },
+    { label:'Retours',           value: thisMonth.filter(l=>l.to==='Retourné').length,  color:'var(--red)'    },
+    { label:'Total Actions',     value: myLog.length,                                    color:'var(--blue)'   },
+  ] : [
+    { label:'Actions Totales',   value: myLog.length,                                              color:'var(--gold)'   },
+    { label:'Ce Mois',           value: thisMonth.length,                                           color:'var(--blue)'  },
+    { label:'Aujourd\'hui',      value: today.length,                                               color:'var(--green)' },
+    { label:'Confirmations',     value: myLog.filter(l=>l.to==='Confirmé').length,                 color:'var(--amber)' },
+  ];
+
+  document.getElementById('perf-kpis').innerHTML = kpis.map(k => `
+    <div class="kpi-card">
+      <div class="kpi-label">${k.label}</div>
+      <div class="kpi-value" style="color:${k.color}">${k.value}</div>
+    </div>`).join('');
+
+  // Daily chart (14 days)
+  const buckets = {};
+  for (let i=13;i>=0;i--) {
+    const d=new Date(); d.setDate(d.getDate()-i);
+    const key=d.toLocaleDateString('fr-DZ',{day:'2-digit',month:'2-digit'});
+    buckets[key]=0;
+  }
+  myLog.forEach(l => {
+    const d=new Date(l.timestamp);
+    const key=d.toLocaleDateString('fr-DZ',{day:'2-digit',month:'2-digit'});
+    if(key in buckets) buckets[key]++;
+  });
+  const maxV = Math.max(...Object.values(buckets), 1);
+  document.getElementById('perf-daily-chart').innerHTML = `
+    <div style="display:flex;align-items:flex-end;gap:4px;height:100px;">
+      ${Object.entries(buckets).map(([day,cnt]) => `
+        <div style="flex:1;display:flex;flex-direction:column;align-items:center;gap:3px;">
+          <div style="font-size:8px;color:var(--text-2);">${cnt||''}</div>
+          <div title="${cnt} actions" style="width:100%;background:var(--gold-dim);border:1px solid rgba(201,168,76,0.2);border-radius:2px 2px 0 0;height:${Math.round(cnt/maxV*80)+5}px;transition:height 0.5s;"></div>
+          <div style="font-size:8px;color:var(--text-3);white-space:nowrap;">${day}</div>
+        </div>`).join('')}
+    </div>`;
+
+  // Goals
+  const goals = emp.role === 'confirmation' ? [
+    { label:'Appels / jour',    current: today.filter(l=>l.action==='call').length,    target: 20 },
+    { label:'Confirmés / mois', current: thisMonth.filter(l=>l.to==='Confirmé').length, target: 30 },
+    { label:'Taux confirmation',current: (()=>{ const c=myLog.filter(l=>l.action==='call').length; const cf=myLog.filter(l=>l.to==='Confirmé').length; return c?Math.round(cf/c*100):0; })(), target: 40, unit:'%' },
+  ] : emp.role === 'livraison' ? [
+    { label:'Livraisons / mois', current: thisMonth.filter(l=>l.to==='Livré').length,  target: 25 },
+    { label:'Taux livraison',    current: (()=>{ const e=myLog.filter(l=>l.to==='Expédié').length; const d=myLog.filter(l=>l.to==='Livré').length; return e?Math.round(d/e*100):0; })(), target: 80, unit:'%' },
+  ] : [
+    { label:'Actions / jour',    current: today.length,        target: 15 },
+    { label:'Confirmations / mois', current: thisMonth.filter(l=>l.to==='Confirmé').length, target: 50 },
+  ];
+
+  document.getElementById('perf-goals').innerHTML = goals.map(g => {
+    const pct = Math.min(Math.round(g.current / g.target * 100), 100);
+    const col = pct >= 80 ? 'var(--green)' : pct >= 50 ? 'var(--amber)' : 'var(--red)';
+    return `<div style="margin-bottom:16px;">
+      <div style="display:flex;justify-content:space-between;margin-bottom:5px;font-size:12px;">
+        <span style="color:var(--text-2);">${g.label}</span>
+        <span style="font-weight:700;color:${col};">${g.current}${g.unit||''} / ${g.target}${g.unit||''}</span>
+      </div>
+      <div style="background:var(--bg-elev);border-radius:3px;height:7px;overflow:hidden;">
+        <div style="background:${col};height:100%;width:${pct}%;transition:width 0.6s;border-radius:3px;"></div>
+      </div>
+    </div>`;
+  }).join('');
+}
+
+// ============================================================
+// ACTIVITY LOG
+// ============================================================
+function renderLog() {
+  const emp    = currentEmployee;
+  const log    = getActivityLog();
+  const myLog  = log.filter(l => l.employeeId === emp.id);
+  const days   = document.getElementById('log-filter').value;
+  const cutoff = days === 'all' ? 0 : Date.now() - parseInt(days) * 86400000;
+  const filtered = myLog.filter(l => !cutoff || new Date(l.timestamp).getTime() >= cutoff);
+
+  const dotColor = { 'Nouveau':'var(--blue)','Appelé':'var(--amber)','Confirmé':'var(--gold)','Expédié':'var(--purple)','En transit':'#38bdf8','Livré':'var(--green)','Retourné':'var(--red)' };
+  const container = document.getElementById('activity-log-list');
+  if (!filtered.length) {
+    container.innerHTML = '<div style="color:var(--text-3);font-size:13px;text-align:center;padding:20px;">Aucune activité sur cette période.</div>';
+    return;
+  }
+  container.innerHTML = filtered.slice(0, 100).map(l => `
+    <div class="activity-item">
+      <div class="activity-dot" style="background:${dotColor[l.to]||'var(--text-3)'}"></div>
+      <div class="activity-content">
+        <div class="activity-text">
+          ${l.action === 'call' ? '📞 Appel vers' : '🔄 Statut changé :'} <strong>${l.orderName||'—'}</strong>
+          ${l.from ? `<span style="color:var(--text-3);">${l.from}</span> →` : ''}
+          <span class="status ${STATUS_CSS[l.to]||'s-new'}">${l.to||''}</span>
+        </div>
+        <div class="activity-time">${new Date(l.timestamp).toLocaleString('fr-DZ',{weekday:'short',day:'2-digit',month:'2-digit',hour:'2-digit',minute:'2-digit'})}</div>
+      </div>
+    </div>`).join('');
+}
+
+// ============================================================
+// ORDER ACTIONS
+// ============================================================
+function changeStatus(orderId, newStatus) {
+  const emp    = currentEmployee;
+  const role   = ROLE_CONFIG[emp.role] || ROLE_CONFIG.confirmation;
+  if (!role.canSetStatuses.includes(newStatus)) { toast('⛔ Action non autorisée pour votre rôle.'); return; }
+
+  const orders = getOrders();
+  const o = orders.find(x => x.id == orderId || x.id === orderId);
+  if (!o) return;
+  const oldStatus = o.status || 'Nouveau';
+  o.status    = newStatus;
+  o.updatedAt = new Date().toISOString();
+  o.lastAgent = emp.name;
+  saveOrders(orders);
+
+  // Log the action
+  logAction({ action:'status_change', orderId, orderName: o.name, from: oldStatus, to: newStatus });
+
+  toast(`✅ ${o.name} → ${newStatus}`);
+  if (currentPage === 'dashboard') renderDashboard();
+  if (currentPage === 'my-orders') renderMyOrders();
+  if (currentPage === 'pipeline')  renderPipeline();
+}
+
+function logCall(orderId) {
+  const orders = getOrders();
+  const o = orders.find(x => x.id == orderId || x.id === orderId);
+  if (!o) return;
+  if (o.status === 'Nouveau') { changeStatus(orderId, 'Appelé'); }
+  else { logAction({ action:'call', orderId, orderName: o.name, to: o.status || 'Nouveau', from: o.status || 'Nouveau' }); }
+}
+
+function logAction(data) {
+  const emp = currentEmployee;
+  const log = getActivityLog();
+  log.unshift({
+    id: Date.now(),
+    employeeId: emp.id,
+    employeeName: emp.name,
+    employeeRole: emp.role,
+    timestamp: new Date().toISOString(),
+    ...data
+  });
+  // Keep max 2000 entries
+  if (log.length > 2000) log.splice(2000);
+  saveActivityLog(log);
+}
+
+// ============================================================
+// ORDER MODAL
+// ============================================================
+function openOrderModal(orderId) {
+  const emp    = currentEmployee;
+  const role   = ROLE_CONFIG[emp.role] || ROLE_CONFIG.confirmation;
+  const orders = getOrders();
+  const o = orders.find(x => x.id == orderId || x.id === orderId);
+  if (!o) return;
+
+  document.getElementById('om-title').textContent = `${o.name} · #${(o.id||'').toString().slice(-5)}`;
+  document.getElementById('om-body').innerHTML = `
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:16px;">
+      ${[['Client',o.name],['Téléphone',o.phone],['Wilaya',o.wilaya],['Commune',o.commune],['Adresse',o.address],['Produit',o.product]].map(([l,v])=>`
+        <div style="background:var(--bg-elev);border:1px solid var(--border);border-radius:6px;padding:10px;">
+          <div style="font-size:9px;font-weight:700;letter-spacing:2px;text-transform:uppercase;color:var(--text-3);margin-bottom:3px;">${l}</div>
+          <div style="font-size:13px;font-weight:500;">${v||'—'}</div>
+        </div>`).join('')}
+    </div>
+    ${o.notes ? `<div style="background:var(--bg-elev);border:1px solid var(--border);border-radius:6px;padding:10px;margin-bottom:14px;"><div style="font-size:9px;font-weight:700;letter-spacing:2px;text-transform:uppercase;color:var(--text-3);margin-bottom:3px;">Notes</div><div style="font-size:13px;color:var(--text-2);">${o.notes}</div></div>` : ''}
+    <div>
+      <div style="font-size:9px;font-weight:700;letter-spacing:2px;text-transform:uppercase;color:var(--text-3);margin-bottom:8px;">Changer le Statut</div>
+      <div style="display:flex;flex-wrap:wrap;gap:5px;">
+        ${role.canSetStatuses.map(s => `<button class="btn btn-sm ${(o.status||'Nouveau')===s?'btn-gold':'btn-outline'}" onclick="changeStatus('${o.id}','${s}');document.getElementById('order-modal').classList.add('hidden')">${s}</button>`).join('')}
+      </div>
+    </div>
+    ${o.lastAgent ? `<div style="margin-top:12px;font-size:11px;color:var(--text-3);">Dernière action par : ${o.lastAgent}</div>` : ''}`;
+
+  document.getElementById('om-footer').innerHTML = `
+    ${emp.role !== 'livraison' ? `<a href="tel:${o.phone}" onclick="logCall('${o.id}')" class="btn btn-green">📞 Appeler</a>` : ''}
+    <a href="https://wa.me/${(o.phone||'').replace(/\D/g,'')}?text=Bonjour+${encodeURIComponent(o.name||'')}..." target="_blank" class="btn" style="background:rgba(37,211,102,0.1);color:#25D366;border:1px solid rgba(37,211,102,0.3);">💬 WhatsApp</a>
+    <button class="btn btn-outline" onclick="document.getElementById('order-modal').classList.add('hidden')">Fermer</button>`;
+
+  document.getElementById('order-modal').classList.remove('hidden');
+}
+
+function closeModal(e) {
+  if (e.target === document.getElementById('order-modal')) document.getElementById('order-modal').classList.add('hidden');
+}
+
+// ============================================================
+// MOBILE NAV
+// ============================================================
+function toggleMobileNav() { document.getElementById('mobile-nav').classList.add('open'); }
+function closeMobileNav(e) {
+  if (!e || e.target === document.getElementById('mobile-nav')) document.getElementById('mobile-nav').classList.remove('open');
+}
+
+// ============================================================
+// TOAST
+// ============================================================
+function toast(msg) {
+  const t = document.getElementById('crm-toast');
+  t.textContent = msg;
+  t.style.opacity = '1'; t.style.transform = 'translateX(-50%) translateY(0)';
+  setTimeout(() => { t.style.opacity = '0'; t.style.transform = 'translateX(-50%) translateY(20px)'; }, 3000);
+}
+
+// ============================================================
+// BOOT
+// ============================================================
+window.addEventListener('DOMContentLoaded', () => {
+  if (checkSession()) {
+    startApp();
+  } else {
+    document.getElementById('login-id').focus();
+  }
+});
+document.addEventListener('keydown', e => { if(e.ctrlKey && e.shiftKey && e.key==='L') doLogout(); });
+</script>
+</body>
+</html>

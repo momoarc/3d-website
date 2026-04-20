@@ -1,0 +1,293 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>360° Showroom</title>
+<style>
+  /* ============================================================
+     STYLES — safe to tweak (colors, cursor, hint position, etc.)
+     ============================================================ */
+  html, body { margin: 0; padding: 0; height: 100%; background: #0b0b0f; overflow: hidden; font-family: system-ui, -apple-system, "Segoe UI", Roboto, sans-serif; }
+  #showroom-container { position: relative; width: 100%; height: 100vh; cursor: grab; user-select: none; }
+  #showroom-container.dragging { cursor: grabbing; }
+  #showroom-container canvas { display: block; }
+
+  .ui-hint {
+    position: absolute; bottom: 20px; left: 50%; transform: translateX(-50%);
+    color: #fff; background: rgba(0,0,0,0.45); padding: 8px 16px; border-radius: 999px;
+    font-size: 13px; letter-spacing: .3px; pointer-events: none; backdrop-filter: blur(6px);
+  }
+  .arrow-btn {
+    position: absolute; top: 50%; transform: translateY(-50%);
+    width: 48px; height: 48px; border-radius: 50%; border: none;
+    background: rgba(255,255,255,0.12); color: #fff; font-size: 24px; cursor: pointer;
+    backdrop-filter: blur(8px); transition: background .2s;
+  }
+  .arrow-btn:hover { background: rgba(255,255,255,0.25); }
+  .arrow-btn.left { left: 20px; }
+  .arrow-btn.right { right: 20px; }
+
+  .wall-tooltip {
+    position: absolute; pointer-events: none; padding: 6px 12px;
+    background: rgba(0,0,0,0.75); color: #fff; border-radius: 6px;
+    font-size: 13px; transform: translate(-50%, -130%); white-space: nowrap;
+    opacity: 0; transition: opacity .15s;
+  }
+  .wall-tooltip.visible { opacity: 1; }
+</style>
+</head>
+<body>
+
+<div id="showroom-container">
+  <button class="arrow-btn left"  id="rotateLeft"  aria-label="Rotate left">‹</button>
+  <button class="arrow-btn right" id="rotateRight" aria-label="Rotate right">›</button>
+  <div class="ui-hint">Drag to look around · Click a wall to enter</div>
+  <div class="wall-tooltip" id="wallTooltip"></div>
+</div>
+
+<script type="importmap">
+{
+  "imports": {
+    "three": "https://unpkg.com/three@0.160.0/build/three.module.js"
+  }
+}
+</script>
+
+<script type="module">
+import * as THREE from 'three';
+
+/* ================================================================
+   ░░░ CUSTOMIZE HERE ░░░  —  This is the only section you need
+   to edit per business. Each entry = one wall in the showroom.
+   ----------------------------------------------------------------
+   • image  : URL to the wall's image (product photo / category banner)
+              Recommended size: 1024×1024 (square). Use HTTPS URLs.
+   • label  : Text shown on hover above the wall.
+   • url    : Where the customer goes when clicking that wall.
+              Can be absolute (https://...) or relative (/catalog/x).
+   ================================================================ */
+const WALLS = [
+  { image: 'https://picsum.photos/seed/wall1/1024', label: 'New Arrivals',  url: 'https://example.com/catalog/new-arrivals' },
+  { image: 'https://picsum.photos/seed/wall2/1024', label: 'Men',           url: 'https://example.com/catalog/men' },
+  { image: 'https://picsum.photos/seed/wall3/1024', label: 'Women',         url: 'https://example.com/catalog/women' },
+  { image: 'https://picsum.photos/seed/wall4/1024', label: 'Accessories',   url: 'https://example.com/catalog/accessories' },
+  { image: 'https://picsum.photos/seed/wall5/1024', label: 'Shoes',         url: 'https://example.com/catalog/shoes' },
+  { image: 'https://picsum.photos/seed/wall6/1024', label: 'Bags',          url: 'https://example.com/catalog/bags' },
+  { image: 'https://picsum.photos/seed/wall7/1024', label: 'Sale',          url: 'https://example.com/catalog/sale' },
+  { image: 'https://picsum.photos/seed/wall8/1024', label: 'Lookbook',      url: 'https://example.com/lookbook' },
+];
+
+/* ================================================================
+   ░░░ ROOM APPEARANCE (optional) ░░░
+   Tweak floor / ceiling colors and room size here.
+   ================================================================ */
+const ROOM_CONFIG = {
+  radius: 5,                  // distance from center to each wall
+  height: 4,                  // wall height
+  floorColor:    0x1a1a1f,
+  ceilingColor:  0x0d0d12,
+  wallHoverTint: 0xffffff,    // brightness boost color on hover
+  openInNewTab:  true,        // set false to navigate in the same tab
+  rotationSpeed: 0.005,       // mouse drag sensitivity
+  arrowStep:     Math.PI / 8, // rotation per arrow-button click / key press
+};
+
+/* ================================================================
+   ░░░ END OF CUSTOMIZATION ZONE ░░░
+   The code below builds the 3D scene — you usually don't need to edit it.
+   ================================================================ */
+
+const container = document.getElementById('showroom-container');
+const tooltipEl = document.getElementById('wallTooltip');
+
+// --- Scene / camera / renderer ---
+const scene = new THREE.Scene();
+scene.background = new THREE.Color(0x000000);
+
+const camera = new THREE.PerspectiveCamera(75, container.clientWidth / container.clientHeight, 0.1, 100);
+camera.position.set(0, ROOM_CONFIG.height / 2, 0); // camera at center, eye height
+
+const renderer = new THREE.WebGLRenderer({ antialias: true });
+renderer.setPixelRatio(window.devicePixelRatio);
+renderer.setSize(container.clientWidth, container.clientHeight);
+container.appendChild(renderer.domElement);
+
+// --- Lights ---
+scene.add(new THREE.AmbientLight(0xffffff, 0.9));
+const pointLight = new THREE.PointLight(0xffffff, 0.6, 30);
+pointLight.position.set(0, ROOM_CONFIG.height - 0.2, 0);
+scene.add(pointLight);
+
+// --- Build walls (octagonal ring) ---
+const N = WALLS.length;                                    // 8 walls
+const angleStep = (Math.PI * 2) / N;
+const wallWidth = 2 * ROOM_CONFIG.radius * Math.tan(Math.PI / N); // exact side length of regular N-gon
+const textureLoader = new THREE.TextureLoader();
+textureLoader.crossOrigin = 'anonymous';
+
+const wallMeshes = [];
+
+WALLS.forEach((data, i) => {
+  const geom = new THREE.PlaneGeometry(wallWidth, ROOM_CONFIG.height);
+
+  // Texture loaded async; placeholder dark color until ready.
+  const mat = new THREE.MeshStandardMaterial({
+    color: 0x222228,
+    side: THREE.FrontSide,
+    roughness: 0.85,
+    metalness: 0.05,
+  });
+
+  textureLoader.load(
+    data.image,
+    (tex) => {
+      tex.colorSpace = THREE.SRGBColorSpace;
+      mat.map = tex;
+      mat.color.set(0xffffff);
+      mat.needsUpdate = true;
+    },
+    undefined,
+    (err) => console.warn('Wall texture failed:', data.image, err)
+  );
+
+  const mesh = new THREE.Mesh(geom, mat);
+
+  // Position around the ring; face inward toward camera (center).
+  const angle = i * angleStep;
+  mesh.position.set(
+    Math.sin(angle) * ROOM_CONFIG.radius,
+    ROOM_CONFIG.height / 2,
+    Math.cos(angle) * ROOM_CONFIG.radius
+  );
+  mesh.lookAt(0, ROOM_CONFIG.height / 2, 0);
+
+  mesh.userData = { ...data, originalEmissive: 0x000000 };
+  scene.add(mesh);
+  wallMeshes.push(mesh);
+});
+
+// --- Floor & ceiling (NOT clickable) ---
+const floorGeom = new THREE.CircleGeometry(ROOM_CONFIG.radius * 1.05, 64);
+const floor = new THREE.Mesh(floorGeom, new THREE.MeshStandardMaterial({ color: ROOM_CONFIG.floorColor, roughness: 0.9 }));
+floor.rotation.x = -Math.PI / 2;
+scene.add(floor);
+
+const ceiling = new THREE.Mesh(floorGeom, new THREE.MeshStandardMaterial({ color: ROOM_CONFIG.ceilingColor, roughness: 1 }));
+ceiling.rotation.x = Math.PI / 2;
+ceiling.position.y = ROOM_CONFIG.height;
+scene.add(ceiling);
+
+// --- Horizontal-only camera rotation state ---
+let yaw = 0;                       // current rotation around Y axis
+let targetYaw = 0;                 // smoothed target
+const lookTarget = new THREE.Vector3();
+
+function updateCameraLook() {
+  lookTarget.set(
+    Math.sin(yaw) * 10,
+    ROOM_CONFIG.height / 2,
+    Math.cos(yaw) * 10
+  );
+  camera.lookAt(lookTarget);
+}
+updateCameraLook();
+
+// --- Drag to rotate ---
+let isDragging = false;
+let lastX = 0;
+
+container.addEventListener('pointerdown', (e) => {
+  isDragging = true;
+  lastX = e.clientX;
+  container.classList.add('dragging');
+  container.setPointerCapture(e.pointerId);
+});
+container.addEventListener('pointermove', (e) => {
+  if (isDragging) {
+    const dx = e.clientX - lastX;
+    lastX = e.clientX;
+    targetYaw -= dx * ROOM_CONFIG.rotationSpeed;
+  }
+  updateHover(e);
+});
+container.addEventListener('pointerup', (e) => {
+  isDragging = false;
+  container.classList.remove('dragging');
+});
+
+// --- Arrow buttons + keyboard ---
+document.getElementById('rotateLeft').addEventListener('click',  () => targetYaw += ROOM_CONFIG.arrowStep);
+document.getElementById('rotateRight').addEventListener('click', () => targetYaw -= ROOM_CONFIG.arrowStep);
+window.addEventListener('keydown', (e) => {
+  if (e.key === 'ArrowLeft')  targetYaw += ROOM_CONFIG.arrowStep;
+  if (e.key === 'ArrowRight') targetYaw -= ROOM_CONFIG.arrowStep;
+});
+
+// --- Raycaster: hover + click on walls only ---
+const raycaster = new THREE.Raycaster();
+const pointer = new THREE.Vector2();
+let hoveredWall = null;
+let dragStartPos = null;
+
+container.addEventListener('pointerdown', (e) => { dragStartPos = { x: e.clientX, y: e.clientY }; });
+container.addEventListener('pointerup', (e) => {
+  if (!dragStartPos) return;
+  const moved = Math.hypot(e.clientX - dragStartPos.x, e.clientY - dragStartPos.y);
+  dragStartPos = null;
+  if (moved > 5) return; // treat as drag, not click
+  const hit = pickWall(e);
+  if (hit) {
+    if (ROOM_CONFIG.openInNewTab) window.open(hit.userData.url, '_blank', 'noopener');
+    else window.location.href = hit.userData.url;
+  }
+});
+
+function pickWall(e) {
+  const rect = container.getBoundingClientRect();
+  pointer.x = ((e.clientX - rect.left) / rect.width) * 2 - 1;
+  pointer.y = -((e.clientY - rect.top) / rect.height) * 2 + 1;
+  raycaster.setFromCamera(pointer, camera);
+  const hits = raycaster.intersectObjects(wallMeshes, false);
+  return hits.length ? hits[0].object : null;
+}
+
+function updateHover(e) {
+  const wall = pickWall(e);
+  if (wall !== hoveredWall) {
+    if (hoveredWall) hoveredWall.material.emissive?.setHex(0x000000);
+    hoveredWall = wall;
+    if (hoveredWall) {
+      hoveredWall.material.emissive = new THREE.Color(ROOM_CONFIG.wallHoverTint).multiplyScalar(0.15);
+    }
+  }
+  if (hoveredWall) {
+    container.style.cursor = isDragging ? 'grabbing' : 'pointer';
+    tooltipEl.textContent = hoveredWall.userData.label;
+    tooltipEl.style.left = (e.clientX - container.getBoundingClientRect().left) + 'px';
+    tooltipEl.style.top  = (e.clientY - container.getBoundingClientRect().top)  + 'px';
+    tooltipEl.classList.add('visible');
+  } else {
+    container.style.cursor = isDragging ? 'grabbing' : 'grab';
+    tooltipEl.classList.remove('visible');
+  }
+}
+
+// --- Resize ---
+window.addEventListener('resize', () => {
+  camera.aspect = container.clientWidth / container.clientHeight;
+  camera.updateProjectionMatrix();
+  renderer.setSize(container.clientWidth, container.clientHeight);
+});
+
+// --- Animation loop with smoothed yaw ---
+function animate() {
+  requestAnimationFrame(animate);
+  yaw += (targetYaw - yaw) * 0.1; // easing
+  updateCameraLook();
+  renderer.render(scene, camera);
+}
+animate();
+</script>
+</body>
+</html>
