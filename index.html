@@ -867,15 +867,12 @@ input, select, textarea { font-family: inherit; }
       </div>
 
       <!-- Filters Row -->
-      <div style="display:flex;align-items:center;gap:10px;flex-wrap:wrap;margin-bottom:40px;padding-bottom:24px;border-bottom:1px solid var(--border);">
-        <span style="font-size:11px;letter-spacing:2px;text-transform:uppercase;color:var(--text-muted);margin-right:8px;">Filtrer :</span>
-        <button class="filter-btn active" data-filter="all" onclick="filterProducts('all')">Tous</button>
-        <button class="filter-btn" data-filter="blindées" onclick="filterProducts('blindées')">Blindées</button>
-        <button class="filter-btn" data-filter="entrée" onclick="filterProducts('entrée')">Entrée</button>
-        <button class="filter-btn" data-filter="intérieure" onclick="filterProducts('intérieure')">Intérieure</button>
-        <button class="filter-btn" data-filter="verre" onclick="filterProducts('verre')">Vitrée</button>
-        <button class="filter-btn" data-filter="aluminium" onclick="filterProducts('aluminium')">Aluminium</button>
-        <div style="margin-left:auto;display:flex;align-items:center;gap:8px;">
+      <div style="display:flex;align-items:center;gap:10px;margin-bottom:40px;padding-bottom:24px;border-bottom:1px solid var(--border);flex-wrap:wrap;">
+        <span style="font-size:11px;letter-spacing:2px;text-transform:uppercase;color:var(--text-muted);flex-shrink:0;">Filtrer :</span>
+        <div id="filter-bar-scroll">
+          <div id="filterBtnsRow" style="display:contents;"></div>
+        </div>
+        <div style="display:flex;align-items:center;gap:8px;flex-shrink:0;">
           <span style="font-size:11px;color:var(--text-muted);">Trier :</span>
           <select id="sortSelect" onchange="sortProducts()" style="background:var(--bg-elevated);color:var(--text-primary);border:1px solid var(--border);border-radius:4px;padding:8px 12px;font-size:12px;cursor:pointer;">
             <option value="default">Par défaut</option>
@@ -1121,14 +1118,27 @@ input, select, textarea { font-family: inherit; }
 <!-- ============================================================
      PRODUCT MODAL
      ============================================================ -->
-<div id="productModal" style="display:none;position:fixed;inset:0;z-index:2000;background:rgba(0,0,0,0.85);backdrop-filter:blur(8px);overflow-y:auto;" onclick="closeModal(event)">
-  <div id="modalContent" style="max-width:900px;margin:5vh auto;background:var(--bg-card);border:1px solid var(--border);border-radius:var(--radius-lg);overflow:hidden;position:relative;" onclick="event.stopPropagation()">
-    <button onclick="document.getElementById('productModal').style.display='none'" style="position:absolute;top:16px;right:16px;z-index:10;width:36px;height:36px;background:var(--bg-elevated);border:1px solid var(--border);border-radius:50%;color:var(--text-secondary);font-size:18px;display:flex;align-items:center;justify-content:center;cursor:pointer;">✕</button>
-    <div style="display:grid;grid-template-columns:1fr 1fr;min-height:500px;">
-      <div id="modalImg" style="overflow:hidden;"></div>
-      <div style="padding:40px;overflow-y:auto;max-height:90vh;">
+<div id="productModal" onclick="closeModal(event)">
+  <div id="modalContent" onclick="event.stopPropagation()">
+    <!-- Mobile drag handle -->
+    <div id="modal-handle"></div>
+    <!-- Close button -->
+    <button id="modal-x" onclick="closeModalDirect()" aria-label="Fermer">✕</button>
+
+    <!-- Desktop 2-col / Mobile single-col -->
+    <div id="modal-grid">
+      <div id="modalImg"></div>
+      <div id="modal-body-scroll">
+        <!-- FOMO urgency bar -->
+        <div id="modal-fomo"></div>
         <div id="modalBody"></div>
       </div>
+    </div>
+
+    <!-- Sticky bottom CTA bar — shows on mobile while scrolling -->
+    <div id="modal-sticky">
+      <div id="modal-sticky-price"></div>
+      <div id="modal-sticky-btns"></div>
     </div>
   </div>
 </div>
@@ -1278,7 +1288,123 @@ input, select, textarea { font-family: inherit; }
 }
 .faq-item.open .faq-answer { max-height: 300px; padding-bottom: 24px; }
 
-/* Responsive */
+/* ============================================================
+   PRODUCT MODAL — MOBILE BOTTOM SHEET + DESKTOP DIALOG
+   ============================================================ */
+#productModal {
+  display: none;
+  position: fixed; inset: 0; z-index: 2000;
+  background: rgba(0,0,0,0.75);
+  backdrop-filter: blur(6px);
+}
+#productModal.open { display: block; }
+#modalContent {
+  position: absolute; bottom: 0; left: 0; right: 0;
+  height: 94vh;
+  background: var(--bg-card);
+  border-radius: 20px 20px 0 0;
+  border-top: 1px solid var(--border);
+  display: flex; flex-direction: column;
+  transform: translateY(100%);
+  transition: transform 0.38s cubic-bezier(0.4,0,0.2,1);
+  overflow: hidden;
+}
+#productModal.animated #modalContent { transform: translateY(0); }
+#modal-handle {
+  width: 40px; height: 4px;
+  background: var(--border-hover); border-radius: 2px;
+  margin: 10px auto 0; flex-shrink: 0;
+}
+#modal-x {
+  position: absolute; top: 14px; right: 16px; z-index: 10;
+  width: 34px; height: 34px;
+  background: var(--bg-elevated); border: 1px solid var(--border);
+  border-radius: 50%; color: var(--text-secondary);
+  font-size: 16px; display: flex; align-items: center; justify-content: center;
+  cursor: pointer; transition: var(--transition);
+}
+#modal-x:hover { background: var(--border-hover); color: var(--text-primary); }
+#modal-grid {
+  display: flex; flex-direction: column;
+  flex: 1; overflow: hidden;
+}
+#modalImg {
+  width: 100%; flex-shrink: 0;
+  aspect-ratio: 4/3; overflow: hidden;
+}
+#modalImg img { width: 100%; height: 100%; object-fit: cover; }
+#modal-body-scroll {
+  flex: 1; overflow-y: auto;
+  padding: 16px 20px 8px;
+  -webkit-overflow-scrolling: touch;
+}
+/* FOMO urgency bar */
+#modal-fomo {
+  background: linear-gradient(90deg, rgba(201,168,76,0.12), rgba(201,168,76,0.06));
+  border: 1px solid rgba(201,168,76,0.25);
+  border-radius: var(--radius); padding: 8px 12px;
+  margin-bottom: 14px; font-size: 12px;
+  display: flex; align-items: center; gap: 8px;
+  color: var(--gold);
+}
+/* Desktop CTAs hidden on mobile — sticky bar replaces them */
+.modal-desktop-ctas { display: none; }
+
+/* Sticky CTA bar at bottom of sheet */
+#modal-sticky {
+  flex-shrink: 0;
+  display: flex; align-items: center; gap: 10px;
+  padding: 12px 16px;
+  background: var(--bg-card);
+  border-top: 1px solid var(--border);
+  padding-bottom: max(12px, env(safe-area-inset-bottom));
+}
+#modal-sticky-price {
+  font-family: var(--font-serif); font-size: 20px;
+  color: var(--gold); font-weight: 600; white-space: nowrap;
+}
+#modal-sticky-btns {
+  display: flex; gap: 8px; flex: 1;
+}
+#modal-sticky-btns .btn { flex: 1; padding: 14px 8px; font-size: 11px; justify-content: center; }
+/* desktop modal: centered dialog (no flexbox conflict with inline style) */
+@media (min-width: 769px) {
+  #productModal { overflow-y: auto; }
+  #productModal.open { display: block; }
+  #modalContent {
+    position: relative; bottom: auto; left: auto; right: auto;
+    width: 900px; max-width: calc(100vw - 48px);
+    height: auto; max-height: none;
+    overflow: visible;
+    border-radius: var(--radius-lg);
+    margin: 5vh auto 40px;
+    transform: none !important;
+    transition: none !important;
+  }
+  #modal-grid { flex-direction: row; flex: none; }
+  #modalImg { aspect-ratio: auto; width: 50%; min-height: 500px; flex-shrink: 0; }
+  #modal-body-scroll { padding: 36px; flex: 1; overflow-y: visible; }
+  #modal-handle { display: none; }
+  #modal-sticky { display: none; }
+  #modal-fomo { margin: 0 0 16px; }
+  .modal-desktop-ctas { display: flex !important; }
+}
+
+/* ============================================================
+   FILTER BAR — horizontal scroll on mobile
+   ============================================================ */
+#filter-bar-scroll {
+  display: flex; align-items: center; gap: 8px;
+  overflow-x: auto; -webkit-overflow-scrolling: touch;
+  scrollbar-width: none; padding-bottom: 2px;
+  flex: 1;
+}
+#filter-bar-scroll::-webkit-scrollbar { display: none; }
+#filterBtnsRow { display: contents; }
+
+/* ============================================================
+   RESPONSIVE
+   ============================================================ */
 @media (max-width: 768px) {
   .nav-links { display: none; }
   .nav-mobile-toggle { display: flex; }
@@ -1293,19 +1419,27 @@ input, select, textarea { font-family: inherit; }
   .products-grid { grid-template-columns: 1fr 1fr; }
   .conversion-strip-inner { grid-template-columns: 1fr; gap: 28px; }
   .conversion-strip-cta { align-items: stretch; }
-  #modalContent { margin: 0; border-radius: 0; }
-  #modalContent > div { grid-template-columns: 1fr !important; }
-  #modalImg { aspect-ratio: 16/9; }
   footer .container > div:first-child { grid-template-columns: 1fr 1fr !important; }
   #stickyCta { display: flex !important; }
   #whatsappBtn { bottom: 88px; }
-  .form-group + .form-group { margin-top: 0; }
-  #codForm > div[style*="grid-template-columns:1fr 1fr"] { grid-template-columns: 1fr !important; }
+  /* All form grids collapse to 1 col on mobile */
+  [style*="grid-template-columns:1fr 1fr"],
+  [style*="grid-template-columns: 1fr 1fr"] { grid-template-columns: 1fr !important; }
+  /* 16px inputs prevent iOS zoom */
+  .form-input { font-size: 16px !important; }
+  /* Bigger tap targets on product cards */
+  .product-card { -webkit-tap-highlight-color: transparent; touch-action: manipulation; }
+  .product-card:active { transform: scale(0.98); border-color: rgba(201,168,76,0.3); }
+  .product-card:hover { transform: none; box-shadow: none; }
+  .product-card-action { width: 44px; height: 44px; }
 }
 @media (max-width: 480px) {
   .products-grid { grid-template-columns: 1fr; }
   .hero-title { font-size: 32px; }
   footer .container > div:first-child { grid-template-columns: 1fr !important; }
+  /* Bigger product cards on small phones */
+  .product-card-name { font-size: 16px; }
+  .product-card-price { font-size: 18px; }
 }
 @media (min-width: 769px) {
   #stickyCta { display: none !important; }
@@ -1340,44 +1474,63 @@ input, select, textarea { font-family: inherit; }
 // ============================================================
 // DATA
 // ============================================================
-const PRODUCTS = [
+const DEFAULT_PRODUCTS = [
   { id:1, name:'Porte Blindée Fortis Pro', category:'blindées', price:85000, img:'steel-door.jpg', badge:'Bestseller',
     desc:'Porte blindée certifiée classe 4. Serrures multipoints, vitrage anti-effraction, isolation thermique et phonique maximale.',
     specs:['Certification Classe 4','Serrure 7 points','Épaisseur 70mm','Garantie 5 ans','Dimensions standard: 200x90cm'],
-    colors:['Gris anthracite','Blanc cassé','Noir mat'] },
+    attributes:[{name:'Couleurs',values:['Gris anthracite','Blanc cassé','Noir mat']}] },
   { id:2, name:"Porte d'Entrée Prestige Oak", category:'entrée', price:62000, img:'wooden-door.jpg', badge:'',
     desc:"Porte d'entrée en bois massif de chêne. Design contemporain avec finitions haut de gamme. Isolation excellente.",
     specs:['Chêne massif certifié','Isolation Uw 1.1','Serrure 3 points','Garantie 3 ans','Dimensions sur mesure'],
-    colors:['Chêne naturel','Chêne fumé','Wengé'] },
+    attributes:[{name:'Couleurs',values:['Chêne naturel','Chêne fumé','Wengé']}] },
   { id:3, name:'Porte Vitrée Milano', category:'verre', price:48000, img:'glass-door.jpg', badge:'Nouveau',
     desc:'Porte intérieure vitrée avec cadre en aluminium anodisé. Verre trempé 8mm. Apporte lumière et modernité.',
     specs:['Verre trempé 8mm','Cadre aluminium','Hauteur 220cm','Garantie 2 ans','Pose incluse'],
-    colors:['Noir mat','Argent brossé','Or champagne'] },
+    attributes:[{name:'Couleurs',values:['Noir mat','Argent brossé','Or champagne']}] },
   { id:4, name:'Porte Intérieure Élégance', category:'intérieure', price:28000, img:'panel-door.jpg', badge:'',
     desc:'Porte intérieure à panneaux. Bois composite HDF, finition laquée. Idéale pour chambres et salons.',
     specs:['HDF 35mm','Laque satinée','Largeur: 70-90cm','Garantie 2 ans','Disponible en lot'],
-    colors:['Blanc mat','Gris perle','Chêne clair'] },
+    attributes:[{name:'Couleurs',values:['Blanc mat','Gris perle','Chêne clair']}] },
   { id:5, name:'Porte Blindée Titan Max', category:'blindées', price:115000, img:'steel-door.jpg', badge:'Premium',
     desc:'Notre porte blindée haut de gamme. Classe 6, serrures biométriques optionnelles, isolation phonique 52dB.',
     specs:['Certification Classe 6','Serrure 9 points','Épaisseur 90mm','Garantie 10 ans','Biométrie optionnelle'],
-    colors:['Gris anthracite','Noir mat','Acier brossé'] },
+    attributes:[{name:'Couleurs',values:['Gris anthracite','Noir mat','Acier brossé']}] },
   { id:6, name:'Porte Aluminium Design', category:'aluminium', price:54000, img:'glass-door.jpg', badge:'',
     desc:"Porte d'entrée en aluminium thermolaqué. Légèreté et résistance maximales. Idéale pour appartements modernes.",
     specs:['Aluminium 2mm','Thermolaquage','Isolation Uw 1.3','Garantie 5 ans','Large choix RAL'],
-    colors:['RAL 7016','RAL 9005','RAL 9010'] },
+    attributes:[{name:'Couleurs',values:['RAL 7016','RAL 9005','RAL 9010']}] },
   { id:7, name:"Porte d'Entrée Rustique", category:'entrée', price:41000, img:'wooden-door.jpg', badge:'',
     desc:'Porte en bois travaillé à la main. Style rustique méditerranéen. Traitement anti-humidité et anti-insectes.',
     specs:['Bois traité','Ferronnerie forgée','Hauteur 210cm','Garantie 3 ans','Sur mesure possible'],
-    colors:['Bois naturel','Bois teinté foncé'] },
+    attributes:[{name:'Couleurs',values:['Bois naturel','Bois teinté foncé']}] },
   { id:8, name:'Porte Vitrée Loft', category:'verre', price:36000, img:'glass-door.jpg', badge:'',
     desc:'Porte coulissante vitrée style loft industriel. Rail inox, verre dépoli. Gain de place garanti.',
     specs:['Verre dépoli 6mm','Rail inox','Largeur 90cm','Garantie 2 ans','Coulissante'],
-    colors:['Noir mat','Chrome'] },
+    attributes:[{name:'Couleurs',values:['Noir mat','Chrome']}] },
   { id:9, name:'Porte Intérieure Premium Panel', category:'intérieure', price:34000, img:'panel-door.jpg', badge:'',
     desc:"Porte à panneaux surélevés. Finition laque brillante premium. Style classique qui s'adapte à tout intérieur.",
     specs:['Panneau surélevé','Laque brillante','Largeur 80-90cm','Garantie 2 ans'],
-    colors:['Blanc brillant','Ivoire','Taupe'] },
+    attributes:[{name:'Couleurs',values:['Blanc brillant','Ivoire','Taupe']}] },
 ];
+
+// Always read live from localStorage so admin changes appear immediately
+function getProductsCatalog() {
+  try {
+    const s = localStorage.getItem('pp_products');
+    if (s) {
+      const parsed = JSON.parse(s);
+      // Migrate legacy products that only have colors[] instead of attributes[]
+      return parsed.map(p => {
+        if (!p.attributes && p.colors && p.colors.length) {
+          p.attributes = [{ name: 'Couleurs', values: p.colors }];
+        }
+        if (!p.attributes) p.attributes = [];
+        return p;
+      });
+    }
+  } catch(e) {}
+  return DEFAULT_PRODUCTS;
+}
 
 const WILAYAS = [
   {id:1,name:"Adrar"},{id:2,name:"Chlef"},{id:3,name:"Laghouat"},{id:4,name:"Oum El Bouaghi"},
@@ -1437,7 +1590,7 @@ function showPage(page, filter) {
 
   // Page-specific init
   if (page === 'home') { renderFeaturedProducts(); }
-  if (page === 'shop') { if (filter) { filterProducts(filter); } else { renderShopProducts(); } }
+  if (page === 'shop') { renderFilterButtons(); if (filter) { filterProducts(filter); } else { renderShopProducts(); } }
   if (page === 'order') { populateOrderForm(); trackEvent('view_content', 'order_page'); }
   if (page === 'faq') { renderFAQ(); }
 
@@ -1471,12 +1624,13 @@ function productCardHTML(p, featured) {
 }
 
 function renderFeaturedProducts() {
-  const featured = PRODUCTS.filter(p => p.badge || p.id <= 4).slice(0, 6);
+  const all = getProductsCatalog();
+  const featured = all.filter(p => p.badge || p.id <= 4).slice(0, 6);
   document.getElementById('featuredProducts').innerHTML = featured.map(p => productCardHTML(p, true)).join('');
 }
 
 function renderShopProducts(products) {
-  const list = products || PRODUCTS;
+  const list = products || getProductsCatalog();
   const grid = document.getElementById('shopProducts');
   const noRes = document.getElementById('noResults');
   if (list.length === 0) { grid.innerHTML = ''; noRes.classList.remove('hidden'); return; }
@@ -1484,13 +1638,21 @@ function renderShopProducts(products) {
   grid.innerHTML = list.map(p => productCardHTML(p)).join('');
 }
 
+function renderFilterButtons() {
+  const container = document.getElementById('filterBtnsRow');
+  if (!container) return;
+  const cats = [...new Set(getProductsCatalog().map(p => p.category))].filter(Boolean);
+  const cap = s => s.charAt(0).toUpperCase() + s.slice(1);
+  container.innerHTML = `
+    <button class="filter-btn ${currentFilter==='all'?'active':''}" data-filter="all" onclick="filterProducts('all')">Tous</button>
+    ${cats.map(c => `<button class="filter-btn ${currentFilter===c?'active':''}" data-filter="${c}" onclick="filterProducts('${c}')">${cap(c)}</button>`).join('')}`;
+}
+
 function filterProducts(filter) {
   currentFilter = filter;
-  // Update filter button states
-  document.querySelectorAll('.filter-btn').forEach(b => {
-    b.classList.toggle('active', b.dataset.filter === filter);
-  });
-  const filtered = filter === 'all' ? PRODUCTS : PRODUCTS.filter(p => p.category === filter);
+  renderFilterButtons();
+  const all = getProductsCatalog();
+  const filtered = filter === 'all' ? all : all.filter(p => p.category === filter);
   applySort(filtered);
   trackEvent('search', filter);
 }
@@ -1511,45 +1673,93 @@ function applySort(list) {
 // ============================================================
 // PRODUCT MODAL
 // ============================================================
+function getProductAttributes(p) {
+  if (p.attributes && p.attributes.length) return p.attributes;
+  if (p.colors && p.colors.length) return [{ name: 'Couleurs', values: p.colors }];
+  return [];
+}
+
 function openProduct(id) {
-  const p = PRODUCTS.find(x => x.id === id);
+  const p = getProductsCatalog().find(x => x.id === id);
   if (!p) return;
   selectedProduct = p;
   const priceFormatted = p.price.toLocaleString('fr-DZ') + ' DZD';
-  const colorsHTML = p.colors.map(c => `<span style="background:var(--bg-elevated);border:1px solid var(--border);border-radius:4px;padding:4px 10px;font-size:12px;">${c}</span>`).join('');
-  const specsHTML = p.specs.map(s => `<div style="display:flex;align-items:center;gap:8px;font-size:13px;color:var(--text-secondary);padding:6px 0;border-bottom:1px solid var(--border);">
-    <span style="color:var(--gold);font-size:10px;">✦</span>${s}</div>`).join('');
+  const attrs = getProductAttributes(p);
 
-  document.getElementById('modalImg').innerHTML = `<img src="${p.img}" alt="${p.name}" style="width:100%;height:100%;object-fit:cover;min-height:300px;" />`;
+  const attrsHTML = attrs.map(a => `
+    <div style="margin-bottom:14px;">
+      <div style="font-size:10px;letter-spacing:2px;text-transform:uppercase;color:var(--text-muted);margin-bottom:8px;">${a.name}</div>
+      <div style="display:flex;flex-wrap:wrap;gap:6px;">${a.values.map(v =>
+        `<span style="background:var(--bg-elevated);border:1px solid var(--border);border-radius:4px;padding:5px 12px;font-size:12px;">${v}</span>`
+      ).join('')}</div>
+    </div>`).join('');
+
+  const specsHTML = (p.specs||[]).map(s =>
+    `<div style="display:flex;align-items:center;gap:8px;font-size:13px;color:var(--text-secondary);padding:7px 0;border-bottom:1px solid var(--border);">
+      <span style="color:var(--gold);font-size:10px;flex-shrink:0;">✦</span>${s}</div>`
+  ).join('');
+
+  const waMsg = encodeURIComponent(`Bonjour, je suis intéressé par: ${p.name} — ${priceFormatted}`);
+
+  // ── Image ──────────────────────────────────────────
+  document.getElementById('modalImg').innerHTML =
+    `<img src="${p.img}" alt="${p.name}" style="width:100%;height:100%;object-fit:cover;" />`;
+
+  // ── FOMO urgency bar ───────────────────────────────
+  document.getElementById('modal-fomo').innerHTML =
+    `<span style="font-size:16px;">⚡</span>
+     <span>Stock limité · Livraison <strong>48h</strong> · Paiement à la livraison</span>`;
+
+  // ── Main body (desktop CTAs included here) ─────────
   document.getElementById('modalBody').innerHTML = `
-    <div style="margin-bottom:8px;"><span class="badge badge-gold">${p.category}</span>${p.badge ? `<span class="badge badge-green" style="margin-left:8px;">${p.badge}</span>` : ''}</div>
-    <h2 style="font-family:var(--font-serif);font-size:26px;font-weight:500;margin:12px 0;">${p.name}</h2>
-    <div style="font-family:var(--font-serif);font-size:32px;color:var(--gold);font-weight:500;margin-bottom:20px;">${priceFormatted}</div>
-    <p style="color:var(--text-secondary);font-size:14px;line-height:1.7;margin-bottom:24px;">${p.desc}</p>
-    <div style="margin-bottom:24px;">${specsHTML}</div>
-    <div style="margin-bottom:24px;">
-      <div style="font-size:11px;letter-spacing:2px;text-transform:uppercase;color:var(--text-muted);margin-bottom:10px;">Couleurs disponibles</div>
-      <div style="display:flex;flex-wrap:wrap;gap:8px;">${colorsHTML}</div>
+    <div style="margin-bottom:10px;">
+      <span class="badge badge-gold">${p.category}</span>
+      ${p.badge ? `<span class="badge badge-green" style="margin-left:8px;">${p.badge}</span>` : ''}
     </div>
-    <div style="display:flex;flex-direction:column;gap:10px;">
+    <h2 style="font-family:var(--font-serif);font-size:clamp(20px,4vw,26px);font-weight:500;margin:10px 0 6px;line-height:1.25;">${p.name}</h2>
+    <div style="font-family:var(--font-serif);font-size:28px;color:var(--gold);font-weight:500;margin-bottom:16px;">${priceFormatted}</div>
+    <p style="color:var(--text-secondary);font-size:14px;line-height:1.7;margin-bottom:18px;">${p.desc}</p>
+    ${specsHTML ? `<div style="margin-bottom:18px;">${specsHTML}</div>` : ''}
+    ${attrsHTML ? `<div style="margin-bottom:18px;">${attrsHTML}</div>` : ''}
+    <div class="modal-desktop-ctas" style="display:flex;flex-direction:column;gap:10px;margin-bottom:16px;">
       <button class="btn btn-gold" style="width:100%;padding:16px;font-size:13px;justify-content:center;" onclick="orderProduct(${p.id})">
-        🛒 Commander ce Produit (COD)
+        🛒 Commander (Paiement à la livraison)
       </button>
-      <a href="https://wa.me/213XXXXXXXXX?text=Bonjour, je suis intéressé par: ${encodeURIComponent(p.name)}" target="_blank" class="btn btn-outline" style="width:100%;padding:14px;font-size:13px;justify-content:center;" onclick="trackEvent('click_whatsapp','product_modal')">
+      <a href="https://wa.me/213XXXXXXXXX?text=${waMsg}" target="_blank"
+         class="btn btn-outline" style="width:100%;padding:14px;font-size:13px;justify-content:center;"
+         onclick="trackEvent('click_whatsapp','product_modal')">
         💬 Demander un devis WhatsApp
       </a>
     </div>
-    <div style="margin-top:16px;padding:12px;background:var(--bg-elevated);border-radius:var(--radius);text-align:center;">
-      <div style="font-size:12px;color:var(--text-muted);">🚚 Livraison 48h · 🔧 Installation incluse · 🔒 Paiement à la livraison</div>
+    <div style="padding:10px 12px;background:var(--bg-elevated);border-radius:var(--radius);text-align:center;">
+      <div style="font-size:11px;color:var(--text-muted);">🚚 Livraison 48h toute l'Algérie · 🔧 Installation incluse · 🔒 COD</div>
     </div>`;
 
-  document.getElementById('productModal').style.display = 'block';
+  // ── Sticky CTA bar (mobile only) ───────────────────
+  document.getElementById('modal-sticky-price').textContent = priceFormatted;
+  document.getElementById('modal-sticky-btns').innerHTML = `
+    <button class="btn btn-gold" style="flex:2;padding:13px 8px;font-size:11px;justify-content:center;" onclick="orderProduct(${p.id})">
+      🛒 Commander
+    </button>
+    <a href="https://wa.me/213XXXXXXXXX?text=${waMsg}" target="_blank"
+       class="btn btn-outline" style="flex:1;padding:13px 8px;font-size:11px;justify-content:center;"
+       onclick="trackEvent('click_whatsapp','sticky_modal')">
+      💬 WA
+    </a>`;
+
+  // ── Open ───────────────────────────────────────────
+  const modal = document.getElementById('productModal');
+  modal.classList.add('open');               // display:block immediately
+  requestAnimationFrame(() => {
+    requestAnimationFrame(() => modal.classList.add('animated')); // triggers slide-in
+  });
   document.body.style.overflow = 'hidden';
+  document.getElementById('modal-body-scroll').scrollTop = 0;
   trackEvent('view_content', p.name);
 }
 
 function orderProduct(id) {
-  const p = PRODUCTS.find(x => x.id === id);
+  const p = getProductsCatalog().find(x => x.id === id);
   closeModalDirect();
   showPage('order');
   setTimeout(() => {
@@ -1562,8 +1772,29 @@ function closeModal(e) {
   if (e.target === document.getElementById('productModal')) closeModalDirect();
 }
 function closeModalDirect() {
-  document.getElementById('productModal').style.display = 'none';
-  document.body.style.overflow = '';
+  const modal = document.getElementById('productModal');
+  modal.classList.remove('animated'); // slide out (mobile)
+  setTimeout(() => {
+    modal.classList.remove('open');   // display:none
+    document.body.style.overflow = '';
+  }, 380);
+}
+
+// ============================================================
+// UTM ATTRIBUTION
+// ============================================================
+function captureUTM() {
+  const params = new URLSearchParams(window.location.search);
+  if (!params.get('utm_source')) return; // no UTM in URL — keep whatever was stored before (first-click)
+  const utm = {};
+  ['utm_source','utm_medium','utm_campaign','utm_content','utm_term'].forEach(k => {
+    const v = params.get(k); if (v) utm[k] = v;
+  });
+  localStorage.setItem('pp_utm', JSON.stringify(utm));
+}
+
+function getUTM() {
+  return JSON.parse(localStorage.getItem('pp_utm') || '{}');
 }
 
 // ============================================================
@@ -1579,10 +1810,11 @@ function populateOrderForm() {
       wSel.appendChild(o);
     });
   }
-  // Products
+  // Products — always rebuild from live catalog
   const pSel = document.getElementById('orderProduct');
-  if (pSel && pSel.options.length <= 1) {
-    PRODUCTS.forEach(p => {
+  if (pSel) {
+    pSel.innerHTML = '<option value="">-- Choisir un produit --</option>';
+    getProductsCatalog().forEach(p => {
       const o = document.createElement('option');
       o.value = p.name; o.textContent = `${p.name} — ${p.price.toLocaleString('fr-DZ')} DZD`;
       pSel.appendChild(o);
@@ -1594,7 +1826,7 @@ function populateOrderForm() {
   }
   // Set tracking fields
   document.getElementById('orderTimestamp').value = new Date().toISOString();
-  document.getElementById('utmSource').value = new URLSearchParams(window.location.search).get('utm_source') || 'direct';
+  document.getElementById('utmSource').value = getUTM().utm_source || new URLSearchParams(window.location.search).get('utm_source') || 'direct';
 }
 
 function updateCommunes() {
@@ -1615,43 +1847,70 @@ function submitOrder(e) {
   const form = document.getElementById('codForm');
   const data = Object.fromEntries(new FormData(form));
 
-  // Validate
   if (!data.name || !data.phone || !data.wilaya || !data.product) {
     showToast('⚠️ Veuillez remplir tous les champs obligatoires');
     return;
   }
 
-  // Track
-  trackEvent('lead_submit', data.product);
+  // Build full order object with all UTM params
+  const utm = getUTM();
+  const order = {
+    id: 'ORD-' + Date.now(),
+    name:       data.name,
+    phone:      data.phone,
+    wilaya:     data.wilaya,
+    commune:    data.commune || '',
+    address:    data.address || '',
+    product:    data.product,
+    quantity:   data.quantity || 1,
+    color:      data.color || '',
+    notes:      data.notes || '',
+    source:     data.source || 'website',
+    utm_source:   utm.utm_source   || data.utm_source || 'direct',
+    utm_medium:   utm.utm_medium   || '',
+    utm_campaign: utm.utm_campaign || '',
+    utm_content:  utm.utm_content  || '',
+    utm_term:     utm.utm_term     || '',
+    status:     'Nouveau',
+    createdAt:  new Date().toISOString(),
+  };
 
-  // Show loading state
+  trackEvent('lead_submit', order.product);
+
   const btn = form.querySelector('button[type="submit"]');
-  const origText = btn.innerHTML;
   btn.innerHTML = '⏳ Envoi en cours...';
   btn.disabled = true;
 
-  // Simulate submission (replace with real API endpoint)
-  setTimeout(() => {
-    // In production: POST to your backend/webhook here
-    // Example: fetch('/api/orders', { method:'POST', body: JSON.stringify(data) })
+  // 1 — Always save locally first (dashboard works even without webhook)
+  saveOrderLocally(order);
 
+  // 2 — POST to n8n webhook if configured (fire-and-forget, never block the UX)
+  const webhookUrl = (JSON.parse(localStorage.getItem('pp_marketing') || '{}')).webhook?.url;
+  if (webhookUrl) {
+    fetch(webhookUrl, {
+      method:  'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body:    JSON.stringify({ event: 'new_order', source: 'website', timestamp: order.createdAt, order }),
+    }).catch(() => {}); // CORS or network errors are silent — order is already saved locally
+  }
+
+  // 3 — Show success UI
+  setTimeout(() => {
     form.classList.add('hidden');
     document.getElementById('orderSuccess').classList.remove('hidden');
 
-    // Track successful lead
-    if (window.fbq) fbq('track', 'Lead', { content_name: data.product, value: 0, currency: 'DZD' });
+    if (window.fbq) fbq('track', 'Lead', { content_name: order.product, value: 0, currency: 'DZD' });
     if (window.ttq) ttq.track('SubmitForm');
     if (window.gtag) gtag('event', 'generate_lead', { currency: 'DZD', value: 0 });
-
-    // Store locally for dashboard
-    saveOrderLocally(data);
-  }, 1500);
+  }, 800);
 }
 
-function saveOrderLocally(data) {
+function saveOrderLocally(order) {
   const orders = JSON.parse(localStorage.getItem('pp_orders') || '[]');
-  orders.unshift({ ...data, id: Date.now(), status: 'Nouveau', createdAt: new Date().toISOString() });
-  localStorage.setItem('pp_orders', JSON.stringify(orders.slice(0, 100)));
+  // Avoid duplicates if called twice
+  if (orders.some(o => o.id === order.id)) return;
+  orders.unshift(order);
+  localStorage.setItem('pp_orders', JSON.stringify(orders.slice(0, 200)));
 }
 
 // ============================================================
@@ -1742,6 +2001,7 @@ function showToast(msg, color) {
 // INIT
 // ============================================================
 document.addEventListener('DOMContentLoaded', () => {
+  captureUTM();          // store UTM params before anything else
   renderFeaturedProducts();
   renderShopProducts();
 

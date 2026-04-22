@@ -415,14 +415,9 @@ input,select,textarea{font-family:inherit}
                 </div>
                 <div class="form-group">
                   <label class="form-label">Catégorie *</label>
-                  <select class="form-input form-select" id="pf-cat" required>
-                    <option value="">-- Catégorie --</option>
-                    <option value="blindées">Blindées</option>
-                    <option value="entrée">Entrée</option>
-                    <option value="intérieure">Intérieure</option>
-                    <option value="verre">Vitrée</option>
-                    <option value="aluminium">Aluminium</option>
-                  </select>
+                  <input type="text" class="form-input" id="pf-cat" required placeholder="Ex: blindées, entrée, aluminium…" list="cat-datalist" autocomplete="off" />
+                  <datalist id="cat-datalist"></datalist>
+                  <div style="font-size:10px;color:var(--text-3);margin-top:2px;">Choisissez une existante ou tapez-en une nouvelle</div>
                 </div>
                 <div class="form-group">
                   <label class="form-label">Prix (DZD) *</label>
@@ -446,8 +441,14 @@ input,select,textarea{font-family:inherit}
                   <textarea class="form-input" id="pf-specs" rows="4" placeholder="Certification Classe 4&#10;Serrure 7 points&#10;Épaisseur 70mm&#10;Garantie 5 ans"></textarea>
                 </div>
                 <div class="form-group fg-full">
-                  <label class="form-label">Couleurs disponibles (séparées par des virgules)</label>
-                  <input type="text" class="form-input" id="pf-colors" placeholder="Gris anthracite, Blanc cassé, Noir mat" />
+                  <label class="form-label">Attributs / Options disponibles</label>
+                  <div id="pf-attributes-container" style="display:flex;flex-direction:column;gap:8px;"></div>
+                  <button type="button" onclick="addAttribute()" style="margin-top:8px;background:none;border:1px dashed var(--border);border-radius:var(--radius);padding:8px 16px;color:var(--text-2);font-size:12px;cursor:pointer;width:100%;transition:border-color .2s;" onmouseover="this.style.borderColor='var(--gold)'" onmouseout="this.style.borderColor='var(--border)'">
+                    + Ajouter un attribut (Couleurs, Taille, Texture, Matière…)
+                  </button>
+                  <div style="font-size:10px;color:var(--text-3);margin-top:4px;">
+                    Ex : <strong>Couleurs</strong> → Gris anthracite, Noir mat &nbsp;|&nbsp; <strong>Taille</strong> → 70cm, 80cm, 90cm &nbsp;|&nbsp; <strong>Texture</strong> → Mat, Brillant
+                  </div>
                 </div>
               </div>
               <div style="display:flex;gap:12px;margin-top:24px;">
@@ -1400,12 +1401,12 @@ const STATUS_CSS  = {
 
 // Default products (matching the main website)
 const DEFAULT_PRODUCTS = [
-  {id:1,name:'Porte Blindée Fortis Pro',category:'blindées',price:85000,img:'steel-door.jpg',badge:'Bestseller',desc:'Porte blindée certifiée classe 4. Serrures multipoints, vitrage anti-effraction.',specs:['Certification Classe 4','Serrure 7 points','Épaisseur 70mm','Garantie 5 ans'],colors:['Gris anthracite','Blanc cassé','Noir mat']},
-  {id:2,name:"Porte d'Entrée Prestige Oak",category:'entrée',price:62000,img:'wooden-door.jpg',badge:'',desc:"Porte d'entrée en bois massif de chêne.",specs:['Chêne massif','Isolation Uw 1.1','Serrure 3 points','Garantie 3 ans'],colors:['Chêne naturel','Chêne fumé']},
-  {id:3,name:'Porte Vitrée Milano',category:'verre',price:48000,img:'glass-door.jpg',badge:'Nouveau',desc:'Porte intérieure vitrée avec cadre aluminium.',specs:['Verre trempé 8mm','Cadre aluminium','Garantie 2 ans'],colors:['Noir mat','Or champagne']},
-  {id:4,name:'Porte Intérieure Élégance',category:'intérieure',price:28000,img:'panel-door.jpg',badge:'',desc:'Porte intérieure HDF laquée.',specs:['HDF 35mm','Laque satinée','Garantie 2 ans'],colors:['Blanc mat','Gris perle']},
-  {id:5,name:'Porte Blindée Titan Max',category:'blindées',price:115000,img:'steel-door.jpg',badge:'Premium',desc:'Porte blindée haut de gamme Classe 6.',specs:['Certification Classe 6','Serrure 9 points','Garantie 10 ans'],colors:['Gris anthracite','Noir mat']},
-  {id:6,name:'Porte Aluminium Design',category:'aluminium',price:54000,img:'glass-door.jpg',badge:'',desc:"Porte d'entrée en aluminium thermolaqué.",specs:['Aluminium 2mm','Thermolaquage','Garantie 5 ans'],colors:['RAL 7016','RAL 9005']},
+  {id:1,name:'Porte Blindée Fortis Pro',category:'blindées',price:85000,img:'steel-door.jpg',badge:'Bestseller',desc:'Porte blindée certifiée classe 4. Serrures multipoints, vitrage anti-effraction.',specs:['Certification Classe 4','Serrure 7 points','Épaisseur 70mm','Garantie 5 ans'],attributes:[{name:'Couleurs',values:['Gris anthracite','Blanc cassé','Noir mat']}],colors:['Gris anthracite','Blanc cassé','Noir mat']},
+  {id:2,name:"Porte d'Entrée Prestige Oak",category:'entrée',price:62000,img:'wooden-door.jpg',badge:'',desc:"Porte d'entrée en bois massif de chêne.",specs:['Chêne massif','Isolation Uw 1.1','Serrure 3 points','Garantie 3 ans'],attributes:[{name:'Couleurs',values:['Chêne naturel','Chêne fumé']}],colors:['Chêne naturel','Chêne fumé']},
+  {id:3,name:'Porte Vitrée Milano',category:'verre',price:48000,img:'glass-door.jpg',badge:'Nouveau',desc:'Porte intérieure vitrée avec cadre aluminium.',specs:['Verre trempé 8mm','Cadre aluminium','Garantie 2 ans'],attributes:[{name:'Couleurs',values:['Noir mat','Or champagne']}],colors:['Noir mat','Or champagne']},
+  {id:4,name:'Porte Intérieure Élégance',category:'intérieure',price:28000,img:'panel-door.jpg',badge:'',desc:'Porte intérieure HDF laquée.',specs:['HDF 35mm','Laque satinée','Garantie 2 ans'],attributes:[{name:'Couleurs',values:['Blanc mat','Gris perle']}],colors:['Blanc mat','Gris perle']},
+  {id:5,name:'Porte Blindée Titan Max',category:'blindées',price:115000,img:'steel-door.jpg',badge:'Premium',desc:'Porte blindée haut de gamme Classe 6.',specs:['Certification Classe 6','Serrure 9 points','Garantie 10 ans'],attributes:[{name:'Couleurs',values:['Gris anthracite','Noir mat']}],colors:['Gris anthracite','Noir mat']},
+  {id:6,name:'Porte Aluminium Design',category:'aluminium',price:54000,img:'glass-door.jpg',badge:'',desc:"Porte d'entrée en aluminium thermolaqué.",specs:['Aluminium 2mm','Thermolaquage','Garantie 5 ans'],attributes:[{name:'Couleurs',values:['RAL 7016','RAL 9005']}],colors:['RAL 7016','RAL 9005']},
 ];
 
 // ============================================================
@@ -1705,6 +1706,13 @@ function renderPipeline() {
 }
 
 // ============================================================
+// UTILITIES
+// ============================================================
+function escHtml(s) {
+  return String(s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+}
+
+// ============================================================
 // PRODUCTS
 // ============================================================
 function renderProducts() {
@@ -1724,12 +1732,42 @@ function renderProducts() {
     </tr>`).join('');
 }
 
+function addAttribute(name, values) {
+  const container = document.getElementById('pf-attributes-container');
+  const row = document.createElement('div');
+  row.className = 'attr-row';
+  row.style.cssText = 'display:flex;gap:8px;align-items:center;';
+  row.innerHTML = `
+    <input type="text" class="form-input attr-name" placeholder="Nom (ex: Couleurs)" style="flex:0 0 150px;font-size:13px;" value="${escHtml(name||'')}" />
+    <input type="text" class="form-input attr-values" placeholder="Valeurs séparées par virgule" style="flex:1;font-size:13px;" value="${escHtml(values||'')}" />
+    <button type="button" class="btn btn-red btn-sm" style="flex-shrink:0;" onclick="this.closest('.attr-row').remove()">🗑️</button>`;
+  container.appendChild(row);
+}
+
+function readAttributes() {
+  return [...document.querySelectorAll('#pf-attributes-container .attr-row')].map(row => ({
+    name: row.querySelector('.attr-name').value.trim(),
+    values: row.querySelector('.attr-values').value.split(',').map(s => s.trim()).filter(Boolean)
+  })).filter(a => a.name && a.values.length > 0);
+}
+
+function populateCatDatalist() {
+  const dl = document.getElementById('cat-datalist');
+  if (!dl) return;
+  const cats = [...new Set(getProducts().map(p => p.category).filter(Boolean))];
+  // Always include these defaults even if no products use them yet
+  const defaults = ['blindées','entrée','intérieure','verre','aluminium'];
+  const all = [...new Set([...defaults, ...cats])].sort();
+  dl.innerHTML = all.map(c => `<option value="${escHtml(c)}">`).join('');
+}
+
 function initProductForm(productId) {
   document.getElementById('product-form-title').textContent = productId ? '✏️ Modifier le Produit' : '➕ Nouveau Produit';
   document.getElementById('pf-id').value = '';
   ['name','cat','price','badge','img','desc'].forEach(f => document.getElementById('pf-'+f).value = '');
   document.getElementById('pf-specs').value = '';
-  document.getElementById('pf-colors').value = '';
+  document.getElementById('pf-attributes-container').innerHTML = '';
+  populateCatDatalist();
   if (productId) {
     const p = getProducts().find(x => x.id === productId);
     if (p) {
@@ -1741,8 +1779,14 @@ function initProductForm(productId) {
       document.getElementById('pf-img').value = p.img || '';
       document.getElementById('pf-desc').value = p.desc || '';
       document.getElementById('pf-specs').value = (p.specs||[]).join('\n');
-      document.getElementById('pf-colors').value = (p.colors||[]).join(', ');
+      // Load attributes (migrate legacy colors if needed)
+      const attrs = p.attributes && p.attributes.length
+        ? p.attributes
+        : (p.colors && p.colors.length ? [{ name: 'Couleurs', values: p.colors }] : []);
+      attrs.forEach(a => addAttribute(a.name, a.values.join(', ')));
     }
+  } else {
+    addAttribute('Couleurs', '');
   }
 }
 
@@ -1755,16 +1799,20 @@ function saveProduct(e) {
   e.preventDefault();
   const products = getProducts();
   const id = document.getElementById('pf-id').value;
+  const attributes = readAttributes();
+  // Keep legacy colors field populated from the first attribute for backwards compat
+  const legacyColors = attributes.length ? attributes[0].values : [];
   const product = {
     id: id ? parseInt(id) : Date.now(),
     name: document.getElementById('pf-name').value,
-    category: document.getElementById('pf-cat').value,
+    category: document.getElementById('pf-cat').value.trim().toLowerCase(),
     price: parseInt(document.getElementById('pf-price').value) || 0,
     badge: document.getElementById('pf-badge').value,
     img: document.getElementById('pf-img').value || 'steel-door.jpg',
     desc: document.getElementById('pf-desc').value,
     specs: document.getElementById('pf-specs').value.split('\n').filter(Boolean),
-    colors: document.getElementById('pf-colors').value.split(',').map(s=>s.trim()).filter(Boolean),
+    attributes,
+    colors: legacyColors,
   };
   if (id) {
     const idx = products.findIndex(p => p.id == id);
