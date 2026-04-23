@@ -2045,18 +2045,34 @@ document.addEventListener('DOMContentLoaded', () => {
     }
   }
 
-  // ── Load both walls AND room config from localStorage ─────
-  function _loadShowroomConfig() {
-    let walls, room;
-    try { const s = localStorage.getItem('pp_showroom_walls'); if (s) walls = JSON.parse(s); } catch(e) {}
-    try { const s = localStorage.getItem('pp_showroom_room');  if (s) room  = JSON.parse(s); } catch(e) {}
-    return { walls, room };
+  // ── Load both walls AND room config from supabase (ex localStorage) ─────
+  async function _loadShowroomConfig() {
+  console.log("Fetching showroom config from cloud...");
+
+  // Tell Supabase to SELECT the configs where id=1
+  const { data, error } = await supabase
+    .from('showroom_settings')
+    .select('walls_config, room_config')
+    .eq('id', 1)
+    .single(); // .single() ensures we get one object back, not an array
+
+  // If there is no internet, or the database fails, return empty so the 3D scene doesn't crash
+  if (error || !data) {
+    console.warn("Could not load cloud config, using defaults. Error:", error);
+    return { walls: null, room: null }; 
   }
 
-  function bootShowroom() {
+  // Supabase automatically parses JSONB columns, so no need for JSON.parse()
+  return { 
+    walls: data.walls_config, 
+    room: data.room_config 
+  };
+}
+
+  async function bootShowroom() {
     const container = document.getElementById('showroom-canvas-wrap');
     if (!container) return;
-    const { walls, room } = _loadShowroomConfig();
+    const { walls, room } = await _loadShowroomConfig();
     const opts = {};
     if (walls) opts.walls = walls;
     if (room)  opts.room  = room;   // ← floor/ceiling textures now applied
@@ -2071,12 +2087,12 @@ document.addEventListener('DOMContentLoaded', () => {
   }
 
   // Expose for admin live-reload: window.__reloadShowroom(newWalls, newRoom?)
-  window.__reloadShowroom = function(newWalls, newRoom) {
+  window.__reloadShowroom = async function(newWalls, newRoom) {
     if (showroomInstance) showroomInstance.destroy();
     const container = document.getElementById('showroom-canvas-wrap');
     if (!container) return;
     container.innerHTML = '';
-    const { room: savedRoom } = _loadShowroomConfig();
+    const { room: savedRoom } = await _loadShowroomConfig();
     const opts = { walls: newWalls };
     if (newRoom)        opts.room = newRoom;
     else if (savedRoom) opts.room = savedRoom;
