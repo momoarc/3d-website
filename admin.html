@@ -179,6 +179,13 @@ input,select,textarea{font-family:inherit}
   .pipeline{grid-template-columns:repeat(4,1fr)}
 }
 </style>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script>
+  // Replace these with your actual Supabase project keys
+  const SUPABASE_URL = 'https://supabase.com/dashboard/project/smbdgbbgyaubalqoqxnu/';
+  const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InNtYmRnYmJneWF1YmFscW9xeG51Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzY5MzgxMTgsImV4cCI6MjA5MjUxNDExOH0.wg7S0IaZKdWB26_XPSs0BzStx54LspPrfjDRnvf241U';
+  const supabase = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+</script>
 </head>
 <body>
 
