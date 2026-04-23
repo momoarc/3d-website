@@ -2047,28 +2047,37 @@ document.addEventListener('DOMContentLoaded', () => {
 
   // ── Load both walls AND room config from supabase (ex localStorage) ─────
   async function _loadShowroomConfig() {
-  console.log("Fetching showroom config from cloud...");
+    console.log("Fetching showroom config from cloud...");
 
-  // Tell Supabase to SELECT the configs where id=1
-  const { data, error } = await supabase
-    .from('showroom_settings')
-    .select('walls_config, room_config')
-    .eq('id', 1)
-    .single(); // .single() ensures we get one object back, not an array
+    try {
+      // 1. Check if Supabase even exists on the page
+      if (typeof supabase === 'undefined') {
+        console.warn("Supabase is not initialized! Check your <head> scripts.");
+        return { walls: null, room: null };
+      }
 
-  // If there is no internet, or the database fails, return empty so the 3D scene doesn't crash
-  if (error || !data) {
-    console.warn("Could not load cloud config, using defaults. Error:", error);
-    return { walls: null, room: null }; 
+      // 2. Try to fetch the data
+      const { data, error } = await supabase
+        .from('showroom_settings')
+        .select('walls_config, room_config')
+        .eq('id', 1)
+        .single(); 
+
+      // 3. Handle database errors gracefully
+      if (error || !data) {
+        console.warn("Database error or no data found. Using defaults.", error);
+        return { walls: null, room: null }; 
+      }
+
+      console.log("Cloud data loaded successfully!");
+      return { walls: data.walls_config, room: data.room_config };
+
+    } catch (err) {
+      // 4. Catch fatal JS crashes so the 3D room still boots
+      console.error("Fatal error loading from cloud:", err);
+      return { walls: null, room: null };
+    }
   }
-
-  // Supabase automatically parses JSONB columns, so no need for JSON.parse()
-  return { 
-    walls: data.walls_config, 
-    room: data.room_config 
-  };
-}
-
   async function bootShowroom() {
     const container = document.getElementById('showroom-canvas-wrap');
     if (!container) return;
