@@ -2046,15 +2046,26 @@ document.addEventListener('DOMContentLoaded', () => {
   }
 
   // ── Load both walls AND room config from supabase (ex localStorage) ─────
+  // ── Load both walls AND room config from supabase ─────
   async function _loadShowroomConfig() {
     console.log("Fetching showroom config from cloud...");
-
     try {
-      // 1. Check if Supabase even exists on the page
-      if (typeof supabase === 'undefined') {
-        console.warn("Supabase is not initialized! Check your <head> scripts.");
-        return { walls: null, room: null };
+      const { data, error } = await supabase
+        .from('showroom_settings')
+        .select('walls_config, room_config')
+        .eq('id', 1)
+        .single();
+
+      if (error || !data) {
+        console.warn("Database error:", error);
+        return { walls: null, room: null }; 
       }
+      return { walls: data.walls_config, room: data.room_config };
+    } catch (e) {
+      console.error("Critical Load Error:", e);
+      return { walls: null, room: null };
+    }
+  }
 
       // 2. Try to fetch the data
       const { data, error } = await supabase
@@ -2107,6 +2118,29 @@ document.addEventListener('DOMContentLoaded', () => {
     else if (savedRoom) opts.room = savedRoom;
     showroomInstance = initShowroom(container, handleShowroomNavigate, opts);
   };
+// ... (Your _loadShowroomConfig function is up here)
+
+  // ── 3rd Part: The Boot Logic ─────
+  async function bootShowroom() {
+    const container = document.getElementById('showroom-canvas-wrap');
+    if (!container) return;
+
+    try {
+      const config = await _loadShowroomConfig();
+      const opts = {};
+      if (config.walls) opts.walls = config.walls;
+      if (config.room)  opts.room  = config.room;
+      
+      showroomInstance = initShowroom(container, handleShowroomNavigate, opts);
+    } catch (err) {
+      console.error("Boot failed:", err);
+      showroomInstance = initShowroom(container, handleShowroomNavigate, {});
+    }
+  }
+
+  // Final step: This actually triggers the boot
+  window.addEventListener('load', bootShowroom);
+
 </script>
 
 </body>
