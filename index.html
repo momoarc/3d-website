@@ -14,16 +14,6 @@
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Playfair+Display:wght@400;500;700&display=swap" rel="stylesheet" />
 
-  <!-- Three.js — same version as showroom-360.html (proven) -->
-  <script type="importmap">
-  {
-    "imports": {
-      "three": "https://unpkg.com/three@0.160.0/build/three.module.js",
-      "three/addons/": "https://unpkg.com/three@0.160.0/examples/jsm/"
-    }
-  }
-  </script>
-
   <!-- Meta Pixel (replace YOUR_PIXEL_ID) -->
   <script>
     !function(f,b,e,v,n,t,s){if(f.fbq)return;n=f.fbq=function(){n.callMethod?
@@ -53,6 +43,11 @@
     function gtag(){dataLayer.push(arguments);}
     gtag('js', new Date()); gtag('config', 'YOUR_GA4_ID');
   </script>
+
+  <!-- Three.js UMD global — served locally, zero CDN dependency -->
+  <script src="./three.min.js"></script>
+  <!-- Supabase client — deferred so it never blocks HTML parsing or Three.js -->
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2" defer></script>
 
 <style>
 /* ============================================================
@@ -822,6 +817,40 @@ input, select, textarea { font-family: inherit; }
     </div>
   </section>
 
+  <!-- NOS RÉALISATIONS -->
+  <section class="realisations-section" id="realisations-section">
+    <div class="container">
+      <div class="featured-header">
+        <div>
+          <div class="section-label">Projets Réalisés</div>
+          <h2 class="section-title">Nos<br>Réalisations</h2>
+        </div>
+        <button class="btn btn-outline" onclick="document.getElementById('realisations-section').scrollIntoView({behavior:'smooth'})">Voir Tout →</button>
+      </div>
+      <div class="realisations-grid" id="realisationsGrid"></div>
+    </div>
+  </section>
+
+  <!-- PROJECT MODAL -->
+  <div id="projectModal" role="dialog" aria-modal="true" onclick="closeProjectModal(event)">
+    <button class="modal-close-btn" onclick="closeProjectModalDirect()" aria-label="Fermer">✕</button>
+    <div class="modal-inner">
+      <div class="modal-card">
+        <img id="projectModalImg" class="modal-img" src="" alt="" />
+        <div class="modal-body">
+          <div id="projectModalLocation" class="modal-location"></div>
+          <div id="projectModalBadge"></div>
+          <h2 id="projectModalTitle" class="modal-title"></h2>
+          <p id="projectModalDesc" class="modal-desc"></p>
+          <div id="projectModalSpecs" class="modal-specs"></div>
+          <button class="btn btn-gold" style="width:100%;padding:18px;" onclick="showPage('order')">
+            Commander un Projet Similaire
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+
   <!-- CONVERSION STRIP -->
   <section class="conversion-strip">
     <div class="container">
@@ -1469,6 +1498,94 @@ input, select, textarea { font-family: inherit; }
   0% { background-position: -200% 0; }
   100% { background-position: 200% 0; }
 }
+
+/* ── NOS RÉALISATIONS ──────────────────────────────────────── */
+.realisations-section { padding: 80px 0; background: var(--bg-secondary); }
+.realisations-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+  gap: 24px;
+  margin-top: 40px;
+}
+.realisation-card {
+  background: var(--bg-elevated);
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  overflow: hidden;
+  cursor: pointer;
+  transition: transform 0.2s, border-color 0.2s, box-shadow 0.2s;
+}
+.realisation-card:hover {
+  transform: translateY(-4px);
+  border-color: rgba(201,168,76,0.4);
+  box-shadow: 0 12px 40px rgba(0,0,0,0.4);
+}
+.realisation-card-img {
+  width: 100%; aspect-ratio: 16/10; object-fit: cover;
+  background: var(--bg-primary);
+  display: block;
+}
+.realisation-card-body { padding: 20px; }
+.realisation-card-location {
+  font-size: 10px; letter-spacing: 2px; text-transform: uppercase;
+  color: var(--gold); margin-bottom: 8px;
+}
+.realisation-card-title {
+  font-family: var(--font-serif); font-size: 18px;
+  color: var(--text-primary); margin-bottom: 8px; line-height: 1.3;
+}
+.realisation-card-desc {
+  font-size: 13px; color: var(--text-secondary); line-height: 1.6;
+  display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+/* Project modal — reuses product modal base styles */
+#projectModal {
+  position: fixed; inset: 0; z-index: 1100;
+  background: rgba(0,0,0,0.9); backdrop-filter: blur(10px);
+  display: none; overflow-y: auto;
+}
+#projectModal.active { display: block; }
+#projectModal .modal-inner {
+  max-width: 860px; margin: 60px auto; padding: 0 16px 80px;
+}
+#projectModal .modal-card {
+  background: var(--bg-elevated); border: 1px solid var(--border);
+  border-radius: 16px; overflow: hidden;
+}
+#projectModal .modal-img {
+  width: 100%; max-height: 420px; object-fit: cover; display: block;
+}
+#projectModal .modal-body { padding: 32px; }
+#projectModal .modal-location {
+  font-size: 10px; letter-spacing: 3px; text-transform: uppercase;
+  color: var(--gold); margin-bottom: 10px;
+}
+#projectModal .modal-title {
+  font-family: var(--font-serif); font-size: 28px;
+  color: var(--text-primary); margin-bottom: 16px; line-height: 1.2;
+}
+#projectModal .modal-desc {
+  font-size: 15px; color: var(--text-secondary); line-height: 1.7;
+  margin-bottom: 24px;
+}
+#projectModal .modal-specs {
+  display: flex; flex-wrap: wrap; gap: 10px; margin-bottom: 28px;
+}
+#projectModal .modal-spec-tag {
+  font-size: 11px; padding: 6px 14px;
+  border: 1px solid var(--border); border-radius: 20px;
+  color: var(--text-secondary);
+}
+#projectModal .modal-close-btn {
+  position: fixed; top: 20px; right: 20px; z-index: 1200;
+  width: 44px; height: 44px; border-radius: 50%;
+  background: rgba(8,7,5,0.85); border: 1px solid var(--border);
+  color: var(--text-primary); font-size: 20px;
+  display: flex; align-items: center; justify-content: center;
+  cursor: pointer; transition: border-color 0.2s;
+}
+#projectModal .modal-close-btn:hover { border-color: var(--gold); }
 </style>
 
 <script>
@@ -1639,14 +1756,29 @@ function renderShopProducts(products) {
   grid.innerHTML = list.map(p => productCardHTML(p)).join('');
 }
 
+function getCategories() {
+  try { const s = localStorage.getItem('pp_categories'); if (s) return JSON.parse(s); } catch(_) {}
+  return [
+    { value:'blindées',   label:'Portes Blindées'   },
+    { value:'entrée',     label:"Portes d'Entrée"   },
+    { value:'intérieure', label:'Portes Intérieures' },
+    { value:'verre',      label:'Portes Vitrées'    },
+    { value:'aluminium',  label:'Aluminium'         },
+  ];
+}
+
 function renderFilterButtons() {
   const container = document.getElementById('filterBtnsRow');
   if (!container) return;
-  const cats = [...new Set(getProductsCatalog().map(p => p.category))].filter(Boolean);
-  const cap = s => s.charAt(0).toUpperCase() + s.slice(1);
+  // Use admin-configured categories; fall back to what's in the catalog
+  let cats = getCategories();
+  const inCatalog = new Set(getProductsCatalog().map(p => p.category).filter(Boolean));
+  // Keep only categories that actually have products (or show all if none configured)
+  const active = cats.filter(c => inCatalog.has(c.value));
+  const list = active.length ? active : [...inCatalog].map(v => ({ value: v, label: v.charAt(0).toUpperCase() + v.slice(1) }));
   container.innerHTML = `
     <button class="filter-btn ${currentFilter==='all'?'active':''}" data-filter="all" onclick="filterProducts('all')">Tous</button>
-    ${cats.map(c => `<button class="filter-btn ${currentFilter===c?'active':''}" data-filter="${c}" onclick="filterProducts('${c}')">${cap(c)}</button>`).join('')}`;
+    ${list.map(c => `<button class="filter-btn ${currentFilter===c.value?'active':''}" data-filter="${c.value}" onclick="filterProducts('${c.value}')">${c.label}</button>`).join('')}`;
 }
 
 function filterProducts(filter) {
@@ -1999,12 +2131,90 @@ function showToast(msg, color) {
 }
 
 // ============================================================
+// RÉALISATIONS (config-driven — data lives in localStorage or Supabase)
+// ============================================================
+const DEFAULT_PROJECTS = [
+  { id:1, name:'Villa Contemporaine – Alger', location:'Hydra, Alger',
+    badge:'Projet Vedette', img:'steel-door.jpg',
+    desc:"Installation complète de portes blindées et d'entrée pour une villa haut de gamme. Finitions sur mesure en gris anthracite.",
+    specs:['Porte blindée Classe 4','Porte d\'entrée Prestige Oak','Serrures multipoints','Délai : 5 jours'] },
+  { id:2, name:'Résidence Luxe – Oran', location:'Bir El Djir, Oran',
+    badge:'', img:'wooden-door.jpg',
+    desc:"Portes intérieures et d'entrée pour une résidence de 6 appartements. Uniformité de style et finitions premium.",
+    specs:['18 portes intérieures','6 portes d\'entrée','Bois massif chêne','Pose incluse'] },
+  { id:3, name:'Appartement Moderne – Constantine', location:'Constantine',
+    badge:'Nouveau', img:'glass-door.jpg',
+    desc:'Transformation complète avec portes vitrées coulissantes pour un appartement de standing. Luminosité maximale.',
+    specs:['Portes vitrées loft','Rail inox','Verre dépoli 6mm','Délai : 3 jours'] },
+];
+
+function getProjectsCatalog() {
+  try {
+    const s = localStorage.getItem('pp_projects');
+    if (s) return JSON.parse(s);
+  } catch(e) {}
+  return DEFAULT_PROJECTS;
+}
+
+function renderRealisations() {
+  const grid = document.getElementById('realisationsGrid');
+  if (!grid) return;
+  const projects = getProjectsCatalog();
+  if (!projects.length) {
+    grid.innerHTML = '<p style="color:var(--text-muted);text-align:center;padding:40px 0;">Aucune réalisation disponible.</p>';
+    return;
+  }
+  grid.innerHTML = projects.map(p => `
+    <div class="realisation-card" onclick="openProject(${p.id})" role="button" tabindex="0">
+      <img class="realisation-card-img" src="${p.img}" alt="${p.name}" loading="lazy"
+        onerror="this.style.background='var(--bg-primary)';this.removeAttribute('src')" />
+      <div class="realisation-card-body">
+        ${p.badge ? `<div class="badge badge-gold" style="margin-bottom:8px;">${p.badge}</div>` : ''}
+        <div class="realisation-card-location">${p.location || ''}</div>
+        <div class="realisation-card-title">${p.name}</div>
+        <div class="realisation-card-desc">${p.desc || ''}</div>
+      </div>
+    </div>
+  `).join('');
+}
+
+function openProject(id) {
+  const projects = getProjectsCatalog();
+  const p = projects.find(x => x.id === id);
+  if (!p) return;
+  document.getElementById('projectModalImg').src       = p.img || '';
+  document.getElementById('projectModalImg').alt       = p.name;
+  document.getElementById('projectModalLocation').textContent = p.location || '';
+  document.getElementById('projectModalTitle').textContent   = p.name;
+  document.getElementById('projectModalDesc').textContent    = p.desc || '';
+  const badgeEl = document.getElementById('projectModalBadge');
+  badgeEl.innerHTML = p.badge ? `<div class="badge badge-gold" style="margin-bottom:12px;">${p.badge}</div>` : '';
+  const specsEl = document.getElementById('projectModalSpecs');
+  specsEl.innerHTML = (p.specs || []).map(s => `<span class="modal-spec-tag">${s}</span>`).join('');
+  const modal = document.getElementById('projectModal');
+  modal.classList.add('active');
+  document.body.style.overflow = 'hidden';
+  trackEvent('view_project', p.name);
+}
+
+function closeProjectModal(e) {
+  if (e && e.target !== document.getElementById('projectModal')) return;
+  closeProjectModalDirect();
+}
+
+function closeProjectModalDirect() {
+  document.getElementById('projectModal').classList.remove('active');
+  document.body.style.overflow = '';
+}
+
+// ============================================================
 // INIT
 // ============================================================
 document.addEventListener('DOMContentLoaded', () => {
-  captureUTM();          // store UTM params before anything else
+  captureUTM();
   renderFeaturedProducts();
   renderShopProducts();
+  renderRealisations();
 
   // Show sticky CTA on mobile after scroll
   if (window.innerWidth <= 768) {
@@ -2017,114 +2227,110 @@ document.addEventListener('DOMContentLoaded', () => {
   // Handle hash routing
   const hash = window.location.hash.slice(1);
   if (hash && ['shop','order','about','faq','contact'].includes(hash)) showPage(hash);
+
+  // ESC closes project modal too
+  document.addEventListener('keydown', e => {
+    if (e.key === 'Escape') {
+      closeProjectModalDirect();
+      if (typeof closeModalDirect === 'function') closeModalDirect();
+    }
+  });
 });
 </script>
 
 
 
-<!-- ============================================================
-     3D SHOWROOM — MODULE INIT
-     Uses the same importmap as showroom-360.html (Three 0.160)
-     ============================================================ -->
-<script type="module">
-  import { initShowroom, DEFAULT_WALLS } from './showroom.js';
+<!-- showroom.js is a plain script — THREE already global from three.min.js above -->
+<script src="./showroom.js"></script>
 
-  let showroomInstance = null;
+<script>
+// ── Supabase credentials ───────────────────────────────────────
+var SUPABASE_URL      = 'https://smbdgbbgyaubalqoqxnu.supabase.co';
+var SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InNtYmRnYmJneWF1YmFscW9xeG51Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzY5MzgxMTgsImV4cCI6MjA5MjUxNDExOH0.wg7S0IaZKdWB26_XPSs0BzStx54LspPrfjDRnvf241U';
 
-  function handleShowroomNavigate(category) {
-    // showPage() is in the non-module script block below
-    if (typeof showPage === 'function') {
-      showPage('shop', category);
-    }
+var _sbClient = null;
+function getSB() {
+  if (!_sbClient && window.supabase && window.supabase.createClient) {
+    _sbClient = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
   }
-<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  return _sbClient;
+}
 
-  <script>
-    // --- 2. CONFIGURATION ---
-    // PASTE YOUR KEYS HERE
-    const SUPABASE_URL = 'https://supabase.com/dashboard/project/smbdgbbgyaubalqoqxnu'; 
-    const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InNtYmRnYmJneWF1YmFscW9xeG51Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzY5MzgxMTgsImV4cCI6MjA5MjUxNDExOH0.wg7S0IaZKdWB26_XPSs0BzStx54LspPrfjDRnvf241U';
-    
-    const supabase = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
-    let showroomInstance = null;
+function _localConfig() {
+  var walls = null, room = null;
+  try { var s = localStorage.getItem('pp_showroom_walls'); if (s) walls = JSON.parse(s); } catch(e) {}
+  try { var r = localStorage.getItem('pp_showroom_room');  if (r) room  = JSON.parse(r); } catch(e) {}
+  return { walls: walls, room: room };
+}
 
-    // --- 3. THE CLOUD LOADER ---
-    async function _loadShowroomConfig() {
-      console.log("Cloud: Fetching configurations...");
-      try {
-        const { data, error } = await supabase
-          .from('showroom_settings')
-          .select('walls_config, room_config')
-          .eq('id', 1)
-          .single();
-
-        if (error || !data) {
-          console.warn("Cloud: Data missing or error:", error);
-          return { walls: null, room: null }; 
-        }
-        
-        console.log("Cloud: Success!");
-        return { 
-          walls: data.walls_config, 
-          room: data.room_config 
-        };
-      } catch (e) {
-        console.error("Cloud: Connection failed:", e);
-        return { walls: null, room: null };
-      }
+function loadShowroomConfig() {
+  var sb = getSB();
+  if (!sb) return Promise.resolve(_localConfig());
+  var deadline = new Promise(function(resolve) { setTimeout(function() { resolve(null); }, 3000); });
+  var query    = sb.from('showroom_settings').select('walls_config, room_config').eq('id', 1).single();
+  return Promise.race([query, deadline]).then(function(result) {
+    if (result && !result.error && result.data) {
+      if (result.data.walls_config) localStorage.setItem('pp_showroom_walls', JSON.stringify(result.data.walls_config));
+      if (result.data.room_config)  localStorage.setItem('pp_showroom_room',  JSON.stringify(result.data.room_config));
+      return { walls: result.data.walls_config, room: result.data.room_config };
     }
+    return _localConfig();
+  }).catch(function() { return _localConfig(); });
+}
 
-    // --- 4. THE BOOT SEQUENCE ---
-    async function bootShowroom() {
-      const container = document.getElementById('showroom-canvas-wrap');
-      if (!container) return;
+// ── Showroom instance ──────────────────────────────────────────
+var _showroomInstance = null;
 
-      console.log("Engine: Waiting for cloud data...");
-      
-      // 'await' ensures the ceiling is NOT black on load
-      const config = await _loadShowroomConfig();
-      
-      const opts = {};
-      if (config.walls) opts.walls = config.walls;
-      if (config.room)  opts.room  = config.room;
+function _navigate(category) {
+  if (typeof showPage === 'function') showPage('shop', category);
+}
 
-      console.log("Engine: Initializing with:", opts);
-      
-      // Make sure showroom.js is loaded before this runs
-      if (typeof initShowroom === 'function') {
-        showroomInstance = initShowroom(container, handleShowroomNavigate, opts);
-      } else {
-        console.error("Engine: initShowroom not found! Check your showroom.js script tag.");
-      }
-    }
+function _mount(container, opts) {
+  _showroomInstance = initShowroom(container, _navigate, opts || {});
+}
 
-    // --- 5. ADMIN LIVE RELOAD ---
-    window.__reloadShowroom = async function(newWalls, newRoom) {
-      if (showroomInstance) showroomInstance.destroy();
-      const container = document.getElementById('showroom-canvas-wrap');
-      if (!container) return;
-      container.innerHTML = '';
-      
-      const config = await _loadShowroomConfig();
-      const opts = { walls: newWalls };
-      if (newRoom) opts.room = newRoom;
-      else if (config.room) opts.room = config.room;
-      
-      showroomInstance = initShowroom(container, handleShowroomNavigate, opts);
-    };
+// ── Boot: config resolved BEFORE Three.js init ────────────────
+function bootShowroom() {
+  var container = document.getElementById('showroom-canvas-wrap');
+  if (!container) return;
+  loadShowroomConfig().then(function(config) {
+    var opts = {};
+    if (config.walls) opts.walls = config.walls;
+    if (config.room)  opts.room  = config.room;
+    _mount(container, opts);
+  });
+}
 
-    // --- 6. TRIGGER BOOT ---
-    // This is the safest way to trigger the boot on mobile and desktop
-    if (document.readyState === 'loading') {
-      document.addEventListener('DOMContentLoaded', bootShowroom);
-    } else {
-      bootShowroom();
-    }
+// ── Admin live-reload ──────────────────────────────────────────
+window.__reloadShowroom = function(newWalls, newRoom) {
+  if (_showroomInstance) { _showroomInstance.destroy(); _showroomInstance = null; }
+  var container = document.getElementById('showroom-canvas-wrap');
+  if (!container) return;
+  container.innerHTML = '';
+  var opts = { walls: newWalls };
+  if (newRoom) opts.room = newRoom;
+  _mount(container, opts);
+};
 
-    function handleShowroomNavigate(target) {
-        console.log("Navigating to:", target);
-    }
-  </script>
+// ── BroadcastChannel ──────────────────────────────────────────
+if (typeof BroadcastChannel !== 'undefined') {
+  var _bc = new BroadcastChannel('pp_sync');
+  _bc.onmessage = function(e) {
+    var d = e.data;
+    if (d.type === 'showroom_updated')     window.__reloadShowroom(d.walls, d.room);
+    if (d.type === 'products_updated')     { if(typeof renderFeaturedProducts==='function') renderFeaturedProducts(); if(typeof renderShopProducts==='function') renderShopProducts(); }
+    if (d.type === 'realisations_updated') { if(typeof renderRealisations==='function') renderRealisations(); }
+    if (d.type === 'categories_updated')   { if(typeof renderFilterButtons==='function') renderFilterButtons(); if(typeof renderShopProducts==='function') renderShopProducts(); }
+  };
+}
+
+// ── Trigger ───────────────────────────────────────────────────
+if (document.readyState === 'loading') {
+  document.addEventListener('DOMContentLoaded', bootShowroom);
+} else {
+  bootShowroom();
+}
+</script>
 </body>
 </html>
 

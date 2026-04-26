@@ -28,7 +28,8 @@
  * ============================================================
  */
 
-import * as THREE from 'three';
+/* THREE is loaded as a UMD global from <head> — no CDN import in the module chain */
+const THREE = window.THREE;
 
 /* ════════════════════════════════════════════════════════════════
    ██████████████████████████████████████████████████████████████
@@ -49,7 +50,7 @@ import * as THREE from 'three';
    ██                                                          ██
    ██████████████████████████████████████████████████████████████
    ════════════════════════════════════════════════════════════════ */
-export const DEFAULT_WALLS = [
+const DEFAULT_WALLS = [
 
   // ── WALL 1 ── (faces camera at start-up) ─────────────────────
   { image: 'steel-door.jpg',  label: 'Portes Blindées',    category: 'blindées'   },
@@ -76,7 +77,7 @@ export const DEFAULT_WALLS = [
 /* ─────────────────────────────────────────────────────────────
    ROOM APPEARANCE — safe to tweak
    ───────────────────────────────────────────────────────────── */
-export const DEFAULT_ROOM = {
+const DEFAULT_ROOM = {
   radius:        5.2,       // distance center → each wall (meters)
   height:        3.8,       // room / wall height (meters)
   fov:           72,        // camera field of view (degrees)
@@ -115,7 +116,7 @@ export const DEFAULT_ROOM = {
  *   options    – { walls?, room? }  override defaults
  * Returns { destroy, reconfigure }
  */
-export function initShowroom(container, onNavigate, options = {}) {
+function initShowroom(container, onNavigate, options = {}) {
   const v = new Showroom360(container, onNavigate, options);
   return { destroy: () => v.destroy(), reconfigure: (w) => v.reconfigure(w) };
 }
@@ -666,3 +667,8 @@ class Showroom360 {
     this.renderer.domElement.parentNode?.removeChild(this.renderer.domElement);
   }
 }
+
+// Expose as globals — loaded as a plain <script>, no ES module needed
+window.initShowroom  = initShowroom;
+window.DEFAULT_WALLS = DEFAULT_WALLS;
+window.DEFAULT_ROOM  = DEFAULT_ROOM;

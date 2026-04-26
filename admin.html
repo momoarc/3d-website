@@ -271,6 +271,9 @@ input,select,textarea{font-family:inherit}
       <div class="nav-item" data-page="showroom" onclick="adminPage('showroom')">
         <span class="nav-item-icon">🔮</span> Showroom 360°
       </div>
+      <div class="nav-item" data-page="realisations" onclick="adminPage('realisations')">
+        <span class="nav-item-icon">🏆</span> Réalisations
+      </div>
 
       <div class="nav-section" style="margin-top:8px;">Équipe</div>
       <div class="nav-item" data-page="employees" onclick="adminPage('employees')">
@@ -538,6 +541,23 @@ input,select,textarea{font-family:inherit}
         <!-- Walls editor -->
         <div id="showroom-walls-editor" style="display:flex;flex-direction:column;gap:14px;"></div>
 
+        <!-- Categories manager -->
+        <div class="section-card" style="margin-top:28px;">
+          <div class="section-card-header" style="display:flex;justify-content:space-between;align-items:center;">
+            <span class="section-card-title">🗂️ Catégories de Produits</span>
+            <button class="btn btn-outline btn-sm" onclick="addCategory()">+ Ajouter</button>
+          </div>
+          <div style="padding:16px 20px;">
+            <div style="font-size:12px;color:var(--text-3);margin-bottom:14px;">
+              Ces catégories alimentent les filtres du catalogue, les murs du showroom et les formulaires produit. Modifiez-les ici pour les propager partout.
+            </div>
+            <div id="categories-editor" style="display:flex;flex-direction:column;gap:8px;"></div>
+            <div style="margin-top:16px;">
+              <button class="btn btn-gold btn-sm" onclick="saveCategories()">💾 Sauvegarder les catégories</button>
+            </div>
+          </div>
+        </div>
+
         <!-- Room appearance config -->
         <div class="section-card" style="margin-top:28px;">
           <div class="section-card-header"><span class="section-card-title">🎨 Apparence de la Salle</span></div>
@@ -591,6 +611,64 @@ input,select,textarea{font-family:inherit}
           <div style="display:flex;gap:10px;">
             <a href="index.html" target="_blank" class="btn btn-outline btn-sm">Ouvrir le Site →</a>
             <button class="btn btn-red btn-sm" onclick="resetShowroomConfig()">↺ Réinitialiser par défaut</button>
+          </div>
+        </div>
+      </div>
+
+      <!-- ---- RÉALISATIONS ---- -->
+      <div id="page-realisations" class="admin-page hidden">
+        <div class="page-header" style="display:flex;justify-content:space-between;align-items:flex-start;flex-wrap:wrap;gap:16px;">
+          <div>
+            <div class="page-title">🏆 Réalisations</div>
+            <div class="page-sub">Gérez les projets affichés dans la section "Nos Réalisations" de la page d'accueil.</div>
+          </div>
+          <button class="btn btn-gold" onclick="openProjectForm(null)">+ Nouveau Projet</button>
+        </div>
+
+        <!-- Project list -->
+        <div id="realisations-list" style="display:flex;flex-direction:column;gap:14px;"></div>
+
+        <!-- Project form (inline, hidden by default) -->
+        <div id="project-form-wrap" class="section-card" style="display:none;margin-top:28px;">
+          <div class="section-card-header" style="display:flex;justify-content:space-between;align-items:center;">
+            <span class="section-card-title" id="project-form-title">Nouveau Projet</span>
+            <button class="btn btn-ghost btn-sm" onclick="closeProjectForm()">✕ Annuler</button>
+          </div>
+          <div style="padding:20px;display:grid;grid-template-columns:1fr 1fr;gap:18px;">
+            <div class="form-group">
+              <label class="form-label">Nom du projet *</label>
+              <input type="text" class="form-input" id="pf-name" placeholder="Villa Contemporaine – Alger" />
+            </div>
+            <div class="form-group">
+              <label class="form-label">Localisation</label>
+              <input type="text" class="form-input" id="pf-location" placeholder="Hydra, Alger" />
+            </div>
+            <div class="form-group" style="grid-column:1/-1;">
+              <label class="form-label">Image (fichier ou URL) *</label>
+              <input type="text" class="form-input" id="pf-img" placeholder="steel-door.jpg ou https://…"
+                oninput="document.getElementById('pf-img-preview').src=this.value" />
+              <img id="pf-img-preview" src="" alt="" style="margin-top:8px;max-height:120px;border-radius:6px;display:block;object-fit:cover;"
+                onerror="this.style.display='none'" onload="this.style.display='block'" />
+            </div>
+            <div class="form-group">
+              <label class="form-label">Badge (optionnel)</label>
+              <input type="text" class="form-input" id="pf-badge" placeholder="Projet Vedette" />
+            </div>
+            <div class="form-group" style="grid-column:1/-1;">
+              <label class="form-label">Description</label>
+              <textarea class="form-input" id="pf-desc" rows="3" style="resize:vertical;"
+                placeholder="Description du projet réalisé…"></textarea>
+            </div>
+            <div class="form-group" style="grid-column:1/-1;">
+              <label class="form-label">Caractéristiques (une par ligne)</label>
+              <textarea class="form-input" id="pf-specs" rows="4" style="resize:vertical;"
+                placeholder="Porte blindée Classe 4&#10;Serrure 7 points&#10;Pose incluse"></textarea>
+              <div style="font-size:10px;color:var(--text-3);margin-top:3px;">Chaque ligne devient une étiquette sur la page projet.</div>
+            </div>
+          </div>
+          <div style="padding:0 20px 20px;display:flex;gap:10px;">
+            <button class="btn btn-gold" onclick="saveProjectForm()">💾 Sauvegarder</button>
+            <button class="btn btn-outline btn-sm" onclick="closeProjectForm()">Annuler</button>
           </div>
         </div>
       </div>
@@ -1486,7 +1564,8 @@ function renderPage(page) {
     case 'clients':     renderClients(); break;
     case 'analytics':   renderAnalytics(); break;
     case 'settings':    renderSettings(); break;
-    case 'showroom':    renderShowroomConfig(); break;
+    case 'showroom':       renderShowroomConfig(); break;
+    case 'realisations':   renderRealisationsList(); break;
     case 'add-product': initProductForm(); break;
     case 'employees':   renderEmployees(); break;
     case 'performance': renderPerformance(); break;
@@ -2043,10 +2122,206 @@ function getShowroomRoom() {
   return { ...SHOWROOM_DEFAULT_ROOM };
 }
 
+// ============================================================
+// BROADCAST CHANNEL — push changes to open site tabs
+// ============================================================
+const _adminBC = typeof BroadcastChannel !== 'undefined' ? new BroadcastChannel('pp_sync') : null;
+function broadcastSync(payload) { _adminBC?.postMessage(payload); }
+
+// ============================================================
+// CATEGORIES — config-driven, drives filters + wall dropdowns
+// ============================================================
+const DEFAULT_CATEGORIES = [
+  { value: 'blindées',   label: 'Portes Blindées'   },
+  { value: 'entrée',     label: "Portes d'Entrée"   },
+  { value: 'intérieure', label: 'Portes Intérieures' },
+  { value: 'verre',      label: 'Portes Vitrées'    },
+  { value: 'aluminium',  label: 'Aluminium'         },
+];
+
+function getCategories() {
+  try { const s = localStorage.getItem('pp_categories'); if (s) return JSON.parse(s); } catch(_) {}
+  return JSON.parse(JSON.stringify(DEFAULT_CATEGORIES));
+}
+
+function getCategoryOptions() {
+  return [...getCategories(),
+    { value: 'shop',  label: 'Tout le Catalogue' },
+    { value: 'order', label: 'Page Commande'     },
+  ];
+}
+
+function collectCategories() {
+  const rows = document.querySelectorAll('[id^="cat-value-"]');
+  const cats = [];
+  rows.forEach((el, i) => {
+    const v = el.value.trim().toLowerCase().replace(/\s+/g,'-');
+    const l = document.getElementById(`cat-label-${i}`)?.value.trim();
+    if (v && l) cats.push({ value: v, label: l });
+  });
+  return cats;
+}
+
+function renderCategoriesEditor() {
+  const el = document.getElementById('categories-editor');
+  if (!el) return;
+  const cats = getCategories();
+  el.innerHTML = cats.length ? cats.map((c, i) => `
+    <div style="display:grid;grid-template-columns:1fr 1fr auto;gap:10px;align-items:end;margin-bottom:2px;">
+      <div class="form-group" style="margin:0;">
+        ${i === 0 ? '<label class="form-label" style="font-size:10px;">Clé (slug)</label>' : ''}
+        <input type="text" class="form-input" id="cat-value-${i}" value="${c.value}"
+          placeholder="blindées" style="font-size:12px;" />
+      </div>
+      <div class="form-group" style="margin:0;">
+        ${i === 0 ? '<label class="form-label" style="font-size:10px;">Nom affiché</label>' : ''}
+        <input type="text" class="form-input" id="cat-label-${i}" value="${c.label}"
+          placeholder="Portes Blindées" style="font-size:12px;" />
+      </div>
+      <button class="btn btn-red btn-sm" onclick="removeCategory(${i})" title="Supprimer"
+        style="${i === 0 ? 'margin-top:20px;' : ''}">✕</button>
+    </div>`).join('')
+  : '<div style="color:var(--text-3);font-size:13px;">Aucune catégorie. Cliquez "+ Ajouter".</div>';
+}
+
+function addCategory() {
+  const cats = collectCategories();
+  cats.push({ value: '', label: '' });
+  localStorage.setItem('pp_categories', JSON.stringify(cats));
+  renderCategoriesEditor();
+}
+
+function removeCategory(i) {
+  const cats = collectCategories();
+  cats.splice(i, 1);
+  localStorage.setItem('pp_categories', JSON.stringify(cats));
+  renderCategoriesEditor();
+}
+
+function saveCategories() {
+  const cats = collectCategories();
+  if (cats.some(c => !c.value || !c.label)) { toast('⚠️ Remplissez clé et nom pour chaque catégorie'); return; }
+  localStorage.setItem('pp_categories', JSON.stringify(cats));
+  broadcastSync({ type: 'categories_updated', categories: cats });
+  renderCategoriesEditor();
+  renderWallCards(collectWalls()); // refresh wall dropdowns
+  toast('✅ Catégories sauvegardées');
+}
+
+// ============================================================
+// RÉALISATIONS — project portfolio management
+// ============================================================
+const DEFAULT_PROJECTS_ADMIN = [
+  { id:1, name:'Villa Contemporaine – Alger', location:'Hydra, Alger', badge:'Projet Vedette',
+    img:'steel-door.jpg', desc:"Installation complète de portes blindées et d'entrée pour une villa haut de gamme.",
+    specs:['Porte blindée Classe 4','Pose incluse','Délai : 5 jours'] },
+  { id:2, name:'Résidence Luxe – Oran', location:'Bir El Djir, Oran', badge:'',
+    img:'wooden-door.jpg', desc:"Portes intérieures et d'entrée pour une résidence de 6 appartements.",
+    specs:['18 portes intérieures','6 portes d\'entrée','Pose incluse'] },
+  { id:3, name:'Appartement Moderne – Constantine', location:'Constantine', badge:'Nouveau',
+    img:'glass-door.jpg', desc:'Transformation complète avec portes vitrées coulissantes.',
+    specs:['Portes vitrées loft','Rail inox','Délai : 3 jours'] },
+];
+
+function getProjects() {
+  try { const s = localStorage.getItem('pp_projects'); if (s) return JSON.parse(s); } catch(_) {}
+  return JSON.parse(JSON.stringify(DEFAULT_PROJECTS_ADMIN));
+}
+
+function _saveProjects(projects) {
+  localStorage.setItem('pp_projects', JSON.stringify(projects));
+  broadcastSync({ type: 'realisations_updated', projects });
+}
+
+let _editingProjectId = null;
+
+function renderRealisationsList() {
+  const el = document.getElementById('realisations-list');
+  if (!el) return;
+  const projects = getProjects();
+  if (!projects.length) {
+    el.innerHTML = '<div style="text-align:center;padding:60px 0;color:var(--text-3);">Aucun projet. Cliquez "+ Nouveau Projet".</div>';
+    return;
+  }
+  el.innerHTML = projects.map(p => `
+    <div class="section-card" style="border-left:3px solid var(--gold);">
+      <div style="display:grid;grid-template-columns:80px 1fr auto;gap:16px;align-items:center;padding:16px 20px;">
+        <img src="${p.img}" alt="" style="width:80px;height:60px;object-fit:cover;border-radius:6px;border:1px solid var(--border);"
+          onerror="this.style.opacity='0.3'" />
+        <div>
+          ${p.badge ? `<div style="font-size:10px;color:var(--gold);font-weight:700;letter-spacing:1px;margin-bottom:4px;">${p.badge}</div>` : ''}
+          <div style="font-weight:600;color:var(--text-1);margin-bottom:2px;">${p.name}</div>
+          <div style="font-size:12px;color:var(--text-3);">${p.location || ''}</div>
+          <div style="font-size:12px;color:var(--text-2);margin-top:4px;">${(p.desc||'').substring(0,90)}${(p.desc||'').length>90?'…':''}</div>
+        </div>
+        <div style="display:flex;gap:8px;flex-direction:column;">
+          <button class="btn btn-outline btn-sm" onclick="openProjectForm(${p.id})">✏️ Modifier</button>
+          <button class="btn btn-red btn-sm" onclick="deleteProject(${p.id})">✕ Supprimer</button>
+        </div>
+      </div>
+    </div>`).join('');
+}
+
+function openProjectForm(id) {
+  _editingProjectId = id;
+  document.getElementById('project-form-title').textContent = id === null ? 'Nouveau Projet' : 'Modifier le Projet';
+  const p = id !== null ? getProjects().find(x => x.id === id) : null;
+  document.getElementById('pf-name').value     = p?.name     || '';
+  document.getElementById('pf-location').value = p?.location || '';
+  document.getElementById('pf-img').value      = p?.img      || '';
+  document.getElementById('pf-badge').value    = p?.badge    || '';
+  document.getElementById('pf-desc').value     = p?.desc     || '';
+  document.getElementById('pf-specs').value    = (p?.specs || []).join('\n');
+  document.getElementById('pf-img-preview').src = p?.img || '';
+  const wrap = document.getElementById('project-form-wrap');
+  wrap.style.display = 'block';
+  wrap.scrollIntoView({ behavior: 'smooth' });
+}
+
+function closeProjectForm() {
+  document.getElementById('project-form-wrap').style.display = 'none';
+  _editingProjectId = null;
+}
+
+function saveProjectForm() {
+  const name = document.getElementById('pf-name').value.trim();
+  const img  = document.getElementById('pf-img').value.trim();
+  if (!name || !img) { toast('⚠️ Nom et image obligatoires'); return; }
+  const projects = getProjects();
+  const entry = {
+    id:       _editingProjectId ?? Date.now(),
+    name,
+    location: document.getElementById('pf-location').value.trim(),
+    img,
+    badge:    document.getElementById('pf-badge').value.trim(),
+    desc:     document.getElementById('pf-desc').value.trim(),
+    specs:    document.getElementById('pf-specs').value.split('\n').map(s => s.trim()).filter(Boolean),
+  };
+  if (_editingProjectId === null) {
+    projects.push(entry);
+  } else {
+    const idx = projects.findIndex(x => x.id === _editingProjectId);
+    if (idx >= 0) projects[idx] = entry; else projects.push(entry);
+  }
+  _saveProjects(projects);
+  closeProjectForm();
+  renderRealisationsList();
+  toast('✅ Projet sauvegardé');
+}
+
+function deleteProject(id) {
+  if (!confirm('Supprimer ce projet définitivement ?')) return;
+  _saveProjects(getProjects().filter(p => p.id !== id));
+  renderRealisationsList();
+  toast('Projet supprimé');
+}
+
+// ============================================================
 function renderShowroomConfig() {
   const walls = getShowroomWalls();
   const room  = getShowroomRoom();
   renderWallCards(walls);
+  renderCategoriesEditor();
 
   // Room config — basic
   document.getElementById('rc-speed').value      = room.rotationSpeed   || 0.004;
@@ -2123,7 +2398,7 @@ function renderWallCards(walls) {
           <div class="form-group">
             <label class="form-label">Lien au clic</label>
             <select class="form-input form-select" id="wall-cat-${i}">
-              ${CATEGORY_OPTIONS.map(o => `<option value="${o.value}" ${w.category === o.value ? 'selected' : ''}>${o.label}</option>`).join('')}
+              ${getCategoryOptions().map(o => `<option value="${o.value}" ${w.category === o.value ? 'selected' : ''}>${o.label}</option>`).join('')}
             </select>
           </div>
 
@@ -2182,12 +2457,9 @@ function saveShowroomConfig() {
     return;
   }
   localStorage.setItem('pp_showroom_walls', JSON.stringify(walls));
-  toast('✅ Showroom sauvegardé — rechargez le site pour voir les changements');
-  // Optionally ping the open site window
-  if (window.opener && window.opener.__reloadShowroom) {
-    window.opener.__reloadShowroom(walls);
-    toast('✅ Showroom mis à jour en direct !');
-  }
+  broadcastSync({ type: 'showroom_updated', walls, room: getShowroomRoom() });
+  if (window.opener?.__reloadShowroom) window.opener.__reloadShowroom(walls, getShowroomRoom());
+  toast('✅ Showroom sauvegardé et appliqué en direct');
 }
 
 function saveRoomConfig() {
@@ -2201,21 +2473,10 @@ function saveRoomConfig() {
     ceilingImage: ceilingVal || null,
   };
   localStorage.setItem('pp_showroom_room', JSON.stringify(room));
-  // Live-reload the open site tab if available (passes both walls + new room)
-  if (window.opener && window.opener.__reloadShowroom) {
-    let walls;
-    try { const s = localStorage.getItem('pp_showroom_walls'); if (s) walls = JSON.parse(s); } catch(e) {}
-    const defaultWalls = [
-      { image: 'steel-door.jpg',  label: 'Portes Blindées',    category: 'blindées'   },
-      { image: 'wooden-door.jpg', label: "Portes d'Entrée",    category: 'entrée'     },
-      { image: 'panel-door.jpg',  label: 'Portes Intérieures', category: 'intérieure' },
-      { image: 'glass-door.jpg',  label: 'Portes Vitrées',     category: 'verre'      },
-    ];
-    window.opener.__reloadShowroom(walls || defaultWalls, room);
-    toast('✅ Apparence mise à jour en direct !');
-  } else {
-    toast('✅ Apparence sauvegardée — rafraîchissez le site pour voir les changements');
-  }
+  const walls = getShowroomWalls();
+  broadcastSync({ type: 'showroom_updated', walls, room });
+  if (window.opener?.__reloadShowroom) window.opener.__reloadShowroom(walls, room);
+  toast('✅ Apparence sauvegardée et appliquée en direct');
 }
 
 function resetShowroomConfig() {
