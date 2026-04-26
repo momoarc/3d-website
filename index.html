@@ -590,13 +590,6 @@ input, select, textarea { font-family: inherit; }
 .phone-cta-number { font-size: 18px; font-weight: 600; color: var(--text-primary); }
 </style>
   
-<script src='https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2'></script>
-<script>
-  // Replace these with your actual Supabase project keys
-  const SUPABASE_URL = 'https://supabase.com/dashboard/project/smbdgbbgyaubalqoqxnu/';
-  const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InNtYmRnYmJneWF1YmFscW9xeG51Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzY5MzgxMTgsImV4cCI6MjA5MjUxNDExOH0.wg7S0IaZKdWB26_XPSs0BzStx54LspPrfjDRnvf241U';
-  const supabase = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
-</script>
 </head>
 
 <body>
@@ -2044,104 +2037,94 @@ document.addEventListener('DOMContentLoaded', () => {
       showPage('shop', category);
     }
   }
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 
-  // ── Load both walls AND room config from supabase (ex localStorage) ─────
-  // ── Load both walls AND room config from supabase ─────
-  async function _loadShowroomConfig() {
-    console.log("Fetching showroom config from cloud...");
-    try {
-      const { data, error } = await supabase
-        .from('showroom_settings')
-        .select('walls_config, room_config')
-        .eq('id', 1)
-        .single();
+  <script>
+    // --- 2. CONFIGURATION ---
+    // PASTE YOUR KEYS HERE
+    const SUPABASE_URL = 'https://supabase.com/dashboard/project/smbdgbbgyaubalqoqxnu'; 
+    const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InNtYmRnYmJneWF1YmFscW9xeG51Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzY5MzgxMTgsImV4cCI6MjA5MjUxNDExOH0.wg7S0IaZKdWB26_XPSs0BzStx54LspPrfjDRnvf241U';
+    
+    const supabase = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+    let showroomInstance = null;
 
-      if (error || !data) {
-        console.warn("Database error:", error);
-        return { walls: null, room: null }; 
+    // --- 3. THE CLOUD LOADER ---
+    async function _loadShowroomConfig() {
+      console.log("Cloud: Fetching configurations...");
+      try {
+        const { data, error } = await supabase
+          .from('showroom_settings')
+          .select('walls_config, room_config')
+          .eq('id', 1)
+          .single();
+
+        if (error || !data) {
+          console.warn("Cloud: Data missing or error:", error);
+          return { walls: null, room: null }; 
+        }
+        
+        console.log("Cloud: Success!");
+        return { 
+          walls: data.walls_config, 
+          room: data.room_config 
+        };
+      } catch (e) {
+        console.error("Cloud: Connection failed:", e);
+        return { walls: null, room: null };
       }
-      return { walls: data.walls_config, room: data.room_config };
-    } catch (e) {
-      console.error("Critical Load Error:", e);
-      return { walls: null, room: null };
     }
-  }
 
-      // 2. Try to fetch the data
-      const { data, error } = await supabase
-        .from('showroom_settings')
-        .select('walls_config, room_config')
-        .eq('id', 1)
-        .single(); 
+    // --- 4. THE BOOT SEQUENCE ---
+    async function bootShowroom() {
+      const container = document.getElementById('showroom-canvas-wrap');
+      if (!container) return;
 
-      // 3. Handle database errors gracefully
-      if (error || !data) {
-        console.warn("Database error or no data found. Using defaults.", error);
-        return { walls: null, room: null }; 
-      }
-
-      console.log("Cloud data loaded successfully!");
-      return { walls: data.walls_config, room: data.room_config };
-
-    } catch (err) {
-      // 4. Catch fatal JS crashes so the 3D room still boots
-      console.error("Fatal error loading from cloud:", err);
-      return { walls: null, room: null };
-    }
-  }
-  async function bootShowroom() {
-    const container = document.getElementById('showroom-canvas-wrap');
-    if (!container) return;
-    const { walls, room } = await _loadShowroomConfig();
-    const opts = {};
-    if (walls) opts.walls = walls;
-    if (room)  opts.room  = room;   // ← floor/ceiling textures now applied
-    showroomInstance = initShowroom(container, handleShowroomNavigate, opts);
-  }
-
-  // Boot immediately on DOMContentLoaded
-  if (document.readyState === 'loading') {
-    document.addEventListener('DOMContentLoaded', bootShowroom);
-  } else {
-    bootShowroom();
-  }
-
-  // Expose for admin live-reload: window.__reloadShowroom(newWalls, newRoom?)
-  window.__reloadShowroom = async function(newWalls, newRoom) {
-    if (showroomInstance) showroomInstance.destroy();
-    const container = document.getElementById('showroom-canvas-wrap');
-    if (!container) return;
-    container.innerHTML = '';
-    const { room: savedRoom } = await _loadShowroomConfig();
-    const opts = { walls: newWalls };
-    if (newRoom)        opts.room = newRoom;
-    else if (savedRoom) opts.room = savedRoom;
-    showroomInstance = initShowroom(container, handleShowroomNavigate, opts);
-  };
-// ... (Your _loadShowroomConfig function is up here)
-
-  // ── 3rd Part: The Boot Logic ─────
-  async function bootShowroom() {
-    const container = document.getElementById('showroom-canvas-wrap');
-    if (!container) return;
-
-    try {
+      console.log("Engine: Waiting for cloud data...");
+      
+      // 'await' ensures the ceiling is NOT black on load
       const config = await _loadShowroomConfig();
+      
       const opts = {};
       if (config.walls) opts.walls = config.walls;
       if (config.room)  opts.room  = config.room;
+
+      console.log("Engine: Initializing with:", opts);
+      
+      // Make sure showroom.js is loaded before this runs
+      if (typeof initShowroom === 'function') {
+        showroomInstance = initShowroom(container, handleShowroomNavigate, opts);
+      } else {
+        console.error("Engine: initShowroom not found! Check your showroom.js script tag.");
+      }
+    }
+
+    // --- 5. ADMIN LIVE RELOAD ---
+    window.__reloadShowroom = async function(newWalls, newRoom) {
+      if (showroomInstance) showroomInstance.destroy();
+      const container = document.getElementById('showroom-canvas-wrap');
+      if (!container) return;
+      container.innerHTML = '';
+      
+      const config = await _loadShowroomConfig();
+      const opts = { walls: newWalls };
+      if (newRoom) opts.room = newRoom;
+      else if (config.room) opts.room = config.room;
       
       showroomInstance = initShowroom(container, handleShowroomNavigate, opts);
-    } catch (err) {
-      console.error("Boot failed:", err);
-      showroomInstance = initShowroom(container, handleShowroomNavigate, {});
+    };
+
+    // --- 6. TRIGGER BOOT ---
+    // This is the safest way to trigger the boot on mobile and desktop
+    if (document.readyState === 'loading') {
+      document.addEventListener('DOMContentLoaded', bootShowroom);
+    } else {
+      bootShowroom();
     }
-  }
 
-  // Final step: This actually triggers the boot
-  window.addEventListener('load', bootShowroom);
-
-</script>
-
+    function handleShowroomNavigate(target) {
+        console.log("Navigating to:", target);
+    }
+  </script>
 </body>
 </html>
+
