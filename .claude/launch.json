@@ -3,7 +3,7 @@
     {
       "name": "Porte Prestige – 3D Showroom",
       "command": "npx --yes http-server . -p 8080 --cors -c-1",
-      "cwd": "C:\\Users\\User\\Documents\\Claude\\Projects\\3d-website\\loving-ellis-35368d",
+      "cwd": ".",
       "url": "http://localhost:8080",
       "notes": "Static file server. Also exposes /admin.html at http://localhost:8080/admin.html. Run via START-SERVER.bat for auto-open in browser."
     }
