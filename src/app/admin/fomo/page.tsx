@@ -8,7 +8,7 @@ import { Label } from '@/components/ui/label'
 import { Switch } from '@/components/ui/switch'
 import { RoleGuard } from '@/components/admin/RoleGuard'
 import TagInput from '@/components/ui/tag-input'
-import { Save, Loader2, Eye, ShoppingBag, Users, Flame, Truck, Shield, Award, RotateCcw, X, Plus, Package, Clock, Heart, Star, CheckCircle2, Globe, Lock, RefreshCw } from 'lucide-react'
+import { Save, Loader2, Eye, ShoppingBag, Users, Flame, Truck, Shield, Award, RotateCcw, X, Plus, Package, Clock, Heart, Star, CheckCircle2, Globe, Lock, RefreshCw, AlertTriangle } from 'lucide-react'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
 
 interface FomoConfig {
@@ -96,6 +96,9 @@ export default function FomoAdminPage() {
   const [config, setConfig] = useState<FomoConfig>(DEFAULT_CONFIG)
   const [saving, setSaving] = useState(false)
   const [saved, setSaved] = useState(false)
+  const [dbReady, setDbReady] = useState(true)
+  const [setupLoading, setSetupLoading] = useState(false)
+  const [setupError, setSetupError] = useState('')
 
   useEffect(() => {
     fetch('/api/fomo')
@@ -105,6 +108,31 @@ export default function FomoAdminPage() {
       })
       .catch(() => {})
   }, [])
+
+  // Try to auto-setup the fomo_config table
+  const handleSetup = async () => {
+    setSetupLoading(true)
+    setSetupError('')
+    try {
+      const res = await fetch('/api/fomo', { method: 'POST' })
+      const data = await res.json()
+      if (res.ok && (data.created || data.exists)) {
+        setDbReady(true)
+        // Reload config from DB
+        const configRes = await fetch('/api/fomo')
+        const configData = await configRes.json()
+        if (configData) setConfig(configData as FomoConfig)
+      } else {
+        setDbReady(false)
+        setSetupError(data.details || data.error || 'Erreur inconnue')
+      }
+    } catch {
+      setDbReady(false)
+      setSetupError('Impossible de se connecter au serveur')
+    } finally {
+      setSetupLoading(false)
+    }
+  }
 
   const handleSave = async () => {
     setSaving(true)
@@ -116,7 +144,14 @@ export default function FomoAdminPage() {
       })
       if (res.ok) {
         setSaved(true)
+        setDbReady(true)
         setTimeout(() => setSaved(false), 2000)
+      } else {
+        const data = await res.json()
+        if (data.error && data.error.includes('n\'existe pas')) {
+          setDbReady(false)
+        }
+        alert('Erreur: ' + (data.error || 'Sauvegarde échouée'))
       }
     } catch {
       alert('Erreur lors de la sauvegarde')
@@ -147,6 +182,42 @@ export default function FomoAdminPage() {
   return (
     <RoleGuard allowedRoles={['super_admin', 'admin']}>
       <div className="space-y-6 animate-fade-in">
+        {/* Setup banner when DB table is missing */}
+        {!dbReady && (
+          <div className="bg-[#f59e0b]/10 border border-[#f59e0b]/30 rounded-lg p-4">
+            <div className="flex items-start gap-3">
+              <AlertTriangle className="w-5 h-5 text-[#f59e0b] flex-shrink-0 mt-0.5" />
+              <div className="flex-1">
+                <h3 className="text-[#f59e0b] font-semibold text-sm">Table fomo_config introuvable</h3>
+                <p className="text-[#a0a09a] text-xs mt-1">
+                  La table <code className="text-[#c9a84c]">fomo_config</code> n&apos;existe pas encore dans votre base de données Supabase.
+                  Vous pouvez essayer la configuration automatique ou exécuter le script SQL manuellement dans le Supabase SQL Editor.
+                </p>
+                {setupError && (
+                  <p className="text-[#f87171] text-xs mt-1">Erreur : {setupError}</p>
+                )}
+                <div className="flex items-center gap-2 mt-3">
+                  <Button
+                    size="sm"
+                    onClick={handleSetup}
+                    disabled={setupLoading}
+                    className="bg-[#f59e0b] hover:bg-[#f59e0b]/80 text-[#0a0800] font-semibold h-8"
+                  >
+                    {setupLoading ? (
+                      <>
+                        <Loader2 className="mr-1.5 h-3.5 w-3.5 animate-spin" />
+                        Configuration...
+                      </>
+                    ) : (
+                      'Configurer automatiquement'
+                    )}
+                  </Button>
+                  <span className="text-[#606060] text-[10px]">ou exécutez <code className="text-[#a0a09a]">supabase-migration-fomo-images.sql</code></span>
+                </div>
+              </div>
+            </div>
+          </div>
+        )}
         <div className="flex items-center justify-between">
           <div>
             <h1 className="text-2xl font-bold text-[#f5f5f0] font-serif">FOMO & Social Proof</h1>

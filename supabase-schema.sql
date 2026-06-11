@@ -23,6 +23,7 @@ CREATE TABLE IF NOT EXISTS products (
   price INTEGER NOT NULL,
   compare_price INTEGER,
   image_url TEXT,
+  images JSONB DEFAULT '[]',
   badge TEXT,
   description TEXT,
   specs TEXT[],
@@ -601,12 +602,15 @@ CREATE TABLE IF NOT EXISTS fomo_config (
   viewers_counter_max INTEGER DEFAULT 28,
   stock_urgency_enabled BOOLEAN DEFAULT true,
   stock_urgency_threshold INTEGER DEFAULT 5,
+  stock_urgency_use_real BOOLEAN DEFAULT true,
   order_count_enabled BOOLEAN DEFAULT true,
   order_count_min INTEGER DEFAULT 12,
   order_count_max INTEGER DEFAULT 87,
+  order_count_use_real BOOLEAN DEFAULT true,
   delivery_estimate_enabled BOOLEAN DEFAULT true,
   delivery_estimate_days INTEGER DEFAULT 2,
   trust_badges_enabled BOOLEAN DEFAULT true,
+  trust_badges_items JSONB DEFAULT '[{"icon":"award","label":"Authenticité certifiée"},{"icon":"shield","label":"Garantie 3 ans"},{"icon":"truck","label":"Livraison assurée"},{"icon":"package","label":"Paiement à la livraison"}]',
   updated_at TIMESTAMPTZ DEFAULT NOW()
 );
 
