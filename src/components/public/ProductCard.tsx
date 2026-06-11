@@ -32,6 +32,7 @@ export default function ProductCard({ product, onOrder }: ProductCardProps) {
   }
 
   const handleAddToCart = (e: React.MouseEvent) => {
+    e.preventDefault()
     e.stopPropagation()
     const cartItem: CartItem = {
       product_id: product.id,
@@ -47,12 +48,20 @@ export default function ProductCard({ product, onOrder }: ProductCardProps) {
     setTimeout(() => setAdded(false), 1500)
   }
 
+  const handleCommander = (e: React.MouseEvent) => {
+    e.preventDefault()
+    e.stopPropagation()
+    // Direct navigation to order form — bypass any parent link
+    window.location.href = `/commander?product_id=${product.id}`
+  }
+
   const isUnavailable = product.available === false
+  const productUrl = product.slug ? `/produit/${product.slug}` : `/produit/${product.id}`
 
   return (
-    <Link href={product.slug ? `/produit/${product.slug}` : `/produit/${product.id}`} className={`block bg-[#111113] border border-white/[0.08] rounded-[10px] overflow-hidden group transition-all duration-300 hover:border-[#c9a84c]/30 hover:-translate-y-1 hover:shadow-[0_20px_60px_rgba(0,0,0,0.4)] ${isUnavailable ? 'opacity-70' : ''}`}>
-      {/* Image */}
-      <div className="aspect-square overflow-hidden relative">
+    <div className={`bg-[#111113] border border-white/[0.08] rounded-[10px] overflow-hidden group transition-all duration-300 hover:border-[#c9a84c]/30 hover:-translate-y-1 hover:shadow-[0_20px_60px_rgba(0,0,0,0.4)] ${isUnavailable ? 'opacity-70' : ''}`}>
+      {/* Image — clickable to product page */}
+      <Link href={productUrl} className="block aspect-square overflow-hidden relative">
         <img
           src={product.image_url || '/images/watches/automatique-acier.jpg'}
           alt={product.name}
@@ -83,31 +92,33 @@ export default function ProductCard({ product, onOrder }: ProductCardProps) {
             </span>
           </div>
         )}
-      </div>
+      </Link>
 
       {/* Body */}
       <div className="p-5">
-        <div className="flex items-center gap-2 mb-2">
-          <span className="text-[10px] tracking-[2px] uppercase text-[#c9a84c]">
-            {product.category}
-          </span>
-          {product.gender && (
-            <>
-              <span className="text-[#606060]">·</span>
-              <span className="text-[10px] tracking-[1px] uppercase text-[#606060]">
-                {product.gender}
-              </span>
-            </>
+        <Link href={productUrl} className="block">
+          <div className="flex items-center gap-2 mb-2">
+            <span className="text-[10px] tracking-[2px] uppercase text-[#c9a84c]">
+              {product.category}
+            </span>
+            {product.gender && (
+              <>
+                <span className="text-[#606060]">·</span>
+                <span className="text-[10px] tracking-[1px] uppercase text-[#606060]">
+                  {product.gender}
+                </span>
+              </>
+            )}
+          </div>
+          <h3 className="font-serif text-lg font-medium text-[#f5f5f0] mb-2">
+            {product.name}
+          </h3>
+          {product.description && (
+            <p className="text-[13px] text-[#a0a09a] leading-relaxed mb-4 line-clamp-2">
+              {product.description}
+            </p>
           )}
-        </div>
-        <h3 className="font-serif text-lg font-medium text-[#f5f5f0] mb-2">
-          {product.name}
-        </h3>
-        {product.description && (
-          <p className="text-[13px] text-[#a0a09a] leading-relaxed mb-4 line-clamp-2">
-            {product.description}
-          </p>
-        )}
+        </Link>
 
         {/* Footer */}
         <div className="flex items-center justify-between border-t border-white/[0.08] pt-4">
@@ -154,25 +165,17 @@ export default function ProductCard({ product, onOrder }: ProductCardProps) {
           </button>
         </div>
 
-        {/* Commander button — goes directly to order form */}
+        {/* Commander button — goes DIRECTLY to order form, NOT inside Link */}
         {!isUnavailable && (
-          <a
-            href={`/commander?product_id=${product.id}`}
-            onClick={(e) => {
-              e.stopPropagation()
-              e.preventDefault()
-              if (onOrder) {
-                onOrder(product.id)
-              } else {
-                window.location.href = `/commander?product_id=${product.id}`
-              }
-            }}
-            className="mt-3 w-full flex items-center justify-center gap-1.5 py-2.5 rounded-lg text-[10px] tracking-[1.5px] uppercase font-bold bg-[#c9a84c] text-[#0a0800] hover:bg-[#e4c06a] shadow-[0_2px_12px_rgba(201,168,76,0.25)] transition-all no-underline"
+          <button
+            onClick={handleCommander}
+            className="mt-3 w-full flex items-center justify-center gap-1.5 py-2.5 rounded-lg text-[10px] tracking-[1.5px] uppercase font-bold bg-[#c9a84c] text-[#0a0800] hover:bg-[#e4c06a] shadow-[0_2px_12px_rgba(201,168,76,0.25)] transition-all cursor-pointer"
           >
             Commander
             <ArrowRight className="w-3 h-3" />
-          </a>
+          </button>
         )}
       </div>
-    </Link>  )
+    </div>
+  )
 }

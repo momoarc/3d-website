@@ -7,7 +7,7 @@ import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import { Switch } from '@/components/ui/switch'
 import { RoleGuard } from '@/components/admin/RoleGuard'
-import { Save, Loader2, Plus, Trash2, Truck, RotateCcw, Settings, X, AlertTriangle, Database, Copy, CheckCircle2 } from 'lucide-react'
+import { Save, Loader2, Plus, Trash2, Truck, RotateCcw, Settings, X, AlertTriangle, Database, Copy, CheckCircle2, RefreshCw } from 'lucide-react'
 import { WILAYAS } from '@/lib/algeria-data'
 
 interface DeliveryZone {
@@ -129,37 +129,6 @@ const DEFAULT_CONFIG: DeliveryConfig = {
   },
 }
 
-// SQL for creating the delivery_config table
-const MIGRATION_SQL = `-- Create delivery_config table
-CREATE TABLE IF NOT EXISTS delivery_config (
-  id INTEGER PRIMARY KEY DEFAULT 1,
-  services JSONB NOT NULL DEFAULT '{}',
-  global_settings JSONB NOT NULL DEFAULT '{}',
-  updated_at TIMESTAMPTZ DEFAULT NOW()
-);
-
--- Enable RLS
-ALTER TABLE delivery_config ENABLE ROW LEVEL SECURITY;
-
--- Allow public read
-DO $$ BEGIN
-  IF NOT EXISTS (SELECT 1 FROM pg_policies WHERE tablename = 'delivery_config' AND policyname = 'allow_public_read_delivery') THEN
-    CREATE POLICY allow_public_read_delivery ON delivery_config FOR SELECT USING (true);
-  END IF;
-END $$;
-
--- Allow admin write
-DO $$ BEGIN
-  IF NOT EXISTS (SELECT 1 FROM pg_policies WHERE tablename = 'delivery_config' AND policyname = 'allow_admin_write_delivery') THEN
-    CREATE POLICY allow_admin_write_delivery ON delivery_config FOR ALL USING (true) WITH CHECK (true);
-  END IF;
-END $$;
-
--- Insert default config
-INSERT INTO delivery_config (id, services, global_settings)
-VALUES (1, '${JSON.stringify(DEFAULT_CONFIG.services)}'::jsonb, '${JSON.stringify(DEFAULT_CONFIG.global_settings)}'::jsonb)
-ON CONFLICT (id) DO NOTHING;`
-
 // Algeria zone grouping for bulk pricing
 const ZONE_GROUPS: Record<string, { label: string; wilayaCodes: number[] }> = {
   zone1: { label: 'Zone 1 — Alger & environs', wilayaCodes: [16, 9, 35, 42, 44] },
@@ -177,28 +146,57 @@ export default function DeliveryAdminPage() {
   const [newServiceName, setNewServiceName] = useState('')
   const [bulkZone, setBulkZone] = useState<string>('zone1')
   const [bulkPrice, setBulkPrice] = useState<string>('400')
-  const [dbReady, setDbReady] = useState(true)
+  const [dbReady, setDbReady] = useState(false)
   const [setupLoading, setSetupLoading] = useState(false)
   const [setupError, setSetupError] = useState('')
   const [showMigration, setShowMigration] = useState(false)
   const [copied, setCopied] = useState(false)
+  const [loadingConfig, setLoadingConfig] = useState(true)
+  const [saveError, setSaveError] = useState('')
+
+  // Migration SQL — just the delivery_config table part
+  const MIGRATION_SQL = `-- Migration: delivery_config table
+-- Exécutez ce SQL dans le Supabase SQL Editor
+
+CREATE TABLE IF NOT EXISTS delivery_config (
+  id INTEGER PRIMARY KEY DEFAULT 1,
+  services JSONB DEFAULT '{}',
+  global_settings JSONB DEFAULT '{}',
+  updated_at TIMESTAMPTZ DEFAULT NOW()
+);
+
+-- Insérer la configuration par défaut
+INSERT INTO delivery_config (id, services, global_settings)
+VALUES (1, '${JSON.stringify(DEFAULT_CONFIG.services)}'::jsonb, '${JSON.stringify(DEFAULT_CONFIG.global_settings)}'::jsonb)
+ON CONFLICT (id) DO NOTHING;
+
+-- Activer RLS
+ALTER TABLE delivery_config ENABLE ROW LEVEL SECURITY;
+
+-- Autoriser la lecture publique
+DROP POLICY IF EXISTS "Public read delivery config" ON delivery_config;
+CREATE POLICY "Public read delivery config" ON delivery_config FOR SELECT TO anon, authenticated USING (true);
+
+-- Autoriser l'écriture pour les admins
+DROP POLICY IF EXISTS "Admin update delivery" ON delivery_config;
+DROP POLICY IF EXISTS "Admin insert delivery" ON delivery_config;
+CREATE POLICY "Admin update delivery" ON delivery_config FOR UPDATE TO authenticated USING (true) WITH CHECK (true);
+CREATE POLICY "Admin insert delivery" ON delivery_config FOR INSERT TO authenticated WITH CHECK (true);`
 
   useEffect(() => {
+    setLoadingConfig(true)
     fetch('/api/delivery')
       .then(r => r.json())
       .then(data => {
         if (data && data.services) {
-          // Check if any service has pricing configured
           const hasPricing = Object.values(data.services as Record<string, DeliveryService>).some(
             s => Object.values(s.zones).some(z => Object.keys(z.wilayas).length > 0)
           )
           if (hasPricing) {
-            setConfig(data as DeliveryConfig)
-          } else {
-            // DB returned empty config, use our pre-configured defaults
-            setConfig(DEFAULT_CONFIG)
-            setDbReady(false)
+            setConfig({ id: data.id || 1, services: data.services, global_settings: data.global_settings })
           }
+          // If data came from default (table doesn't exist), mark as not ready
+          setDbReady(!data._fromDefault)
         } else {
           setDbReady(false)
         }
@@ -206,6 +204,7 @@ export default function DeliveryAdminPage() {
       .catch(() => {
         setDbReady(false)
       })
+      .finally(() => setLoadingConfig(false))
   }, [])
 
   const handleSetup = async () => {
@@ -223,20 +222,20 @@ export default function DeliveryAdminPage() {
           const hasPricing = Object.values(configData.services as Record<string, DeliveryService>).some(
             (s: DeliveryService) => Object.values(s.zones).some(z => Object.keys(z.wilayas).length > 0)
           )
-          setConfig(hasPricing ? configData : DEFAULT_CONFIG)
+          setConfig(hasPricing ? { id: configData.id || 1, services: configData.services, global_settings: configData.global_settings } : DEFAULT_CONFIG)
         }
       } else if (data.needsMigration) {
         setDbReady(false)
         setShowMigration(true)
         setSetupError('La table doit être créée manuellement. Copiez le SQL ci-dessous et exécutez-le dans le Supabase SQL Editor.')
+      } else if (data.needsRole) {
+        setSetupError('Permission refusée. Vérifiez que vous êtes connecté en tant qu\'admin et que votre rôle est défini dans la table user_roles.')
       } else {
-        setDbReady(false)
+        setSetupError(data.error || 'Impossible de créer la configuration.')
         setShowMigration(true)
-        setSetupError(data.error || 'Impossible de créer la configuration. Exécutez le script SQL de migration.')
       }
     } catch {
       setSetupError('Erreur de connexion. Veuillez réessayer.')
-      setDbReady(false)
     } finally {
       setSetupLoading(false)
     }
@@ -250,6 +249,7 @@ export default function DeliveryAdminPage() {
 
   const handleSave = async () => {
     setSaving(true)
+    setSaveError('')
     try {
       const res = await fetch('/api/delivery', {
         method: 'PATCH',
@@ -265,13 +265,13 @@ export default function DeliveryAdminPage() {
         if (data.needsMigration || data.error?.includes('does not exist') || data.error?.includes('42P01')) {
           setDbReady(false)
           setShowMigration(true)
-          setSetupError('La table delivery_config n\'existe pas. Copiez le SQL ci-dessous et exécutez-le dans le Supabase SQL Editor.')
+          setSaveError('La table delivery_config n\'existe pas. Copiez le SQL ci-dessous et exécutez-le dans le Supabase SQL Editor.')
         } else {
-          alert('Erreur: ' + (data.error || 'Sauvegarde échouée'))
+          setSaveError(data.error || 'Sauvegarde échouée')
         }
       }
     } catch {
-      alert('Erreur lors de la sauvegarde')
+      setSaveError('Erreur lors de la sauvegarde')
     } finally {
       setSaving(false)
     }
@@ -504,6 +504,17 @@ export default function DeliveryAdminPage() {
           </div>
         )}
 
+        {/* Save error banner */}
+        {saveError && (
+          <div className="bg-[#f87171]/10 border border-[#f87171]/30 rounded-xl p-4 flex items-start gap-3">
+            <AlertTriangle className="w-5 h-5 text-[#f87171] flex-shrink-0 mt-0.5" />
+            <div>
+              <div className="font-semibold text-[#f5f5f0] text-sm mb-1">Erreur de sauvegarde</div>
+              <p className="text-[13px] text-[#a0a09a]">{saveError}</p>
+            </div>
+          </div>
+        )}
+
         <div className="flex items-center justify-between">
           <div>
             <h1 className="text-2xl font-bold text-[#f5f5f0] font-serif">Services de Livraison</h1>
@@ -512,6 +523,27 @@ export default function DeliveryAdminPage() {
             </p>
           </div>
           <div className="flex items-center gap-2">
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={() => {
+                setLoadingConfig(true)
+                fetch('/api/delivery')
+                  .then(r => r.json())
+                  .then(data => {
+                    if (data?.services) {
+                      setConfig({ id: data.id || 1, services: data.services, global_settings: data.global_settings })
+                      setDbReady(!data._fromDefault)
+                    }
+                  })
+                  .catch(() => {})
+                  .finally(() => setLoadingConfig(false))
+              }}
+              className="border-white/[0.08] text-[#a0a09a] hover:text-[#f5f5f0] hover:bg-white/[0.04]"
+            >
+              <RefreshCcw className="h-3 w-3 mr-1" />
+              Recharger
+            </Button>
             <Button
               variant="outline"
               size="sm"
@@ -533,7 +565,7 @@ export default function DeliveryAdminPage() {
                 </>
               ) : saved ? (
                 <>
-                  <Save className="mr-2 h-4 w-4" />
+                  <CheckCircle2 className="mr-2 h-4 w-4" />
                   Sauvegardé ✓
                 </>
               ) : (

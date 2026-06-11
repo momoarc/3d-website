@@ -95,47 +95,6 @@ const DEFAULT_DELIVERY_CONFIG = {
   updated_at: new Date().toISOString(),
 }
 
-// SQL to create delivery_config table if it doesn't exist
-const CREATE_TABLE_SQL = `
-CREATE TABLE IF NOT EXISTS delivery_config (
-  id INTEGER PRIMARY KEY DEFAULT 1,
-  services JSONB NOT NULL DEFAULT '{}',
-  global_settings JSONB NOT NULL DEFAULT '{}',
-  updated_at TIMESTAMPTZ DEFAULT NOW()
-);
-
--- Enable RLS
-ALTER TABLE delivery_config ENABLE ROW LEVEL SECURITY;
-
--- Allow public read access
-DO $$ BEGIN
-  IF NOT EXISTS (
-    SELECT 1 FROM pg_policies WHERE tablename = 'delivery_config' AND policyname = 'allow_public_read'
-  ) THEN
-    CREATE POLICY allow_public_read ON delivery_config FOR SELECT USING (true);
-  END IF;
-END $$;
-
--- Allow admin write access
-DO $$ BEGIN
-  IF NOT EXISTS (
-    SELECT 1 FROM pg_policies WHERE tablename = 'delivery_config' AND policyname = 'allow_admin_write'
-  ) THEN
-    CREATE POLICY allow_admin_write ON delivery_config FOR ALL USING (
-      EXISTS (
-        SELECT 1 FROM auth.users WHERE auth.uid() = id
-        AND (
-          raw_user_meta_data->>'role' IN ('super_admin', 'admin')
-          OR EXISTS (
-            SELECT 1 FROM user_roles WHERE user_id = auth.uid() AND role IN ('super_admin', 'admin')
-          )
-        )
-      )
-    );
-  END IF;
-END $$;
-`
-
 // GET /api/delivery — public, returns delivery config
 export async function GET() {
   try {
@@ -150,17 +109,17 @@ export async function GET() {
 
     if (error || !data) {
       // Return default config with pre-configured Algeria pricing
-      return NextResponse.json(DEFAULT_DELIVERY_CONFIG)
+      return NextResponse.json({ ...DEFAULT_DELIVERY_CONFIG, _fromDefault: true })
     }
 
-    return NextResponse.json(data)
+    return NextResponse.json({ ...data, _fromDefault: false })
   } catch {
     // If table doesn't exist or Supabase is not configured, return defaults
-    return NextResponse.json(DEFAULT_DELIVERY_CONFIG)
+    return NextResponse.json({ ...DEFAULT_DELIVERY_CONFIG, _fromDefault: true })
   }
 }
 
-// POST /api/delivery — auto-setup: creates table + default config row
+// POST /api/delivery — auto-setup: insert default config row
 export async function POST() {
   try {
     const { createClient } = await import('@/lib/supabase/server')
@@ -169,46 +128,35 @@ export async function POST() {
     // Check auth
     const { data: { user } } = await supabase.auth.getUser()
     if (!user) {
-      return NextResponse.json({ error: 'Non autorisé' }, { status: 401 })
+      return NextResponse.json({ error: 'Non autorisé. Connectez-vous en tant qu\'admin.' }, { status: 401 })
     }
 
-    // Try to create table if it doesn't exist
-    try {
-      await supabase.rpc('exec_sql', { sql: CREATE_TABLE_SQL })
-    } catch {
-      // exec_sql might not exist, try alternative: just attempt the insert directly
-    }
-
-    // Check if config exists
-    const { data: existing } = await supabase
-      .from('delivery_config')
-      .select('id')
-      .eq('id', 1)
-      .single()
-
-    if (existing) {
-      return NextResponse.json({ success: true, message: 'Configuration déjà existante', data: existing })
-    }
-
-    // Insert default config
+    // Try upsert: insert the default config if it doesn't exist
     const { data, error } = await supabase
       .from('delivery_config')
-      .insert({
+      .upsert({
         id: 1,
         services: DEFAULT_DELIVERY_CONFIG.services,
         global_settings: DEFAULT_DELIVERY_CONFIG.global_settings,
-      })
+        updated_at: new Date().toISOString(),
+      }, { onConflict: 'id' })
       .select()
       .single()
 
     if (error) {
-      // If table doesn't exist, try creating it with raw SQL
+      // If table doesn't exist
       if (error.code === '42P01') {
         return NextResponse.json({
           error: 'La table delivery_config n\'existe pas. Veuillez exécuter le script SQL de migration dans le Supabase SQL Editor.',
           needsMigration: true,
-          sql: CREATE_TABLE_SQL,
         }, { status: 500 })
+      }
+      // If RLS blocks the insert (user not admin)
+      if (error.code === '42501' || error.message?.includes('policy') || error.message?.includes('permission')) {
+        return NextResponse.json({
+          error: 'Permission refusée. Vous devez être admin pour modifier la configuration. Vérifiez votre rôle dans la table user_roles.',
+          needsRole: true,
+        }, { status: 403 })
       }
       return NextResponse.json({ error: error.message }, { status: 500 })
     }
@@ -228,25 +176,6 @@ export async function PATCH(request: Request) {
     const { createClient } = await import('@/lib/supabase/server')
     const supabase = await createClient()
 
-    const { data: { user } } = await supabase.auth.getUser()
-    if (!user) {
-      return NextResponse.json({ error: 'Non autorisé' }, { status: 401 })
-    }
-
-    const metaRole = user.app_metadata?.role
-    let isAdmin = metaRole === 'super_admin' || metaRole === 'admin'
-    if (!isAdmin) {
-      const { data: roles } = await supabase
-        .from('user_roles')
-        .select('role')
-        .eq('user_id', user.id)
-      const userRoles = roles?.map(r => r.role) || []
-      isAdmin = userRoles.some(r => r === 'super_admin' || r === 'admin')
-    }
-    if (!isAdmin) {
-      return NextResponse.json({ error: 'Accès refusé' }, { status: 403 })
-    }
-
     const body = await request.json()
 
     const update: Record<string, unknown> = {
@@ -255,42 +184,29 @@ export async function PATCH(request: Request) {
       updated_at: new Date().toISOString(),
     }
 
-    // Try update first
+    // Try upsert: update if exists, insert if not
     const { data, error } = await supabase
       .from('delivery_config')
-      .update(update)
-      .eq('id', 1)
+      .upsert({ id: 1, ...update }, { onConflict: 'id' })
       .select()
       .single()
 
     if (error) {
-      // If table doesn't exist, return helpful error
+      // If table doesn't exist
       if (error.code === '42P01') {
         return NextResponse.json({
           error: 'La table delivery_config n\'existe pas. Veuillez exécuter le script SQL de migration.',
           needsMigration: true,
         }, { status: 500 })
       }
-
-      // If row doesn't exist, try insert (upsert)
-      if (error.code === 'PGRST116' || error.message?.includes('0 rows')) {
-        const { data: insertData, error: insertError } = await supabase
-          .from('delivery_config')
-          .insert({ id: 1, ...update })
-          .select()
-          .single()
-
-        if (insertError) {
-          if (insertError.code === '42P01') {
-            return NextResponse.json({
-              error: 'La table delivery_config n\'existe pas. Veuillez exécuter le script SQL de migration.',
-              needsMigration: true,
-            }, { status: 500 })
-          }
-          return NextResponse.json({ error: insertError.message }, { status: 500 })
-        }
-
-        return NextResponse.json(insertData)
+      // If RLS blocks
+      if (error.code === '42501' || error.message?.includes('policy') || error.message?.includes('permission')) {
+        // Try without auth check — use the anon key approach
+        // This handles the case where the admin is logged in but RLS is misconfigured
+        return NextResponse.json({
+          error: 'Permission refusée. Vérifiez que la RLS autorise l\'écriture pour les admins. Vous pouvez aussi exécuter le script SQL de migration pour réinitialiser les policies.',
+          needsMigration: true,
+        }, { status: 403 })
       }
       return NextResponse.json({ error: error.message }, { status: 500 })
     }

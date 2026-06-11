@@ -54,7 +54,7 @@ function CatalogueContent() {
   const [sortBy, setSortBy] = useState<SortOption>('pertinence')
   const [genderFilter, setGenderFilter] = useState<GenderFilter>('Tous')
   const [inStockOnly, setInStockOnly] = useState(false)
-  const [filtersOpen, setFiltersOpen] = useState(false)
+  const [filtersOpen, setFiltersOpen] = useState<boolean>(false)
 
   useEffect(() => {
     const fetchData = async () => {
@@ -323,8 +323,12 @@ function CatalogueContent() {
               </div>
             </div>
 
-            {/* Expanded filters */}
-            {filtersOpen && (
+            {/* Expanded filters — ONLY visible when user clicks the Filtres button */}
+            <div
+              className={`overflow-hidden transition-all duration-300 ease-in-out ${
+                filtersOpen ? 'max-h-[500px] opacity-100' : 'max-h-0 opacity-0'
+              }`}
+            >
               <div className="pb-4 space-y-5 border-t border-white/[0.06] pt-4">
                 {/* Price Range + Gender + Availability row */}
                 <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
@@ -401,7 +405,7 @@ function CatalogueContent() {
                   </div>
                 </div>
               </div>
-            )}
+            </div>
 
             {/* Active filter chips */}
             {hasActiveFilters && (
