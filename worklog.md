@@ -68,3 +68,32 @@ Stage Summary:
 - Image upload working via Supabase Storage
 - All admin data now goes through Supabase API routes
 - Site verified with Agent Browser - homepage and admin login both working
+
+---
+Task ID: 4
+Agent: Main Agent
+Task: Fix dynamic attributes in product creation, verify product page/FOMO/landing pages
+
+Work Log:
+- Analyzed the AttributeValuesInput component bug: useEffect sync from values→text caused feedback loop that erased comma while typing
+- Replaced the textarea-based AttributeValuesInput with a proper tag-based input (similar to TagInput component)
+- New input: type a value, press Enter or comma to add it as a tag, backspace to remove last, paste multiple values at once
+- Added useRef import that was missing
+- Fixed fetchProduct to restore compare_price, stock, and slug when editing
+- Fixed handleSave to include compare_price and stock in the product data sent to Supabase
+- Added Stock field to the "Statut & Options" section of the product form
+- Enhanced product detail page to show compare_price (strikethrough) when available
+- Fixed stock display on product page to use real stock value instead of random number
+- Updated "Voir la page produit" button to prefer slug over ID
+- Verified all 4 tasks are already implemented:
+  1. ✅ Dynamic attributes: now fixed with tag-based input
+  2. ✅ Product detail page (/produit/[id]): exists with FOMO widgets, attribute selectors, zoom, share
+  3. ✅ FOMO admin control (/admin/fomo): exists with all widget toggles and config
+  4. ✅ Landing page builder (/admin/landing-pages): list + editor + public renderer at /p/[slug]
+- Built successfully, pushed to GitHub
+
+Stage Summary:
+- Fixed the core bug that prevented comma-separated attribute values
+- All 4 requested features are now complete and functional
+- Product creation form now properly saves stock, compare_price, and slug
+- Product page shows real stock data and compare prices
