@@ -327,6 +327,10 @@ export default function OrdersPage() {
                   <p className="text-[#f5f5f0]">{selectedOrder.phone}</p>
                 </div>
                 <div>
+                  <span className="text-[#606060] text-xs">Email</span>
+                  <p className="text-[#f5f5f0]">{selectedOrder.email || '-'}</p>
+                </div>
+                <div>
                   <span className="text-[#606060] text-xs">Wilaya</span>
                   <p className="text-[#f5f5f0]">{selectedOrder.wilaya || '-'}</p>
                 </div>
@@ -343,12 +347,20 @@ export default function OrdersPage() {
                   <p className="text-[#f5f5f0]">{selectedOrder.quantity}</p>
                 </div>
                 <div>
-                  <span className="text-[#606060] text-xs">Source</span>
-                  <p className="text-[#f5f5f0]">{selectedOrder.source}</p>
+                  <span className="text-[#606060] text-xs">Service livraison</span>
+                  <p className="text-[#f5f5f0]">{selectedOrder.delivery_service || '-'}</p>
+                </div>
+                <div>
+                  <span className="text-[#606060] text-xs">Prix livraison</span>
+                  <p className="text-[#f5f5f0]">{selectedOrder.delivery_price ? `${selectedOrder.delivery_price} DA` : '-'}</p>
                 </div>
                 <div>
                   <span className="text-[#606060] text-xs">Total</span>
-                  <p className="text-[#f5f5f0]">{selectedOrder.total ? `${selectedOrder.total} DA` : '-'}</p>
+                  <p className="text-[#f5f5f0] font-semibold">{selectedOrder.total ? `${new Intl.NumberFormat('fr-DZ').format(selectedOrder.total)} DA` : '-'}</p>
+                </div>
+                <div>
+                  <span className="text-[#606060] text-xs">Source</span>
+                  <p className="text-[#f5f5f0]">{selectedOrder.source}</p>
                 </div>
                 <div>
                   <span className="text-[#606060] text-xs">Date</span>

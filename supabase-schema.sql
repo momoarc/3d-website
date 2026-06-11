@@ -60,6 +60,7 @@ CREATE TABLE IF NOT EXISTS orders (
   id TEXT PRIMARY KEY,
   name TEXT NOT NULL,
   phone TEXT NOT NULL,
+  email TEXT,
   wilaya TEXT,
   commune TEXT,
   product TEXT,
@@ -69,10 +70,17 @@ CREATE TABLE IF NOT EXISTS orders (
   notes TEXT,
   source TEXT DEFAULT 'website',
   total INTEGER,
+  delivery_service TEXT,
+  delivery_price INTEGER DEFAULT 0,
   assigned_to UUID REFERENCES auth.users(id),
   created_at TIMESTAMPTZ DEFAULT NOW(),
   updated_at TIMESTAMPTZ DEFAULT NOW()
 );
+
+-- Add new columns to existing orders table
+ALTER TABLE orders ADD COLUMN IF NOT EXISTS email TEXT;
+ALTER TABLE orders ADD COLUMN IF NOT EXISTS delivery_service TEXT;
+ALTER TABLE orders ADD COLUMN IF NOT EXISTS delivery_price INTEGER DEFAULT 0;
 
 -- Projects (Réalisations) table
 CREATE TABLE IF NOT EXISTS projects (
@@ -546,12 +554,15 @@ CREATE POLICY "Auth read shipments" ON shipments FOR SELECT TO authenticated USI
 CREATE POLICY "Admin write shipments" ON shipments FOR INSERT TO authenticated WITH check (has_admin_role());
 CREATE POLICY "Admin update shipments" ON shipments FOR UPDATE TO authenticated USING (has_admin_role());
 
--- Delivery config
+-- Delivery config: public read (order form needs pricing), admin manage
 DROP POLICY IF EXISTS "Auth read delivery" ON delivery_config;
+DROP POLICY IF EXISTS "Public read delivery config" ON delivery_config;
 DROP POLICY IF EXISTS "Admin update delivery" ON delivery_config;
+DROP POLICY IF EXISTS "Admin insert delivery" ON delivery_config;
 
-CREATE POLICY "Auth read delivery" ON delivery_config FOR SELECT TO authenticated USING (true);
+CREATE POLICY "Public read delivery config" ON delivery_config FOR SELECT TO anon, authenticated USING (true);
 CREATE POLICY "Admin update delivery" ON delivery_config FOR UPDATE TO authenticated USING (has_admin_role());
+CREATE POLICY "Admin insert delivery" ON delivery_config FOR INSERT TO authenticated WITH check (has_admin_role());
 
 -- User cart: users can only read/write their own cart
 DROP POLICY IF EXISTS "Users read own cart" ON user_cart;

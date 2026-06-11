@@ -97,3 +97,44 @@ Stage Summary:
 - All 4 requested features are now complete and functional
 - Product creation form now properly saves stock, compare_price, and slug
 - Product page shows real stock data and compare prices
+---
+Task ID: delivery-orders-system
+Agent: main
+Task: Build complete order form system with delivery configuration
+
+Work Log:
+- Created migration SQL (supabase-migration-delivery-orders.sql) that:
+  - Creates delivery_config table if not exists
+  - Adds PUBLIC read policy for delivery_config (order form needs pricing)
+  - Adds admin insert/update policies for delivery_config
+  - Seeds default delivery pricing for all 58 wilayas with 4 zones (Alger & environs, Nord, Hauts Plateaux, Sud) for Yalidine, Maybox, ECO LOG
+  - Adds email, delivery_service, delivery_price columns to orders table
+- Updated /api/delivery/route.ts:
+  - Added POST endpoint for auto-setup (creates config row if missing)
+  - Made GET resilient with pre-configured default Algeria pricing
+  - PATCH handles missing row with upsert fallback
+- Updated /api/orders/route.ts:
+  - Accepts email, delivery_service, delivery_price fields
+  - Graceful fallback if new columns don't exist (stores in notes)
+- Updated /admin/delivery/page.tsx:
+  - Pre-configured default pricing for all 58 wilayas (4 zones)
+  - Added setup banner when table doesn't exist
+  - Added "Configurer automatiquement" button
+  - Shows wilaya count per service (X/58 configured)
+  - Better bulk pricing UX with zone group labels
+- Updated /commander/page.tsx:
+  - Added delivery type selector (Domicile/Stop Desk)
+  - Properly sends email, delivery_service, delivery_price to API
+  - Shows delivery service name in price breakdown
+- Updated /lib/types.ts: Added email, delivery_service, delivery_price to Order interface
+- Updated /admin/orders/page.tsx: Shows email, delivery service, delivery price in order details
+- Updated supabase-schema.sql with new columns and public read policy
+
+Stage Summary:
+- Complete order form system with Algeria-specific delivery zones
+- 3 delivery services pre-configured (Yalidine, Maybox, ECO LOG)
+- All 58 wilayas have default pricing per zone
+- Admin can configure delivery pricing per wilaya/zone
+- Order form calculates delivery price based on selected wilaya
+- Email, delivery service, and delivery price stored with orders
+- Migration SQL must be run in Supabase SQL Editor for DB changes

@@ -1,6 +1,6 @@
 'use client'
 
-import { Suspense, useEffect, useState, useCallback } from 'react'
+import { Suspense, useEffect, useState } from 'react'
 import Link from 'next/link'
 import { useSearchParams } from 'next/navigation'
 import { ArrowLeft, Phone, Shield, Truck, CheckCircle2, AlertCircle, Minus, Plus, MapPin, Mail, User } from 'lucide-react'
@@ -68,6 +68,7 @@ function CommanderPageContent() {
   const [quantity, setQuantity] = useState(1)
   const [deliveryConfig, setDeliveryConfig] = useState<DeliveryConfig | null>(null)
   const [selectedService, setSelectedService] = useState<string>('')
+  const [selectedZone, setSelectedZone] = useState<string>('home')
   const [deliveryPrice, setDeliveryPrice] = useState(0)
   const [freeShipping, setFreeShipping] = useState(false)
   const [submitting, setSubmitting] = useState(false)
@@ -158,14 +159,27 @@ function CommanderPageContent() {
     // Zone-based pricing
     const wilayaCode = form.wilaya
     let price = 0
-    for (const zone of Object.values(service.zones)) {
+
+    // If a specific zone is selected, check it first
+    if (selectedZone && service.zones[selectedZone]) {
+      const zone = service.zones[selectedZone]
       if (zone.wilayas[wilayaCode] !== undefined) {
         price = zone.wilayas[wilayaCode]
-        break
       }
     }
+
+    // If not found in selected zone, search all zones
+    if (price === 0) {
+      for (const zone of Object.values(service.zones)) {
+        if (zone.wilayas[wilayaCode] !== undefined) {
+          price = zone.wilayas[wilayaCode]
+          break
+        }
+      }
+    }
+
     setDeliveryPrice(price)
-  }, [deliveryConfig, form.wilaya, selectedService, product, quantity])
+  }, [deliveryConfig, form.wilaya, selectedService, selectedZone, product, quantity])
 
   const formatPrice = (price: number) => new Intl.NumberFormat('fr-DZ').format(price)
 
@@ -193,6 +207,8 @@ function CommanderPageContent() {
     try {
       const selectedWilaya = WILAYAS.find(w => w.code.toString() === form.wilaya)
       const serviceName = deliveryConfig?.services[selectedService]?.name || selectedService
+      const zoneLabel = selectedZone && deliveryConfig?.services[selectedService]?.zones[selectedZone]?.label
+        ? ` (${deliveryConfig.services[selectedService].zones[selectedZone].label})` : ''
 
       const res = await fetch('/api/orders', {
         method: 'POST',
@@ -200,12 +216,15 @@ function CommanderPageContent() {
         body: JSON.stringify({
           name: form.name,
           phone: form.phone,
+          email: form.email || null,
           wilaya: selectedWilaya?.name || form.wilaya,
           commune: form.commune,
           product: product.name,
           product_id: product.id,
           quantity,
-          notes: `Email: ${form.email}\nService livraison: ${serviceName}\nPrix livraison: ${deliveryPrice} DA`,
+          delivery_service: serviceName + zoneLabel,
+          delivery_price: deliveryPrice,
+          notes: '',
           source: 'direct_order',
           total: total,
         }),
@@ -444,6 +463,41 @@ function CommanderPageContent() {
                     </div>
                   </div>
 
+                  {/* Delivery type selector (Domicile / Stop Desk) */}
+                  {form.wilaya && deliveryConfig?.services[selectedService]?.pricing_type === 'zone' && (
+                    <div className="space-y-2">
+                      <Label className="text-[#a0a09a] text-xs">Type de livraison</Label>
+                      <div className="grid grid-cols-2 gap-2">
+                        {Object.entries(deliveryConfig.services[selectedService]?.zones || {}).map(([zoneKey, zone]) => {
+                          const hasPrice = zone.wilayas[form.wilaya] !== undefined
+                          return (
+                            <button
+                              key={zoneKey}
+                              type="button"
+                              onClick={() => setSelectedZone(zoneKey)}
+                              className={`p-3 rounded-lg border text-left transition-all ${
+                                selectedZone === zoneKey
+                                  ? 'bg-[#c9a84c]/10 border-[#c9a84c]/40'
+                                  : hasPrice
+                                    ? 'bg-[#08080a] border-white/[0.06] hover:border-white/[0.15]'
+                                    : 'bg-[#08080a] border-white/[0.06] opacity-40 cursor-not-allowed'
+                              }`}
+                              disabled={!hasPrice && selectedZone !== zoneKey}
+                            >
+                              <div className="text-[12px] font-semibold text-[#f5f5f0]">{zone.label}</div>
+                              <div className="text-[11px] text-[#a0a09a] mt-0.5">
+                                {hasPrice
+                                  ? `${formatPrice(zone.wilayas[form.wilaya])} DA`
+                                  : 'Non disponible'
+                                }
+                              </div>
+                            </button>
+                          )
+                        })}
+                      </div>
+                    </div>
+                  )}
+
                   {/* Delivery service selector */}
                   {enabledServices.length > 1 && form.wilaya && (
                     <div className="space-y-2">
@@ -464,7 +518,7 @@ function CommanderPageContent() {
                             <div className="text-[11px] text-[#a0a09a] mt-0.5">
                               {service.pricing_type === 'flat'
                                 ? `${formatPrice(service.flat_price)} DA`
-                                : deliveryPrice > 0
+                                : deliveryPrice > 0 && selectedService === key
                                   ? `${formatPrice(deliveryPrice)} DA`
                                   : 'Prix selon zone'
                               }
@@ -557,6 +611,9 @@ function CommanderPageContent() {
                         <span className="text-[#a0a09a] flex items-center gap-1.5">
                           <Truck className="w-3.5 h-3.5" />
                           Livraison
+                          {deliveryConfig?.services[selectedService]?.name && form.wilaya && (
+                            <span className="text-[#606060] text-[11px]">({deliveryConfig.services[selectedService].name})</span>
+                          )}
                         </span>
                         <span className={freeShipping ? 'text-[#4ade80]' : deliveryPrice > 0 ? 'text-[#f5f5f0]' : 'text-[#606060]'}>
                           {freeShipping
@@ -573,7 +630,7 @@ function CommanderPageContent() {
                       {freeShipping && (
                         <div className="bg-[#4ade80]/5 border border-[#4ade80]/15 rounded-md px-3 py-2">
                           <p className="text-[10px] text-[#4ade80]">
-                            🎉 Livraison gratuite ! Votre commande dépasse {formatPrice(deliveryConfig?.global_settings.free_shipping_min_amount || 0)} DA
+                            Livraison gratuite ! Votre commande dépasse {formatPrice(deliveryConfig?.global_settings.free_shipping_min_amount || 0)} DA
                           </p>
                         </div>
                       )}

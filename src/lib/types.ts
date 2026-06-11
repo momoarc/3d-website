@@ -43,6 +43,7 @@ export interface Order {
   id: string
   name: string
   phone: string
+  email?: string | null
   wilaya: string | null
   commune: string | null
   product: string | null
@@ -52,6 +53,8 @@ export interface Order {
   notes: string | null
   source: string
   total: number | null
+  delivery_service?: string | null
+  delivery_price?: number | null
   assigned_to: string | null
   created_at: string
   updated_at: string
