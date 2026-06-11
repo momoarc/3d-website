@@ -11,7 +11,7 @@ import { Textarea } from '@/components/ui/textarea'
 import { Switch } from '@/components/ui/switch'
 import { Badge } from '@/components/ui/badge'
 import { ImageUpload } from '@/components/ui/image-upload'
-import { ArrowLeft, Plus, X, Save, Loader2, Eye } from 'lucide-react'
+import { ArrowLeft, Plus, X, Save, Loader2, Eye, ArrowUp, ArrowDown, ImageIcon } from 'lucide-react'
 import type { Product, ProductAttribute } from '@/lib/types'
 
 // ─── Attribute Values Input ─────────────────────────────────────────────────
@@ -127,6 +127,132 @@ function AttributeValuesInput({
   )
 }
 
+// ─── Multi-Image Upload ─────────────────────────────────────────────────────
+function MultiImageUpload({
+  images,
+  onImagesChange,
+}: {
+  images: string[]
+  onImagesChange: (images: string[]) => void
+}) {
+  const [showUpload, setShowUpload] = useState(false)
+
+  const handleUploadComplete = (url: string) => {
+    onImagesChange([...images, url])
+    setShowUpload(false)
+  }
+
+  const removeImage = (index: number) => {
+    onImagesChange(images.filter((_, i) => i !== index))
+  }
+
+  const moveImage = (index: number, direction: 'up' | 'down') => {
+    const newImages = [...images]
+    const targetIndex = direction === 'up' ? index - 1 : index + 1
+    if (targetIndex < 0 || targetIndex >= newImages.length) return
+    ;[newImages[index], newImages[targetIndex]] = [newImages[targetIndex], newImages[index]]
+    onImagesChange(newImages)
+  }
+
+  return (
+    <div className="space-y-3">
+      {/* Image grid */}
+      {images.length > 0 && (
+        <div className="space-y-2">
+          {images.map((img, index) => (
+            <div
+              key={`${img}-${index}`}
+              className="relative flex items-center gap-3 p-2 bg-[#08080a] border border-white/[0.06] rounded-lg group hover:border-[#c9a84c]/20 transition-colors"
+            >
+              {/* Thumbnail */}
+              <div className="relative w-16 h-16 rounded-md overflow-hidden flex-shrink-0 bg-[#111113]">
+                <img
+                  src={img}
+                  alt={`Image ${index + 1}`}
+                  className="w-full h-full object-cover"
+                />
+                {index === 0 && (
+                  <span className="absolute top-0.5 left-0.5 px-1.5 py-0.5 rounded text-[8px] font-bold tracking-[1px] uppercase bg-[#c9a84c] text-[#0a0800]">
+                    Principale
+                  </span>
+                )}
+              </div>
+
+              {/* URL preview */}
+              <div className="flex-1 min-w-0">
+                <p className="text-[11px] text-[#a0a09a] truncate">{img.split('/').pop()}</p>
+                <p className="text-[9px] text-[#606060] mt-0.5">Image {index + 1}</p>
+              </div>
+
+              {/* Controls */}
+              <div className="flex items-center gap-1 flex-shrink-0">
+                <button
+                  type="button"
+                  onClick={() => moveImage(index, 'up')}
+                  disabled={index === 0}
+                  className="w-7 h-7 rounded flex items-center justify-center text-[#606060] hover:text-[#f5f5f0] hover:bg-white/5 disabled:opacity-30 disabled:cursor-not-allowed transition-colors"
+                  aria-label="Monter"
+                >
+                  <ArrowUp className="w-3.5 h-3.5" />
+                </button>
+                <button
+                  type="button"
+                  onClick={() => moveImage(index, 'down')}
+                  disabled={index === images.length - 1}
+                  className="w-7 h-7 rounded flex items-center justify-center text-[#606060] hover:text-[#f5f5f0] hover:bg-white/5 disabled:opacity-30 disabled:cursor-not-allowed transition-colors"
+                  aria-label="Descendre"
+                >
+                  <ArrowDown className="w-3.5 h-3.5" />
+                </button>
+                <button
+                  type="button"
+                  onClick={() => removeImage(index)}
+                  className="w-7 h-7 rounded flex items-center justify-center text-[#606060] hover:text-red-400 hover:bg-red-400/10 transition-colors"
+                  aria-label="Supprimer l'image"
+                >
+                  <X className="w-3.5 h-3.5" />
+                </button>
+              </div>
+            </div>
+          ))}
+        </div>
+      )}
+
+      {/* Add image button / upload area */}
+      {showUpload ? (
+        <div className="space-y-2">
+          <ImageUpload
+            onUploadComplete={handleUploadComplete}
+            path="products"
+          />
+          <button
+            type="button"
+            onClick={() => setShowUpload(false)}
+            className="text-[11px] text-[#606060] hover:text-[#a0a09a] transition-colors"
+          >
+            Annuler
+          </button>
+        </div>
+      ) : (
+        <button
+          type="button"
+          onClick={() => setShowUpload(true)}
+          className="w-full py-3 border border-dashed border-white/[0.12] rounded-lg text-[#606060] hover:text-[#c9a84c] hover:border-[#c9a84c]/30 transition-colors flex items-center justify-center gap-2 text-[12px]"
+        >
+          <Plus className="w-4 h-4" />
+          Ajouter une image
+        </button>
+      )}
+
+      {/* Help text */}
+      <p className="text-[10px] text-[#606060]">
+        La première image sera l&apos;image principale affichée sur la page produit.
+        Utilisez les flèches pour réorganiser.
+      </p>
+    </div>
+  )
+}
+
 // ─── Main Component ─────────────────────────────────────────────────────────
 export default function NewProductPage() {
   const router = useRouter()
@@ -147,6 +273,7 @@ export default function NewProductPage() {
   const [description, setDescription] = useState('')
   const [specs, setSpecs] = useState('')
   const [imageUrl, setImageUrl] = useState('')
+  const [images, setImages] = useState<string[]>([])
   const [available, setAvailable] = useState(true)
   const [gender, setGender] = useState('Mixte')
   const [stock, setStock] = useState('')
@@ -185,6 +312,7 @@ export default function NewProductPage() {
         setDescription(p.description || '')
         setSpecs(p.specs?.join('\n') || '')
         setImageUrl(p.image_url || '')
+        setImages(p.images || [])
         setAvailable(p.available)
         setGender(p.gender || 'Mixte')
         setStock(p.stock?.toString() || '')
@@ -261,7 +389,8 @@ export default function NewProductPage() {
         badge: badge || null,
         description: description || null,
         specs: specs.split('\n').filter(s => s.trim()),
-        image_url: imageUrl || null,
+        image_url: images[0] || imageUrl || null,
+        images: images,
         available,
         gender,
         stock: stock ? parseInt(stock) : null,
@@ -512,13 +641,19 @@ export default function NewProductPage() {
         <div className="space-y-4">
           <Card className="bg-[#111113] border-white/[0.06]">
             <CardHeader className="pb-3">
-              <CardTitle className="text-sm text-[#a0a09a]">Image du produit</CardTitle>
+              <div className="flex items-center justify-between">
+                <CardTitle className="text-sm text-[#a0a09a]">Images du produit</CardTitle>
+                {images.length > 0 && (
+                  <Badge className="bg-[#c9a84c]/10 text-[#c9a84c] border-[#c9a84c]/20 text-[10px]">
+                    {images.length} image{images.length > 1 ? 's' : ''}
+                  </Badge>
+                )}
+              </div>
             </CardHeader>
             <CardContent>
-              <ImageUpload
-                onUploadComplete={setImageUrl}
-                currentImage={imageUrl}
-                path="products"
+              <MultiImageUpload
+                images={images}
+                onImagesChange={setImages}
               />
             </CardContent>
           </Card>

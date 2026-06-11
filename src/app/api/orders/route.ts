@@ -1,6 +1,39 @@
 import { NextResponse } from 'next/server'
 import { fireEvent } from '@/lib/webhooks'
 
+// GET /api/orders?count=true&product_id=X — count orders for a specific product
+export async function GET(request: Request) {
+  try {
+    const { searchParams } = new URL(request.url)
+    const count = searchParams.get('count')
+    const productId = searchParams.get('product_id')
+
+    if (count === 'true' && productId) {
+      try {
+        const { createClient } = await import('@/lib/supabase/server')
+        const supabase = await createClient()
+
+        const { count: orderCount, error } = await supabase
+          .from('orders')
+          .select('*', { count: 'exact', head: true })
+          .eq('product_id', parseInt(productId))
+
+        if (error) {
+          return NextResponse.json({ count: 0 })
+        }
+
+        return NextResponse.json({ count: orderCount || 0 })
+      } catch {
+        return NextResponse.json({ count: 0 })
+      }
+    }
+
+    return NextResponse.json({ error: 'Paramètres invalides' }, { status: 400 })
+  } catch {
+    return NextResponse.json({ count: 0 })
+  }
+}
+
 export async function POST(request: Request) {
   try {
     const body = await request.json()

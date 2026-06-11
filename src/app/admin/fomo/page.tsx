@@ -8,7 +8,8 @@ import { Label } from '@/components/ui/label'
 import { Switch } from '@/components/ui/switch'
 import { RoleGuard } from '@/components/admin/RoleGuard'
 import TagInput from '@/components/ui/tag-input'
-import { Save, Loader2, Eye, ShoppingBag, Users, Flame, Truck, Shield, Award, RotateCcw } from 'lucide-react'
+import { Save, Loader2, Eye, ShoppingBag, Users, Flame, Truck, Shield, Award, RotateCcw, X, Plus, Package, Clock, Heart, Star, CheckCircle2, Globe, Lock, RefreshCw } from 'lucide-react'
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
 
 interface FomoConfig {
   recent_purchases_enabled: boolean
@@ -20,12 +21,49 @@ interface FomoConfig {
   viewers_counter_max: number
   stock_urgency_enabled: boolean
   stock_urgency_threshold: number
+  stock_urgency_use_real: boolean
   order_count_enabled: boolean
   order_count_min: number
   order_count_max: number
+  order_count_use_real: boolean
   delivery_estimate_enabled: boolean
   delivery_estimate_days: number
   trust_badges_enabled: boolean
+  trust_badges_items: Array<{ icon: string; label: string }>
+}
+
+const BADGE_ICON_OPTIONS = [
+  { value: 'award', label: 'Award' },
+  { value: 'shield', label: 'Shield' },
+  { value: 'truck', label: 'Truck' },
+  { value: 'package', label: 'Package' },
+  { value: 'clock', label: 'Clock' },
+  { value: 'heart', label: 'Heart' },
+  { value: 'star', label: 'Star' },
+  { value: 'gem', label: 'Gem' },
+  { value: 'check', label: 'Check' },
+  { value: 'globe', label: 'Globe' },
+  { value: 'lock', label: 'Lock' },
+  { value: 'refresh', label: 'Refresh' },
+]
+
+function BadgePreviewIcon({ icon }: { icon: string }) {
+  const cls = 'w-4 h-4'
+  switch (icon) {
+    case 'award': return <Award className={cls} />
+    case 'shield': return <Shield className={cls} />
+    case 'truck': return <Truck className={cls} />
+    case 'package': return <Package className={cls} />
+    case 'clock': return <Clock className={cls} />
+    case 'heart': return <Heart className={cls} />
+    case 'star': return <Star className={cls} />
+    case 'gem': return <svg className={cls} fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}><path strokeLinecap="round" strokeLinejoin="round" d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z" /></svg>
+    case 'check': return <CheckCircle2 className={cls} />
+    case 'globe': return <Globe className={cls} />
+    case 'lock': return <Lock className={cls} />
+    case 'refresh': return <RefreshCw className={cls} />
+    default: return <Award className={cls} />
+  }
 }
 
 const DEFAULT_CONFIG: FomoConfig = {
@@ -38,12 +76,20 @@ const DEFAULT_CONFIG: FomoConfig = {
   viewers_counter_max: 28,
   stock_urgency_enabled: true,
   stock_urgency_threshold: 5,
+  stock_urgency_use_real: true,
   order_count_enabled: true,
   order_count_min: 12,
   order_count_max: 87,
+  order_count_use_real: true,
   delivery_estimate_enabled: true,
   delivery_estimate_days: 2,
   trust_badges_enabled: true,
+  trust_badges_items: [
+    { icon: 'award', label: 'Authenticité certifiée' },
+    { icon: 'shield', label: 'Garantie 3 ans' },
+    { icon: 'truck', label: 'Livraison assurée' },
+    { icon: 'package', label: 'Paiement à la livraison' },
+  ],
 }
 
 export default function FomoAdminPage() {
@@ -251,21 +297,33 @@ export default function FomoAdminPage() {
                 </div>
               </CardHeader>
               {config.stock_urgency_enabled && (
-                <CardContent>
-                  <div className="space-y-2">
-                    <Label className="text-[#a0a09a] text-xs">Seuil de stock affiché</Label>
-                    <Input
-                      type="number"
-                      value={config.stock_urgency_threshold}
-                      onChange={(e) => updateConfig('stock_urgency_threshold', parseInt(e.target.value) || 5)}
-                      className="bg-[#08080a] border-white/[0.08] text-[#f5f5f0] h-9"
-                      min={1}
-                      max={50}
+                <CardContent className="space-y-4">
+                  <div className="flex items-center justify-between">
+                    <div className="space-y-0.5">
+                      <Label className="text-[#a0a09a] text-xs">Utiliser le stock réel</Label>
+                      <p className="text-[11px] text-[#606060]">Affiche le nombre réel d&apos;unités en stock au lieu d&apos;un nombre aléatoire</p>
+                    </div>
+                    <Switch
+                      checked={config.stock_urgency_use_real}
+                      onCheckedChange={(v) => updateConfig('stock_urgency_use_real', v)}
                     />
-                    <p className="text-[11px] text-[#606060]">
-                      &quot;Plus que X en stock !&quot; — un nombre aléatoire ≤ ce seuil sera affiché
-                    </p>
                   </div>
+                  {!config.stock_urgency_use_real && (
+                    <div className="space-y-2">
+                      <Label className="text-[#a0a09a] text-xs">Seuil de stock affiché</Label>
+                      <Input
+                        type="number"
+                        value={config.stock_urgency_threshold}
+                        onChange={(e) => updateConfig('stock_urgency_threshold', parseInt(e.target.value) || 5)}
+                        className="bg-[#08080a] border-white/[0.08] text-[#f5f5f0] h-9"
+                        min={1}
+                        max={50}
+                      />
+                      <p className="text-[11px] text-[#606060]">
+                        &quot;Plus que X en stock !&quot; — un nombre aléatoire ≤ ce seuil sera affiché
+                      </p>
+                    </div>
+                  )}
                 </CardContent>
               )}
             </Card>
@@ -285,29 +343,47 @@ export default function FomoAdminPage() {
                 </div>
               </CardHeader>
               {config.order_count_enabled && (
-                <CardContent>
-                  <div className="grid grid-cols-2 gap-4">
-                    <div className="space-y-2">
-                      <Label className="text-[#a0a09a] text-xs">Minimum</Label>
-                      <Input
-                        type="number"
-                        value={config.order_count_min}
-                        onChange={(e) => updateConfig('order_count_min', parseInt(e.target.value) || 12)}
-                        className="bg-[#08080a] border-white/[0.08] text-[#f5f5f0] h-9"
-                        min={1}
-                      />
+                <CardContent className="space-y-4">
+                  <div className="flex items-center justify-between">
+                    <div className="space-y-0.5">
+                      <Label className="text-[#a0a09a] text-xs">Utiliser les commandes réelles</Label>
+                      <p className="text-[11px] text-[#606060]">Affiche le nombre réel de commandes depuis la base de données</p>
                     </div>
-                    <div className="space-y-2">
-                      <Label className="text-[#a0a09a] text-xs">Maximum</Label>
-                      <Input
-                        type="number"
-                        value={config.order_count_max}
-                        onChange={(e) => updateConfig('order_count_max', parseInt(e.target.value) || 87)}
-                        className="bg-[#08080a] border-white/[0.08] text-[#f5f5f0] h-9"
-                        min={config.order_count_min}
-                      />
-                    </div>
+                    <Switch
+                      checked={config.order_count_use_real}
+                      onCheckedChange={(v) => updateConfig('order_count_use_real', v)}
+                    />
                   </div>
+                  {config.order_count_use_real ? (
+                    <div className="bg-[#c9a84c]/5 border border-[#c9a84c]/15 rounded-md px-3 py-2">
+                      <p className="text-[11px] text-[#c9a84c]">
+                        Le nombre réel de commandes sera affiché
+                      </p>
+                    </div>
+                  ) : (
+                    <div className="grid grid-cols-2 gap-4">
+                      <div className="space-y-2">
+                        <Label className="text-[#a0a09a] text-xs">Minimum</Label>
+                        <Input
+                          type="number"
+                          value={config.order_count_min}
+                          onChange={(e) => updateConfig('order_count_min', parseInt(e.target.value) || 12)}
+                          className="bg-[#08080a] border-white/[0.08] text-[#f5f5f0] h-9"
+                          min={1}
+                        />
+                      </div>
+                      <div className="space-y-2">
+                        <Label className="text-[#a0a09a] text-xs">Maximum</Label>
+                        <Input
+                          type="number"
+                          value={config.order_count_max}
+                          onChange={(e) => updateConfig('order_count_max', parseInt(e.target.value) || 87)}
+                          className="bg-[#08080a] border-white/[0.08] text-[#f5f5f0] h-9"
+                          min={config.order_count_min}
+                        />
+                      </div>
+                    </div>
+                  )}
                 </CardContent>
               )}
             </Card>
@@ -358,10 +434,67 @@ export default function FomoAdminPage() {
                 </div>
               </CardHeader>
               {config.trust_badges_enabled && (
-                <CardContent>
-                  <p className="text-[11px] text-[#606060]">
-                    Affiche les badges : Authenticité certifiée, Garantie 3 ans, Livraison assurée, Paiement à la livraison
-                  </p>
+                <CardContent className="space-y-3">
+                  {config.trust_badges_items.map((badge, index) => (
+                    <div key={index} className="flex items-center gap-2">
+                      <Select
+                        value={badge.icon}
+                        onValueChange={(v) => {
+                          const updated = [...config.trust_badges_items]
+                          updated[index] = { ...updated[index], icon: v }
+                          updateConfig('trust_badges_items', updated)
+                        }}
+                      >
+                        <SelectTrigger className="w-[130px] bg-[#08080a] border-white/[0.08] text-[#f5f5f0] h-9 text-xs">
+                          <SelectValue />
+                        </SelectTrigger>
+                        <SelectContent className="bg-[#111113] border-white/[0.08]">
+                          {BADGE_ICON_OPTIONS.map((opt) => (
+                            <SelectItem key={opt.value} value={opt.value} className="text-[#f5f5f0] text-xs focus:bg-white/[0.06] focus:text-[#f5f5f0]">
+                              {opt.label}
+                            </SelectItem>
+                          ))}
+                        </SelectContent>
+                      </Select>
+                      <Input
+                        value={badge.label}
+                        onChange={(e) => {
+                          const updated = [...config.trust_badges_items]
+                          updated[index] = { ...updated[index], label: e.target.value }
+                          updateConfig('trust_badges_items', updated)
+                        }}
+                        className="flex-1 bg-[#08080a] border-white/[0.08] text-[#f5f5f0] h-9 text-xs"
+                        placeholder="Label du badge"
+                      />
+                      <button
+                        onClick={() => {
+                          const updated = config.trust_badges_items.filter((_, i) => i !== index)
+                          updateConfig('trust_badges_items', updated)
+                        }}
+                        className="w-8 h-8 flex items-center justify-center rounded-md text-[#606060] hover:text-[#f87171] hover:bg-[#f87171]/10 transition-colors"
+                        aria-label="Supprimer le badge"
+                      >
+                        <X className="w-4 h-4" />
+                      </button>
+                    </div>
+                  ))}
+                  {config.trust_badges_items.length < 6 && (
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      onClick={() => {
+                        const updated = [...config.trust_badges_items, { icon: 'award', label: '' }]
+                        updateConfig('trust_badges_items', updated)
+                      }}
+                      className="w-full border-dashed border-white/[0.12] text-[#a0a09a] hover:text-[#f5f5f0] hover:bg-white/[0.04] h-9"
+                    >
+                      <Plus className="w-3.5 h-3.5 mr-1" />
+                      Ajouter un badge
+                    </Button>
+                  )}
+                  {config.trust_badges_items.length >= 6 && (
+                    <p className="text-[11px] text-[#606060] text-center">Maximum 6 badges atteint</p>
+                  )}
                 </CardContent>
               )}
             </Card>
@@ -408,7 +541,10 @@ export default function FomoAdminPage() {
                     <div className="flex items-center gap-2 text-[11px]">
                       <Flame className="w-3.5 h-3.5 text-[#f59e0b]" />
                       <span className="text-[#f59e0b] font-medium">
-                        Plus que {Math.min(config.stock_urgency_threshold, Math.floor(Math.random() * config.stock_urgency_threshold) + 1)} en stock !
+                        {config.stock_urgency_use_real
+                          ? 'Plus que X en stock ! (stock réel)'
+                          : `Plus que ${Math.min(config.stock_urgency_threshold, Math.floor(Math.random() * config.stock_urgency_threshold) + 1)} en stock !`
+                        }
                       </span>
                     </div>
                   )}
@@ -417,7 +553,7 @@ export default function FomoAdminPage() {
                   {config.order_count_enabled && (
                     <div className="flex items-center gap-2 text-[11px] text-[#a0a09a]">
                       <Users className="w-3.5 h-3.5 text-[#c9a84c]" />
-                      <span>Ce produit a été commandé <span className="text-[#c9a84c] font-semibold">{previewOrders}</span> fois ce mois-ci</span>
+                      <span>Ce produit a été commandé <span className="text-[#c9a84c] font-semibold">{config.order_count_use_real ? 'N (réel)' : previewOrders}</span> fois ce mois-ci</span>
                     </div>
                   )}
 
@@ -436,17 +572,14 @@ export default function FomoAdminPage() {
                   )}
 
                   {/* Preview: Trust badges */}
-                  {config.trust_badges_enabled && (
+                  {config.trust_badges_enabled && config.trust_badges_items.length > 0 && (
                     <div className="grid grid-cols-2 gap-2 pt-2 border-t border-white/[0.06]">
-                      {[
-                        { icon: <Award className="w-4 h-4" />, label: 'Authenticité certifiée' },
-                        { icon: <Shield className="w-4 h-4" />, label: 'Garantie 3 ans' },
-                        { icon: <Truck className="w-4 h-4" />, label: 'Livraison assurée' },
-                        { icon: <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}><path strokeLinecap="round" strokeLinejoin="round" d="M17 9V7a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2m2 4h10a2 2 0 002-2v-6a2 2 0 00-2-2H9a2 2 0 00-2 2v6a2 2 0 002 2zm7-5a2 2 0 11-4 0 2 2 0 014 0z" /></svg>, label: 'Paiement à la livraison' },
-                      ].map((badge, i) => (
+                      {config.trust_badges_items.map((badge, i) => (
                         <div key={i} className="flex items-center gap-2 py-1.5">
-                          <span className="text-[#c9a84c]">{badge.icon}</span>
-                          <span className="text-[9px] tracking-[0.5px] uppercase text-[#a0a09a] font-medium">{badge.label}</span>
+                          <span className="text-[#c9a84c]">
+                            <BadgePreviewIcon icon={badge.icon} />
+                          </span>
+                          <span className="text-[9px] tracking-[0.5px] uppercase text-[#a0a09a] font-medium">{badge.label || '...'}</span>
                         </div>
                       ))}
                     </div>

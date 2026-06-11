@@ -12,12 +12,20 @@ const DEFAULT_FOMO_CONFIG = {
   viewers_counter_max: 28,
   stock_urgency_enabled: true,
   stock_urgency_threshold: 5,
+  stock_urgency_use_real: true,
   order_count_enabled: true,
   order_count_min: 12,
   order_count_max: 87,
+  order_count_use_real: true,
   delivery_estimate_enabled: true,
   delivery_estimate_days: 2,
   trust_badges_enabled: true,
+  trust_badges_items: [
+    { icon: 'award', label: 'Authenticité certifiée' },
+    { icon: 'shield', label: 'Garantie 3 ans' },
+    { icon: 'truck', label: 'Livraison assurée' },
+    { icon: 'package', label: 'Paiement à la livraison' },
+  ],
   updated_at: new Date().toISOString(),
 }
 
@@ -81,7 +89,9 @@ export async function PATCH(request: Request) {
       'recent_purchases_enabled',
       'viewers_counter_enabled',
       'stock_urgency_enabled',
+      'stock_urgency_use_real',
       'order_count_enabled',
+      'order_count_use_real',
       'delivery_estimate_enabled',
       'trust_badges_enabled',
     ]
@@ -99,6 +109,7 @@ export async function PATCH(request: Request) {
     const arrayFields = [
       'recent_purchases_names',
       'recent_purchases_wilayas',
+      'trust_badges_items',
     ]
 
     for (const field of booleanFields) {

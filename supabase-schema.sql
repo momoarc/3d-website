@@ -626,3 +626,13 @@ CREATE POLICY "Admin manage fomo" ON fomo_config FOR UPDATE TO authenticated USI
 -- CREATE POLICY "Editors upload images" ON storage.objects FOR INSERT TO authenticated WITH check (bucket_id = 'images' AND has_write_role());
 -- CREATE POLICY "Editors delete images" ON storage.objects FOR DELETE TO authenticated USING (bucket_id = 'images' AND has_write_role());
 -- CREATE POLICY "Editors update images" ON storage.objects FOR UPDATE TO authenticated USING (bucket_id = 'images' AND has_write_role());
+
+-- Add images column for multi-image gallery support
+ALTER TABLE products ADD COLUMN IF NOT EXISTS images JSONB DEFAULT '[]';
+
+-- Add real data support to FOMO config
+ALTER TABLE fomo_config ADD COLUMN IF NOT EXISTS stock_urgency_use_real BOOLEAN DEFAULT true;
+ALTER TABLE fomo_config ADD COLUMN IF NOT EXISTS order_count_use_real BOOLEAN DEFAULT true;
+
+-- Add customizable trust badges to FOMO config
+ALTER TABLE fomo_config ADD COLUMN IF NOT EXISTS trust_badges_items JSONB DEFAULT '[{"icon":"award","label":"Authenticité certifiée"},{"icon":"shield","label":"Garantie 3 ans"},{"icon":"truck","label":"Livraison assurée"},{"icon":"package","label":"Paiement à la livraison"}]';

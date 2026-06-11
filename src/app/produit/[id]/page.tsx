@@ -22,6 +22,9 @@ import {
   MessageCircle,
   Heart,
   Package,
+  Globe,
+  Lock,
+  RefreshCw,
 } from 'lucide-react'
 import Navbar from '@/components/public/Navbar'
 import ProductCard from '@/components/public/ProductCard'
@@ -38,12 +41,30 @@ interface FomoConfig {
   viewers_counter_max: number
   stock_urgency_enabled: boolean
   stock_urgency_threshold: number
+  stock_urgency_use_real: boolean
   order_count_enabled: boolean
   order_count_min: number
   order_count_max: number
+  order_count_use_real: boolean
   delivery_estimate_enabled: boolean
   delivery_estimate_days: number
   trust_badges_enabled: boolean
+  trust_badges_items: Array<{ icon: string; label: string }>
+}
+
+const BADGE_ICON_MAP: Record<string, React.ComponentType<{ className?: string }>> = {
+  award: Award,
+  shield: Shield,
+  truck: Truck,
+  package: Package,
+  clock: Clock,
+  heart: Heart,
+  star: Star,
+  gem: () => <svg className="w-full h-full" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}><path strokeLinecap="round" strokeLinejoin="round" d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z" /></svg>,
+  check: CheckCircle2,
+  globe: Globe,
+  lock: Lock,
+  refresh: RefreshCw,
 }
 
 const DEFAULT_FOMO: FomoConfig = {
@@ -56,12 +77,20 @@ const DEFAULT_FOMO: FomoConfig = {
   viewers_counter_max: 28,
   stock_urgency_enabled: true,
   stock_urgency_threshold: 5,
+  stock_urgency_use_real: true,
   order_count_enabled: true,
   order_count_min: 12,
   order_count_max: 87,
+  order_count_use_real: true,
   delivery_estimate_enabled: true,
   delivery_estimate_days: 2,
   trust_badges_enabled: true,
+  trust_badges_items: [
+    { icon: 'award', label: 'Authenticité certifiée' },
+    { icon: 'shield', label: 'Garantie 3 ans' },
+    { icon: 'truck', label: 'Livraison assurée' },
+    { icon: 'package', label: 'Paiement à la livraison' },
+  ],
 }
 
 // ─── FOMO Recent Purchase Toast ────────────────────────────────────────────
@@ -202,6 +231,7 @@ export default function ProductDetailPage({ params }: { params: Promise<{ id: st
   const [zoomPos, setZoomPos] = useState({ x: 50, y: 50 })
   const [copied, setCopied] = useState(false)
   const [wishlist, setWishlist] = useState(false)
+  const [selectedImageIndex, setSelectedImageIndex] = useState(0)
 
   // Fetch product by ID or slug
   useEffect(() => {
@@ -275,10 +305,28 @@ export default function ProductDetailPage({ params }: { params: Promise<{ id: st
   // FOMO: Order count
   useEffect(() => {
     if (!fomo.order_count_enabled) return
-    const min = fomo.order_count_min
-    const max = fomo.order_count_max
-    setOrderCount(Math.floor(Math.random() * (max - min + 1)) + min)
-  }, [fomo.order_count_enabled, fomo.order_count_min, fomo.order_count_max])
+    if (fomo.order_count_use_real) {
+      // Fetch real order count for this product
+      if (!id) return
+      fetch(`/api/orders?count=true&product_id=${id}`)
+        .then(r => r.json())
+        .then(data => {
+          if (data && typeof data.count === 'number') {
+            setOrderCount(data.count)
+          }
+        })
+        .catch(() => {
+          // Fallback to random if API fails
+          const min = fomo.order_count_min
+          const max = fomo.order_count_max
+          setOrderCount(Math.floor(Math.random() * (max - min + 1)) + min)
+        })
+    } else {
+      const min = fomo.order_count_min
+      const max = fomo.order_count_max
+      setOrderCount(Math.floor(Math.random() * (max - min + 1)) + min)
+    }
+  }, [fomo.order_count_enabled, fomo.order_count_use_real, fomo.order_count_min, fomo.order_count_max, id])
 
   // Format price
   const formatPrice = useCallback((price: number) => {
@@ -382,10 +430,20 @@ export default function ProductDetailPage({ params }: { params: Promise<{ id: st
   }
 
   const isUnavailable = product.available === false
-  // Use real stock if available, otherwise generate a FOMO number
-  const stockLeft = product.stock && product.stock > 0
-    ? Math.min(product.stock, fomo.stock_urgency_threshold)
-    : Math.floor(Math.random() * 4) + 2
+  // Use real stock if stock_urgency_use_real is true and product has stock
+  const stockLeft = fomo.stock_urgency_use_real && product.stock && product.stock > 0
+    ? product.stock
+    : (product.stock && product.stock > 0
+      ? Math.min(product.stock, fomo.stock_urgency_threshold)
+      : Math.floor(Math.random() * 4) + 2)
+
+  // Build images array from product data
+  const allImages = product.images?.length
+    ? product.images
+    : (product.image_url ? [product.image_url] : ['/images/watches/automatique-acier.jpg'])
+
+  // Reset selectedImageIndex if it's out of bounds (e.g. after product change)
+  const safeImageIndex = selectedImageIndex < allImages.length ? selectedImageIndex : 0
 
   // ─── JSON-LD Schema ──────────────────────────────────────────────────────
   const jsonLd = {
@@ -393,7 +451,7 @@ export default function ProductDetailPage({ params }: { params: Promise<{ id: st
     '@type': 'Product',
     name: product.name,
     description: product.description || '',
-    image: product.image_url || '',
+    image: allImages,
     offers: {
       '@type': 'Offer',
       price: product.price,
@@ -435,51 +493,83 @@ export default function ProductDetailPage({ params }: { params: Promise<{ id: st
             </nav>
 
             <div className="grid grid-cols-1 lg:grid-cols-2 gap-10 lg:gap-16">
-              {/* Left: Image */}
-              <div
-                className="relative aspect-square rounded-[12px] overflow-hidden bg-[#111113] border border-white/[0.06] cursor-zoom-in"
-                onMouseEnter={() => setZoomed(true)}
-                onMouseLeave={() => setZoomed(false)}
-                onMouseMove={handleImageMouseMove}
-              >
-                <img
-                  src={product.image_url || '/images/watches/automatique-acier.jpg'}
-                  alt={product.name}
-                  className={`w-full h-full object-cover transition-transform duration-300 ${
-                    zoomed ? 'scale-[2]' : 'scale-100'
-                  }`}
-                  style={zoomed ? { transformOrigin: `${zoomPos.x}% ${zoomPos.y}%` } : undefined}
-                />
-                {/* Badge overlay */}
-                {product.badge && (
-                  <div className="absolute top-4 left-4 z-10">
-                    <span className="inline-block px-3 py-1.5 rounded-full text-[10px] font-semibold tracking-[1.5px] uppercase bg-[#c9a84c]/15 text-[#c9a84c] border border-[#c9a84c]/30 backdrop-blur-sm">
-                      {product.badge}
-                    </span>
-                  </div>
-                )}
-                {product.gender && product.gender !== 'Mixte' && (
-                  <div className="absolute top-4 right-4 z-10">
-                    <span className="inline-block px-3 py-1.5 rounded-full text-[10px] font-semibold tracking-[1px] uppercase bg-white/10 text-[#a0a09a] border border-white/10 backdrop-blur-sm">
-                      {product.gender}
-                    </span>
-                  </div>
-                )}
-                {isUnavailable && (
-                  <div className="absolute inset-0 bg-black/60 flex items-center justify-center backdrop-blur-[2px] z-20">
-                    <span className="px-6 py-3 rounded-lg bg-[#f87171]/15 border border-[#f87171]/30 text-[#f87171] text-[13px] font-bold tracking-[2px] uppercase">
-                      Rupture de stock
-                    </span>
-                  </div>
-                )}
-                {/* Wishlist button */}
-                <button
-                  onClick={() => setWishlist(!wishlist)}
-                  className="absolute bottom-4 right-4 z-10 w-10 h-10 rounded-full bg-black/50 backdrop-blur-sm border border-white/10 flex items-center justify-center hover:bg-black/70 transition-colors"
-                  aria-label="Ajouter aux favoris"
+              {/* Left: Image Gallery */}
+              <div className="space-y-3">
+                {/* Main Image */}
+                <div
+                  className="relative aspect-square rounded-[12px] overflow-hidden bg-[#111113] border border-white/[0.06] cursor-zoom-in"
+                  onMouseEnter={() => setZoomed(true)}
+                  onMouseLeave={() => setZoomed(false)}
+                  onMouseMove={handleImageMouseMove}
                 >
-                  <Heart className={`w-5 h-5 transition-colors ${wishlist ? 'text-red-400 fill-red-400' : 'text-white/70'}`} />
-                </button>
+                  <img
+                    src={allImages[safeImageIndex]}
+                    alt={`${product.name} - Image ${safeImageIndex + 1}`}
+                    className={`w-full h-full object-cover transition-transform duration-300 ${
+                      zoomed ? 'scale-[2]' : 'scale-100'
+                    }`}
+                    style={zoomed ? { transformOrigin: `${zoomPos.x}% ${zoomPos.y}%` } : undefined}
+                  />
+                  {/* Badge overlay */}
+                  {product.badge && (
+                    <div className="absolute top-4 left-4 z-10">
+                      <span className="inline-block px-3 py-1.5 rounded-full text-[10px] font-semibold tracking-[1.5px] uppercase bg-[#c9a84c]/15 text-[#c9a84c] border border-[#c9a84c]/30 backdrop-blur-sm">
+                        {product.badge}
+                      </span>
+                    </div>
+                  )}
+                  {product.gender && product.gender !== 'Mixte' && (
+                    <div className="absolute top-4 right-4 z-10">
+                      <span className="inline-block px-3 py-1.5 rounded-full text-[10px] font-semibold tracking-[1px] uppercase bg-white/10 text-[#a0a09a] border border-white/10 backdrop-blur-sm">
+                        {product.gender}
+                      </span>
+                    </div>
+                  )}
+                  {isUnavailable && (
+                    <div className="absolute inset-0 bg-black/60 flex items-center justify-center backdrop-blur-[2px] z-20">
+                      <span className="px-6 py-3 rounded-lg bg-[#f87171]/15 border border-[#f87171]/30 text-[#f87171] text-[13px] font-bold tracking-[2px] uppercase">
+                        Rupture de stock
+                      </span>
+                    </div>
+                  )}
+                  {/* Wishlist button */}
+                  <button
+                    onClick={() => setWishlist(!wishlist)}
+                    className="absolute bottom-4 right-4 z-10 w-10 h-10 rounded-full bg-black/50 backdrop-blur-sm border border-white/10 flex items-center justify-center hover:bg-black/70 transition-colors"
+                    aria-label="Ajouter aux favoris"
+                  >
+                    <Heart className={`w-5 h-5 transition-colors ${wishlist ? 'text-red-400 fill-red-400' : 'text-white/70'}`} />
+                  </button>
+                </div>
+
+                {/* Thumbnail Strip */}
+                {allImages.length > 1 && (
+                  <div className="flex lg:flex-col gap-2 overflow-x-auto lg:overflow-x-visible lg:max-h-[460px] lg:overflow-y-auto pb-2 lg:pb-0 scrollbar-thin">
+                    {allImages.map((img, index) => (
+                      <button
+                        key={`${img}-${index}`}
+                        onClick={() => setSelectedImageIndex(index)}
+                        className={`relative flex-shrink-0 w-16 h-16 lg:w-20 lg:h-20 rounded-lg overflow-hidden border-2 transition-all duration-200 ${
+                          safeImageIndex === index
+                            ? 'border-[#c9a84c] shadow-[0_0_12px_rgba(201,168,76,0.25)]'
+                            : 'border-white/[0.06] hover:border-white/[0.15]'
+                        }`}
+                        aria-label={`Voir image ${index + 1}`}
+                      >
+                        <img
+                          src={img}
+                          alt={`${product.name} vignette ${index + 1}`}
+                          className="w-full h-full object-cover"
+                        />
+                        {index === 0 && (
+                          <span className="absolute bottom-0 left-0 right-0 px-1 py-0.5 bg-[#c9a84c] text-[#0a0800] text-[7px] font-bold tracking-[0.5px] uppercase text-center">
+                            Principale
+                          </span>
+                        )}
+                      </button>
+                    ))}
+                  </div>
+                )}
               </div>
 
               {/* Right: Info */}
@@ -735,21 +825,19 @@ export default function ProductDetailPage({ params }: { params: Promise<{ id: st
         )}
 
         {/* ─── Trust Badges ──────────────────────────────────────────────────── */}
-        {fomo.trust_badges_enabled && (
+        {fomo.trust_badges_enabled && fomo.trust_badges_items && fomo.trust_badges_items.length > 0 && (
           <section className="py-8 border-t border-white/[0.08] bg-[#0a0a0c]">
             <div className="max-w-[1200px] mx-auto px-6">
               <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-                {[
-                  { icon: <Award className="w-6 h-6" />, label: 'Authenticité certifiée' },
-                  { icon: <Shield className="w-6 h-6" />, label: 'Garantie 3 ans' },
-                  { icon: <Truck className="w-6 h-6" />, label: 'Livraison assurée' },
-                  { icon: <Package className="w-6 h-6" />, label: 'Paiement à la livraison' },
-                ].map((badge, i) => (
-                  <div key={i} className="flex items-center gap-3 justify-center py-4">
-                    <span className="text-[#c9a84c]">{badge.icon}</span>
-                    <span className="text-[11px] tracking-[1px] uppercase text-[#a0a09a] font-medium">{badge.label}</span>
-                  </div>
-                ))}
+                {fomo.trust_badges_items.map((badge, i) => {
+                  const IconComponent = BADGE_ICON_MAP[badge.icon] || Award
+                  return (
+                    <div key={i} className="flex items-center gap-3 justify-center py-4">
+                      <span className="text-[#c9a84c]"><IconComponent className="w-6 h-6" /></span>
+                      <span className="text-[11px] tracking-[1px] uppercase text-[#a0a09a] font-medium">{badge.label}</span>
+                    </div>
+                  )
+                })}
               </div>
             </div>
           </section>

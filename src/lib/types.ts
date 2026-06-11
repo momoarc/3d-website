@@ -12,6 +12,7 @@ export interface Product {
   price: number
   compare_price?: number
   image_url: string | null
+  images?: string[]
   badge: string | null
   description: string | null
   specs: string[]
