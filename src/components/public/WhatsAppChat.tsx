@@ -211,7 +211,7 @@ export default function WhatsAppChat({ open, onClose, whatsappNumber }: WhatsApp
     if (action === 'catalogue') {
       setTimeout(() => { window.location.href = '/catalogue' }, 800)
     } else if (action === 'commander') {
-      setTimeout(() => { window.location.href = '/commander' }, 800)
+      setTimeout(() => { window.location.href = '/catalogue' }, 800)
     }
   }, [config, sendToN8n])
 

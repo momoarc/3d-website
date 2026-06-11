@@ -154,18 +154,24 @@ export default function ProductCard({ product, onOrder }: ProductCardProps) {
           </button>
         </div>
 
-        {/* Secondary: Commander link */}
-        {onOrder && !isUnavailable && (
-          <button
+        {/* Commander button — goes directly to order form */}
+        {!isUnavailable && (
+          <a
+            href={`/commander?product_id=${product.id}`}
             onClick={(e) => {
               e.stopPropagation()
-              onOrder(product.id)
+              e.preventDefault()
+              if (onOrder) {
+                onOrder(product.id)
+              } else {
+                window.location.href = `/commander?product_id=${product.id}`
+              }
             }}
-            className="mt-3 flex items-center gap-1.5 text-[10px] tracking-[1.5px] uppercase text-[#606060] hover:text-[#c9a84c] transition-colors"
+            className="mt-3 w-full flex items-center justify-center gap-1.5 py-2.5 rounded-lg text-[10px] tracking-[1.5px] uppercase font-bold bg-[#c9a84c] text-[#0a0800] hover:bg-[#e4c06a] shadow-[0_2px_12px_rgba(201,168,76,0.25)] transition-all no-underline"
           >
+            Commander
             <ArrowRight className="w-3 h-3" />
-            Commander directement
-          </button>
+          </a>
         )}
       </div>
     </Link>  )

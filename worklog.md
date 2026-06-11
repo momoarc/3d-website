@@ -160,3 +160,33 @@ Stage Summary:
 - /checkout/page.tsx — converted from 4-step to single-page
 - /produit/[id]/page.tsx — "Commander" is now primary CTA, "Ajouter au panier" is secondary
 - Build passes successfully
+---
+Task ID: 1
+Agent: main
+Task: Fix 3 issues: admin delivery page, Commander button redirect, and filter auto-expand
+
+Work Log:
+- Fixed catalogue page filters: changed `filtersOpen` default from `true` to `false` so filters are collapsed by default
+- Fixed Commander button across all pages to always include product_id when redirecting to order form
+- Updated ProductCard component to have a prominent "Commander" button that links directly to `/commander?product_id=X`
+- Fixed catalogue page `onOrder` callback to pass `productId` parameter
+- Fixed home page `onOrder` callback to pass `productId` parameter
+- Changed all generic `/commander` links (without product_id) to redirect to `/catalogue` instead, including:
+  - Home page "Commander (COD)" button → /catalogue
+  - Home page "Passer Commande Maintenant" → /catalogue
+  - Home page footer "Commander" → /catalogue
+  - Navbar "Commander" → /catalogue
+  - Navbar mobile "Commander Maintenant" → /catalogue
+  - WhatsAppChat commander action → /catalogue
+- Updated commander page to auto-redirect to /catalogue if no product_id is provided
+- Enhanced admin delivery page with better migration SQL handling
+- Added SQL migration code display with copy button when delivery_config table doesn't exist
+- Updated delivery API to detect missing table (42P01 error) and provide helpful error messages
+- Updated catalogue CTA section from /commander to WhatsApp link
+
+Stage Summary:
+- Filters now collapsed by default on catalogue page
+- Commander button from product cards now goes directly to order form with product pre-filled
+- Generic "Commander" links without product context go to catalogue
+- Admin delivery page more robust with SQL migration display when table missing
+- Build successful with no errors

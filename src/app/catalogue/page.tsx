@@ -54,7 +54,7 @@ function CatalogueContent() {
   const [sortBy, setSortBy] = useState<SortOption>('pertinence')
   const [genderFilter, setGenderFilter] = useState<GenderFilter>('Tous')
   const [inStockOnly, setInStockOnly] = useState(false)
-  const [filtersOpen, setFiltersOpen] = useState(true)
+  const [filtersOpen, setFiltersOpen] = useState(false)
 
   useEffect(() => {
     const fetchData = async () => {
@@ -476,8 +476,8 @@ function CatalogueContent() {
                   >
                     <ProductCard
                       product={product}
-                      onOrder={() => {
-                        window.location.href = '/commander'
+                      onOrder={(productId) => {
+                        window.location.href = `/commander?product_id=${productId}`
                       }}
                     />
                   </div>
@@ -505,12 +505,14 @@ function CatalogueContent() {
               Contactez-nous et nous vous aiderons à trouver la montre idéale pour vous.
             </p>
             <div className="flex flex-wrap justify-center gap-3">
-              <Link
-                href="/commander"
+              <a
+                href="https://wa.me/213XXXXXXXXX"
+                target="_blank"
+                rel="noopener noreferrer"
                 className="bg-[#c9a84c] text-[#0a0800] px-8 py-3.5 rounded text-[12px] font-bold tracking-[2px] uppercase shadow-[0_4px_24px_rgba(201,168,76,0.3)] hover:bg-[#e4c06a] transition-all duration-200"
               >
-                Commander
-              </Link>
+                Commander via WhatsApp
+              </a>
               <a
                 href="tel:+213XXXXXXXXX"
                 className="border border-white/[0.18] text-[#f5f5f0] px-8 py-3.5 rounded text-[12px] font-semibold tracking-[2px] uppercase hover:border-[#c9a84c] hover:text-[#c9a84c] transition-all duration-200"

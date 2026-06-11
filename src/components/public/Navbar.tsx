@@ -92,7 +92,7 @@ export default function Navbar() {
             </button>
 
             <Link
-              href="/commander"
+              href="/catalogue"
               className="hidden sm:inline-flex bg-[#c9a84c] text-[#0a0800] px-5 py-2.5 rounded text-[11px] font-bold tracking-[2px] uppercase hover:bg-[#e4c06a] hover:-translate-y-px transition-all duration-200 shadow-[0_4px_24px_rgba(201,168,76,0.3)]"
             >
               Commander
@@ -131,7 +131,7 @@ export default function Navbar() {
           </Link>
         ))}
         <Link
-          href="/commander"
+          href="/catalogue"
           className="mt-3 py-4 bg-[#c9a84c] text-[#0a0800] text-center text-[13px] font-bold tracking-[2px] uppercase rounded hover:bg-[#e4c06a] transition-colors"
           onClick={() => setMobileOpen(false)}
         >

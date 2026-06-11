@@ -7,7 +7,7 @@ import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import { Switch } from '@/components/ui/switch'
 import { RoleGuard } from '@/components/admin/RoleGuard'
-import { Save, Loader2, Plus, Trash2, Truck, RotateCcw, Settings, X, AlertTriangle, Database } from 'lucide-react'
+import { Save, Loader2, Plus, Trash2, Truck, RotateCcw, Settings, X, AlertTriangle, Database, Copy, CheckCircle2 } from 'lucide-react'
 import { WILAYAS } from '@/lib/algeria-data'
 
 interface DeliveryZone {
@@ -129,6 +129,37 @@ const DEFAULT_CONFIG: DeliveryConfig = {
   },
 }
 
+// SQL for creating the delivery_config table
+const MIGRATION_SQL = `-- Create delivery_config table
+CREATE TABLE IF NOT EXISTS delivery_config (
+  id INTEGER PRIMARY KEY DEFAULT 1,
+  services JSONB NOT NULL DEFAULT '{}',
+  global_settings JSONB NOT NULL DEFAULT '{}',
+  updated_at TIMESTAMPTZ DEFAULT NOW()
+);
+
+-- Enable RLS
+ALTER TABLE delivery_config ENABLE ROW LEVEL SECURITY;
+
+-- Allow public read
+DO $$ BEGIN
+  IF NOT EXISTS (SELECT 1 FROM pg_policies WHERE tablename = 'delivery_config' AND policyname = 'allow_public_read_delivery') THEN
+    CREATE POLICY allow_public_read_delivery ON delivery_config FOR SELECT USING (true);
+  END IF;
+END $$;
+
+-- Allow admin write
+DO $$ BEGIN
+  IF NOT EXISTS (SELECT 1 FROM pg_policies WHERE tablename = 'delivery_config' AND policyname = 'allow_admin_write_delivery') THEN
+    CREATE POLICY allow_admin_write_delivery ON delivery_config FOR ALL USING (true) WITH CHECK (true);
+  END IF;
+END $$;
+
+-- Insert default config
+INSERT INTO delivery_config (id, services, global_settings)
+VALUES (1, '${JSON.stringify(DEFAULT_CONFIG.services)}'::jsonb, '${JSON.stringify(DEFAULT_CONFIG.global_settings)}'::jsonb)
+ON CONFLICT (id) DO NOTHING;`
+
 // Algeria zone grouping for bulk pricing
 const ZONE_GROUPS: Record<string, { label: string; wilayaCodes: number[] }> = {
   zone1: { label: 'Zone 1 — Alger & environs', wilayaCodes: [16, 9, 35, 42, 44] },
@@ -149,6 +180,8 @@ export default function DeliveryAdminPage() {
   const [dbReady, setDbReady] = useState(true)
   const [setupLoading, setSetupLoading] = useState(false)
   const [setupError, setSetupError] = useState('')
+  const [showMigration, setShowMigration] = useState(false)
+  const [copied, setCopied] = useState(false)
 
   useEffect(() => {
     fetch('/api/delivery')
@@ -192,14 +225,27 @@ export default function DeliveryAdminPage() {
           )
           setConfig(hasPricing ? configData : DEFAULT_CONFIG)
         }
+      } else if (data.needsMigration) {
+        setDbReady(false)
+        setShowMigration(true)
+        setSetupError('La table doit être créée manuellement. Copiez le SQL ci-dessous et exécutez-le dans le Supabase SQL Editor.')
       } else {
+        setDbReady(false)
+        setShowMigration(true)
         setSetupError(data.error || 'Impossible de créer la configuration. Exécutez le script SQL de migration.')
       }
     } catch {
       setSetupError('Erreur de connexion. Veuillez réessayer.')
+      setDbReady(false)
     } finally {
       setSetupLoading(false)
     }
+  }
+
+  const handleCopySQL = () => {
+    navigator.clipboard.writeText(MIGRATION_SQL)
+    setCopied(true)
+    setTimeout(() => setCopied(false), 2000)
   }
 
   const handleSave = async () => {
@@ -216,9 +262,10 @@ export default function DeliveryAdminPage() {
         setTimeout(() => setSaved(false), 2000)
       } else {
         const data = await res.json()
-        if (data.error?.includes('does not exist') || data.error?.includes('42P01')) {
+        if (data.needsMigration || data.error?.includes('does not exist') || data.error?.includes('42P01')) {
           setDbReady(false)
-          setSetupError('La table delivery_config n\'existe pas. Exécutez le script SQL de migration.')
+          setShowMigration(true)
+          setSetupError('La table delivery_config n\'existe pas. Copiez le SQL ci-dessous et exécutez-le dans le Supabase SQL Editor.')
         } else {
           alert('Erreur: ' + (data.error || 'Sauvegarde échouée'))
         }
@@ -394,12 +441,12 @@ export default function DeliveryAdminPage() {
                 <div className="font-semibold text-[#f5f5f0] text-sm mb-1">Configuration requise</div>
                 <p className="text-[13px] text-[#a0a09a] mb-3">
                   La table <code className="text-[#c9a84c] bg-[#c9a84c]/10 px-1.5 py-0.5 rounded text-[11px]">delivery_config</code> n&apos;existe pas encore dans la base de données.
-                  Vous pouvez tenter une configuration automatique ou exécuter le script SQL manuellement.
+                  Vous pouvez tenter une configuration automatique ou copier le script SQL et l&apos;exécuter manuellement dans le Supabase SQL Editor.
                 </p>
                 {setupError && (
                   <p className="text-[12px] text-[#f87171] mb-2">{setupError}</p>
                 )}
-                <div className="flex gap-2">
+                <div className="flex gap-2 flex-wrap">
                   <Button
                     onClick={handleSetup}
                     disabled={setupLoading}
@@ -418,7 +465,40 @@ export default function DeliveryAdminPage() {
                       </>
                     )}
                   </Button>
+                  <Button
+                    onClick={() => setShowMigration(!showMigration)}
+                    variant="outline"
+                    size="sm"
+                    className="border-[#f59e0b]/30 text-[#f59e0b] hover:bg-[#f59e0b]/10 h-8"
+                  >
+                    {showMigration ? 'Masquer SQL' : 'Voir le script SQL'}
+                  </Button>
                 </div>
+
+                {showMigration && (
+                  <div className="mt-3 relative">
+                    <pre className="bg-[#08080a] border border-white/[0.08] rounded-lg p-4 text-[11px] text-[#a0a09a] overflow-x-auto max-h-[300px] overflow-y-auto whitespace-pre-wrap">
+                      {MIGRATION_SQL}
+                    </pre>
+                    <Button
+                      onClick={handleCopySQL}
+                      size="sm"
+                      className="absolute top-2 right-2 h-7 bg-[#111113] border border-white/[0.08] text-[#a0a09a] hover:text-[#f5f5f0] text-[10px]"
+                    >
+                      {copied ? (
+                        <>
+                          <CheckCircle2 className="w-3 h-3 mr-1 text-[#4ade80]" />
+                          Copié
+                        </>
+                      ) : (
+                        <>
+                          <Copy className="w-3 h-3 mr-1" />
+                          Copier
+                        </>
+                      )}
+                    </Button>
+                  </div>
+                )}
               </div>
             </div>
           </div>

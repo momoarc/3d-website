@@ -2,7 +2,7 @@
 
 import { Suspense, useEffect, useState, useCallback } from 'react'
 import Link from 'next/link'
-import { useSearchParams } from 'next/navigation'
+import { useSearchParams, useRouter } from 'next/navigation'
 import {
   ArrowLeft, Phone, Shield, Truck, CheckCircle2, AlertCircle,
   Minus, Plus, MapPin, Mail, User, Package, Clock
@@ -369,15 +369,22 @@ function CommanderPageContent() {
     )
   }
 
-  // ─── No Product ───────────────────────────────────────────────
+  // ─── No Product — redirect to catalogue ───────────────────────
   if (!loading && !product) {
+    // If no product_id was provided, redirect to catalogue
+    if (!productId) {
+      if (typeof window !== 'undefined') {
+        window.location.href = '/catalogue'
+        return null
+      }
+    }
     return (
       <div className="min-h-screen flex flex-col bg-[#08080a]">
         <Navbar />
         <main className="pt-[72px] flex-1 flex items-center justify-center">
           <div className="text-center space-y-4">
-            <h2 className="font-serif text-2xl text-[#f5f5f0]">Aucun produit sélectionné</h2>
-            <p className="text-[#a0a09a]">Veuillez sélectionner un produit depuis le catalogue.</p>
+            <h2 className="font-serif text-2xl text-[#f5f5f0]">Produit introuvable</h2>
+            <p className="text-[#a0a09a]">Ce produit n&apos;existe pas ou a été retiré.</p>
             <Link
               href="/catalogue"
               className="inline-flex items-center gap-2 bg-[#c9a84c] text-[#0a0800] px-6 py-3 rounded text-[11px] font-bold tracking-[2px] uppercase hover:bg-[#e4c06a] transition-all"

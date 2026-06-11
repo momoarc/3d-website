@@ -160,7 +160,7 @@ export default function HomePage() {
         <div className="absolute bottom-0 left-0 right-0 z-20 p-5 md:p-7 flex items-center justify-between bg-gradient-to-t from-[#08070a]/90 to-transparent pointer-events-none">
           <div className="flex items-center gap-3 pointer-events-auto">
             <Link
-              href="/commander"
+              href="/catalogue"
               className="bg-[#c9a84c] text-[#0a0800] px-6 py-3.5 rounded text-[11px] font-bold tracking-[2.5px] uppercase shadow-[0_4px_28px_rgba(201,168,76,0.35)] hover:bg-[#e4c06a] hover:-translate-y-px transition-all duration-200"
             >
               Commander (COD)
@@ -285,8 +285,8 @@ export default function HomePage() {
               <ProductCard
                 key={product.id}
                 product={product}
-                onOrder={() => {
-                  window.location.href = '/commander'
+                onOrder={(productId) => {
+                  window.location.href = `/commander?product_id=${productId}`
                 }}
               />
             ))}
@@ -473,7 +473,7 @@ export default function HomePage() {
             </div>
             <div className="flex flex-col gap-3 items-start lg:items-end">
               <Link
-                href="/commander"
+                href="/catalogue"
                 className="bg-[#c9a84c] text-[#0a0800] px-8 py-4 rounded text-[13px] font-bold tracking-[2px] uppercase shadow-[0_4px_24px_rgba(201,168,76,0.3)] hover:bg-[#e4c06a] hover:-translate-y-px transition-all duration-200"
               >
                 Passer Commande Maintenant
@@ -578,7 +578,7 @@ export default function HomePage() {
                 <Link href="/#faq" className="text-[13px] text-[#a0a09a] hover:text-[#f5f5f0] transition-colors">
                   FAQ
                 </Link>
-                <Link href="/commander" className="text-[13px] text-[#a0a09a] hover:text-[#f5f5f0] transition-colors">
+                <Link href="/catalogue" className="text-[13px] text-[#a0a09a] hover:text-[#f5f5f0] transition-colors">
                   Commander
                 </Link>
               </div>

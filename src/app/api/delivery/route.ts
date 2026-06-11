@@ -95,6 +95,47 @@ const DEFAULT_DELIVERY_CONFIG = {
   updated_at: new Date().toISOString(),
 }
 
+// SQL to create delivery_config table if it doesn't exist
+const CREATE_TABLE_SQL = `
+CREATE TABLE IF NOT EXISTS delivery_config (
+  id INTEGER PRIMARY KEY DEFAULT 1,
+  services JSONB NOT NULL DEFAULT '{}',
+  global_settings JSONB NOT NULL DEFAULT '{}',
+  updated_at TIMESTAMPTZ DEFAULT NOW()
+);
+
+-- Enable RLS
+ALTER TABLE delivery_config ENABLE ROW LEVEL SECURITY;
+
+-- Allow public read access
+DO $$ BEGIN
+  IF NOT EXISTS (
+    SELECT 1 FROM pg_policies WHERE tablename = 'delivery_config' AND policyname = 'allow_public_read'
+  ) THEN
+    CREATE POLICY allow_public_read ON delivery_config FOR SELECT USING (true);
+  END IF;
+END $$;
+
+-- Allow admin write access
+DO $$ BEGIN
+  IF NOT EXISTS (
+    SELECT 1 FROM pg_policies WHERE tablename = 'delivery_config' AND policyname = 'allow_admin_write'
+  ) THEN
+    CREATE POLICY allow_admin_write ON delivery_config FOR ALL USING (
+      EXISTS (
+        SELECT 1 FROM auth.users WHERE auth.uid() = id
+        AND (
+          raw_user_meta_data->>'role' IN ('super_admin', 'admin')
+          OR EXISTS (
+            SELECT 1 FROM user_roles WHERE user_id = auth.uid() AND role IN ('super_admin', 'admin')
+          )
+        )
+      )
+    );
+  END IF;
+END $$;
+`
+
 // GET /api/delivery — public, returns delivery config
 export async function GET() {
   try {
@@ -119,7 +160,7 @@ export async function GET() {
   }
 }
 
-// POST /api/delivery — auto-setup: creates default config row if missing
+// POST /api/delivery — auto-setup: creates table + default config row
 export async function POST() {
   try {
     const { createClient } = await import('@/lib/supabase/server')
@@ -129,6 +170,13 @@ export async function POST() {
     const { data: { user } } = await supabase.auth.getUser()
     if (!user) {
       return NextResponse.json({ error: 'Non autorisé' }, { status: 401 })
+    }
+
+    // Try to create table if it doesn't exist
+    try {
+      await supabase.rpc('exec_sql', { sql: CREATE_TABLE_SQL })
+    } catch {
+      // exec_sql might not exist, try alternative: just attempt the insert directly
     }
 
     // Check if config exists
@@ -154,6 +202,14 @@ export async function POST() {
       .single()
 
     if (error) {
+      // If table doesn't exist, try creating it with raw SQL
+      if (error.code === '42P01') {
+        return NextResponse.json({
+          error: 'La table delivery_config n\'existe pas. Veuillez exécuter le script SQL de migration dans le Supabase SQL Editor.',
+          needsMigration: true,
+          sql: CREATE_TABLE_SQL,
+        }, { status: 500 })
+      }
       return NextResponse.json({ error: error.message }, { status: 500 })
     }
 
@@ -208,6 +264,14 @@ export async function PATCH(request: Request) {
       .single()
 
     if (error) {
+      // If table doesn't exist, return helpful error
+      if (error.code === '42P01') {
+        return NextResponse.json({
+          error: 'La table delivery_config n\'existe pas. Veuillez exécuter le script SQL de migration.',
+          needsMigration: true,
+        }, { status: 500 })
+      }
+
       // If row doesn't exist, try insert (upsert)
       if (error.code === 'PGRST116' || error.message?.includes('0 rows')) {
         const { data: insertData, error: insertError } = await supabase
@@ -217,6 +281,12 @@ export async function PATCH(request: Request) {
           .single()
 
         if (insertError) {
+          if (insertError.code === '42P01') {
+            return NextResponse.json({
+              error: 'La table delivery_config n\'existe pas. Veuillez exécuter le script SQL de migration.',
+              needsMigration: true,
+            }, { status: 500 })
+          }
           return NextResponse.json({ error: insertError.message }, { status: 500 })
         }
 
