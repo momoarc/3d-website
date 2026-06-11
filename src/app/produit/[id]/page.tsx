@@ -382,7 +382,10 @@ export default function ProductDetailPage({ params }: { params: Promise<{ id: st
   }
 
   const isUnavailable = product.available === false
-  const stockLeft = Math.floor(Math.random() * 4) + 2
+  // Use real stock if available, otherwise generate a FOMO number
+  const stockLeft = product.stock && product.stock > 0
+    ? Math.min(product.stock, fomo.stock_urgency_threshold)
+    : Math.floor(Math.random() * 4) + 2
 
   // ─── JSON-LD Schema ──────────────────────────────────────────────────────
   const jsonLd = {
@@ -507,6 +510,11 @@ export default function ProductDetailPage({ params }: { params: Promise<{ id: st
                     {formatPrice(product.price)}
                   </span>
                   <span className="text-sm text-[#606060] font-normal">DA</span>
+                  {product.compare_price && product.compare_price > product.price && (
+                    <span className="text-lg text-[#606060] line-through ml-1">
+                      {formatPrice(product.compare_price)} DA
+                    </span>
+                  )}
                 </div>
 
                 {/* Badge */}

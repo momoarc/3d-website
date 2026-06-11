@@ -1,6 +1,6 @@
 'use client'
 
-import { useEffect, useState } from 'react'
+import { useEffect, useState, useRef } from 'react'
 import { useRouter, useSearchParams } from 'next/navigation'
 import { createClient } from '@/lib/supabase/client'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
@@ -15,8 +15,8 @@ import { ArrowLeft, Plus, X, Save, Loader2, Eye } from 'lucide-react'
 import type { Product, ProductAttribute } from '@/lib/types'
 
 // ─── Attribute Values Input ─────────────────────────────────────────────────
-// Replaces TagInput — a simple textarea where you type comma-separated values
-// and they get parsed into individual options on the product page.
+// A tag-based input where you type values and press Enter/comma to add them.
+// Each value becomes a selectable option on the product page.
 function AttributeValuesInput({
   values,
   onChange,
@@ -24,65 +24,104 @@ function AttributeValuesInput({
   values: string[]
   onChange: (values: string[]) => void
 }) {
-  // Display current values as comma-separated text in the textarea
-  const [text, setText] = useState(values.join(', '))
+  const [inputValue, setInputValue] = useState('')
+  const inputRef = useRef<HTMLInputElement>(null)
 
-  // Sync from external changes (e.g. loading a product)
-  useEffect(() => {
-    setText(values.join(', '))
-  }, [values])
-
-  // Parse the textarea content into values array
-  const parseValues = (input: string) => {
-    const parsed = input
-      .split(/[,;\n]/)
-      .map(v => v.trim())
-      .filter(Boolean)
-    onChange(parsed)
+  // Add a value to the list
+  const addValue = (val: string) => {
+    const trimmed = val.trim()
+    if (trimmed && !values.includes(trimmed)) {
+      onChange([...values, trimmed])
+    }
+    setInputValue('')
   }
 
-  const handleChange = (e: React.ChangeEvent<HTMLTextAreaElement>) => {
-    const val = e.target.value
-    setText(val)
-    parseValues(val)
+  // Remove a value from the list
+  const removeValue = (index: number) => {
+    onChange(values.filter((_, i) => i !== index))
   }
 
-  // Also parse on blur to catch any remaining text
+  // Handle keyboard input
+  const handleKeyDown = (e: React.KeyboardEvent<HTMLInputElement>) => {
+    if (e.key === 'Enter' || e.key === ',') {
+      e.preventDefault()
+      if (inputValue.trim()) {
+        addValue(inputValue)
+      }
+    } else if (e.key === 'Backspace' && !inputValue && values.length > 0) {
+      removeValue(values.length - 1)
+    }
+  }
+
+  // On blur, add any remaining text as a value
   const handleBlur = () => {
-    parseValues(text)
-    // Re-format the text to be clean
-    const parsed = text
+    if (inputValue.trim()) {
+      addValue(inputValue)
+    }
+  }
+
+  // On paste, split by commas/semicolons/newlines and add all
+  const handlePaste = (e: React.ClipboardEvent<HTMLInputElement>) => {
+    e.preventDefault()
+    const pasted = e.clipboardData.getData('text')
+    const newVals = pasted
       .split(/[,;\n]/)
       .map(v => v.trim())
       .filter(Boolean)
-    setText(parsed.join(', '))
+
+    if (newVals.length > 0) {
+      const combined = [...values]
+      newVals.forEach(v => {
+        if (!combined.includes(v)) {
+          combined.push(v)
+        }
+      })
+      onChange(combined)
+      setInputValue('')
+    }
   }
 
   return (
     <div className="space-y-2">
-      <Textarea
-        value={text}
-        onChange={handleChange}
-        onBlur={handleBlur}
-        placeholder="Séparez les valeurs par des virgules. Ex: 38mm, 42mm, 46mm"
-        rows={2}
-        className="bg-[#111113] border-white/[0.08] text-[#f5f5f0] placeholder:text-[#606060] text-sm resize-none"
-      />
-      {/* Preview of parsed values as tags */}
-      {values.length > 0 && (
-        <div className="flex flex-wrap gap-1.5 pt-1">
-          <span className="text-[10px] text-[#606060] uppercase tracking-wider mr-1 self-center">
-            Aperçu :
-          </span>
-          {values.map((val, i) => (
-            <span
-              key={`${val}-${i}`}
-              className="inline-flex items-center gap-1 px-2 py-0.5 rounded text-[11px] font-medium bg-[#c9a84c]/15 text-[#c9a84c] border border-[#c9a84c]/30"
+      <div
+        className="flex flex-wrap items-center gap-1.5 min-h-[42px] px-3 py-2 bg-[#08080a] border border-white/[0.08] rounded-md focus-within:border-[#c9a84c]/40 transition-colors cursor-text"
+        onClick={() => inputRef.current?.focus()}
+      >
+        {values.map((val, i) => (
+          <span
+            key={`${val}-${i}`}
+            className="inline-flex items-center gap-1 px-2.5 py-1 rounded text-[11px] font-medium bg-[#c9a84c]/15 text-[#c9a84c] border border-[#c9a84c]/30 animate-in fade-in duration-150"
+          >
+            {val}
+            <button
+              type="button"
+              onClick={(e) => {
+                e.stopPropagation()
+                removeValue(i)
+              }}
+              className="ml-0.5 hover:bg-[#c9a84c]/25 rounded-full p-0.5 transition-colors"
+              aria-label={`Supprimer ${val}`}
             >
-              {val}
-            </span>
-          ))}
-        </div>
+              <X className="w-3 h-3" />
+            </button>
+          </span>
+        ))}
+        <input
+          ref={inputRef}
+          type="text"
+          value={inputValue}
+          onChange={(e) => setInputValue(e.target.value)}
+          onKeyDown={handleKeyDown}
+          onBlur={handleBlur}
+          onPaste={handlePaste}
+          placeholder={values.length === 0 ? 'Tapez une valeur puis Entrée ou virgule. Ex: 38mm, 42mm, 46mm' : 'Ajouter...'}
+          className="flex-1 min-w-[100px] bg-transparent text-[#f5f5f0] text-[12px] outline-none placeholder:text-[#606060]"
+        />
+      </div>
+      {values.length > 0 && (
+        <p className="text-[10px] text-[#606060]">
+          <span className="text-[#c9a84c] font-semibold">{values.length}</span> valeur{values.length > 1 ? 's' : ''} — ces options seront sélectionnables sur la page produit
+        </p>
       )}
     </div>
   )
@@ -141,13 +180,16 @@ export default function NewProductPage() {
         setName(p.name)
         setCategory(p.category)
         setPrice(p.price.toString())
+        setComparePrice(p.compare_price?.toString() || '')
         setBadge(p.badge || '')
         setDescription(p.description || '')
         setSpecs(p.specs?.join('\n') || '')
         setImageUrl(p.image_url || '')
         setAvailable(p.available)
         setGender(p.gender || 'Mixte')
+        setStock(p.stock?.toString() || '')
         setAttributes(p.attributes || [])
+        setSlug(p.slug || '')
         setSlugManuallySet(true)
       }
     } catch {
@@ -215,12 +257,14 @@ export default function NewProductPage() {
         name,
         category,
         price: parseInt(price),
+        compare_price: comparePrice ? parseInt(comparePrice) : null,
         badge: badge || null,
         description: description || null,
         specs: specs.split('\n').filter(s => s.trim()),
         image_url: imageUrl || null,
         available,
         gender,
+        stock: stock ? parseInt(stock) : null,
         attributes: cleanAttributes,
         updated_at: new Date().toISOString(),
       }
@@ -492,6 +536,18 @@ export default function NewProductPage() {
                 />
               </div>
               <div className="space-y-2">
+                <Label className="text-[#a0a09a] text-sm">Stock (quantité)</Label>
+                <Input
+                  type="number"
+                  value={stock}
+                  onChange={(e) => setStock(e.target.value)}
+                  placeholder="Laissez vide pour stock illimité"
+                  className="bg-[#08080a] border-white/[0.08] text-[#f5f5f0] placeholder:text-[#606060]"
+                  min={0}
+                />
+                <p className="text-[10px] text-[#606060]">Utilisé pour l&apos;affichage FOMO &quot;Plus que X en stock&quot;</p>
+              </div>
+              <div className="space-y-2">
                 <Label className="text-[#a0a09a] text-sm">Genre</Label>
                 <div className="flex gap-2">
                   {['Homme', 'Femme', 'Mixte'].map((g) => (
@@ -528,7 +584,7 @@ export default function NewProductPage() {
                 <Button
                   variant="outline"
                   size="sm"
-                  onClick={() => window.open(`/produit/${editId}`, '_blank')}
+                  onClick={() => window.open(`/produit/${slug || editId}`, '_blank')}
                   className="w-full border-[#c9a84c]/30 text-[#c9a84c] hover:bg-[#c9a84c]/10 hover:text-[#e4c06a]"
                 >
                   <Eye className="h-4 w-4 mr-2" />
