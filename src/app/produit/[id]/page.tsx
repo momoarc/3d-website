@@ -736,7 +736,7 @@ export default function ProductDetailPage({ params }: { params: Promise<{ id: st
                   </button>
 
                   <Link
-                    href="/checkout"
+                    href={`/commander?product_id=${product.id}`}
                     className={`w-full py-3.5 rounded text-[11px] font-semibold tracking-[2px] uppercase text-center transition-all duration-200 border ${
                       isUnavailable
                         ? 'border-white/[0.06] text-[#606060] pointer-events-none'
