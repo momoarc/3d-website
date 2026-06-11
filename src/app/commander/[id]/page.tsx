@@ -1,8 +1,7 @@
 'use client'
 
-import { Suspense, useEffect, useState, useCallback } from 'react'
+import { useEffect, useState, useCallback, use } from 'react'
 import Link from 'next/link'
-import { useSearchParams, useRouter } from 'next/navigation'
 import {
   ArrowLeft, Phone, Shield, Truck, CheckCircle2, AlertCircle,
   Minus, Plus, MapPin, Mail, User, Package, Clock
@@ -83,35 +82,8 @@ const DEFAULT_DELIVERY_CONFIG: DeliveryConfig = {
   },
 }
 
-export default function CommanderPage() {
-  return (
-    <Suspense fallback={
-      <div className="min-h-screen flex flex-col bg-[#08080a]">
-        <Navbar />
-        <main className="pt-[72px] flex-1 flex items-center justify-center">
-          <div className="flex flex-col items-center gap-4">
-            <div className="h-10 w-10 animate-spin rounded-full border-2 border-[#c9a84c] border-t-transparent" />
-            <p className="text-[#a0a09a] text-sm">Chargement...</p>
-          </div>
-        </main>
-      </div>
-    }>
-      <CommanderPageContent />
-    </Suspense>
-  )
-}
-
-function CommanderPageContent() {
-  const searchParams = useSearchParams()
-  const productId = searchParams.get('product_id')
-  const router = useRouter()
-
-  // Redirect to the new dynamic route /commander/[id]
-  useEffect(() => {
-    if (productId) {
-      router.replace(`/commander/${productId}`)
-    }
-  }, [productId, router])
+export default function CommanderPage({ params }: { params: Promise<{ id: string }> }) {
+  const { id } = use(params)
 
   const [product, setProduct] = useState<ProductInfo | null>(null)
   const [loading, setLoading] = useState(true)
@@ -136,11 +108,7 @@ function CommanderPageContent() {
 
   // Fetch product
   useEffect(() => {
-    if (!productId) {
-      setLoading(false)
-      return
-    }
-    fetch(`/api/products/${productId}`)
+    fetch(`/api/products/${id}`)
       .then(r => r.json())
       .then(data => {
         if (data && !data.error) {
@@ -158,7 +126,7 @@ function CommanderPageContent() {
       })
       .catch(() => {})
       .finally(() => setLoading(false))
-  }, [productId])
+  }, [id])
 
   // Fetch delivery config
   useEffect(() => {
@@ -166,14 +134,12 @@ function CommanderPageContent() {
       .then(r => r.json())
       .then(data => {
         if (data && data.services) {
-          // Check if services have actual pricing data
           const hasPricing = Object.values(data.services as Record<string, DeliveryService>).some(
             s => s.enabled && Object.values(s.zones).some(z => Object.keys(z.wilayas).length > 0)
           )
           if (hasPricing) {
             setDeliveryConfig(data as DeliveryConfig)
           }
-          // Find default enabled service
           const enabled = Object.entries(data.services as Record<string, DeliveryService>).find(([, s]) => s.enabled)
           if (enabled) {
             setSelectedService(enabled[0])
@@ -228,15 +194,13 @@ function CommanderPageContent() {
       return
     }
 
-    // Zone-based pricing - find price for selected wilaya
+    // Zone-based pricing
     const wilayaCode = form.wilaya
     let price = 0
 
-    // Check selected zone first
     if (selectedZone && service.zones[selectedZone]?.wilayas[wilayaCode] !== undefined) {
       price = service.zones[selectedZone].wilayas[wilayaCode]
     } else {
-      // Search all zones
       for (const zone of Object.values(service.zones)) {
         if (zone.wilayas[wilayaCode] !== undefined) {
           price = zone.wilayas[wilayaCode]
@@ -256,14 +220,11 @@ function CommanderPageContent() {
   const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
     const { name, value } = e.target
     setForm(prev => ({ ...prev, [name]: value }))
-    // Clear error for this field
     if (errors[name]) {
       setErrors(prev => { const next = { ...prev }; delete next[name]; return next })
     }
-    // Reset commune when wilaya changes
     if (name === 'wilaya') {
       setForm(prev => ({ ...prev, commune: '' }))
-      // Auto-select first available zone for this wilaya
       if (deliveryConfig.services[selectedService]?.pricing_type === 'zone') {
         const service = deliveryConfig.services[selectedService]
         for (const [zoneKey, zone] of Object.entries(service.zones)) {
@@ -279,11 +240,11 @@ function CommanderPageContent() {
   const validate = () => {
     const newErrors: Record<string, string> = {}
     if (!form.name.trim()) newErrors.name = 'Le nom est obligatoire'
-    if (!form.phone.trim()) newErrors.phone = 'Le téléphone est obligatoire'
-    else if (!/^0[5-7]\d{8}$/.test(form.phone.replace(/\s/g, ''))) newErrors.phone = 'Numéro invalide (ex: 05XXXXXXXX)'
+    if (!form.phone.trim()) newErrors.phone = 'Le telephone est obligatoire'
+    else if (!/^0[5-7]\d{8}$/.test(form.phone.replace(/\s/g, ''))) newErrors.phone = 'Numero invalide (ex: 05XXXXXXXX)'
     if (form.email && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(form.email)) newErrors.email = 'Email invalide'
-    if (!form.wilaya) newErrors.wilaya = 'Sélectionnez votre wilaya'
-    if (!form.commune && form.wilaya) newErrors.commune = 'Sélectionnez votre commune'
+    if (!form.wilaya) newErrors.wilaya = 'Selectionnez votre wilaya'
+    if (!form.commune && form.wilaya) newErrors.commune = 'Selectionnez votre commune'
     setErrors(newErrors)
     return Object.keys(newErrors).length === 0
   }
@@ -325,12 +286,12 @@ function CommanderPageContent() {
       const data = await res.json()
 
       if (res.ok && data.success) {
-        setResult({ success: true, message: data.message || 'Commande enregistrée avec succès !', orderId: data.id })
+        setResult({ success: true, message: data.message || 'Commande enregistree avec succes !', orderId: data.id })
       } else {
         setResult({ success: false, message: data.error || 'Erreur lors de la soumission.' })
       }
     } catch {
-      setResult({ success: false, message: 'Erreur de connexion. Veuillez réessayer.' })
+      setResult({ success: false, message: 'Erreur de connexion. Veuillez reessayer.' })
     } finally {
       setSubmitting(false)
     }
@@ -347,14 +308,14 @@ function CommanderPageContent() {
               <CheckCircle2 className="w-10 h-10 text-[#4ade80]" />
             </div>
             <div>
-              <h2 className="font-serif text-2xl text-[#f5f5f0] mb-2">Commande confirmée !</h2>
-              <p className="text-[#a0a09a]">Votre commande a été enregistrée avec succès.</p>
+              <h2 className="font-serif text-2xl text-[#f5f5f0] mb-2">Commande confirmee !</h2>
+              <p className="text-[#a0a09a]">Votre commande a ete enregistree avec succes.</p>
             </div>
             <div className="bg-[#111113] border border-white/[0.06] rounded-lg p-6">
-              <div className="text-[10px] tracking-[2px] uppercase text-[#c9a84c] font-semibold mb-2">Numéro de commande</div>
+              <div className="text-[10px] tracking-[2px] uppercase text-[#c9a84c] font-semibold mb-2">Numero de commande</div>
               <div className="text-xl font-semibold text-[#f5f5f0] mb-4">{result.orderId}</div>
               <p className="text-[13px] text-[#a0a09a]">
-                Notre équipe vous contactera sous 24h pour confirmer votre commande. Vous payez à la livraison, aucun paiement en ligne requis.
+                Notre equipe vous contactera sous 24h pour confirmer votre commande. Vous payez a la livraison, aucun paiement en ligne requis.
               </p>
             </div>
             <div className="flex flex-col sm:flex-row items-center justify-center gap-3">
@@ -362,7 +323,7 @@ function CommanderPageContent() {
                 href="/"
                 className="bg-[#c9a84c] text-[#0a0800] px-8 py-3.5 rounded text-[11px] font-bold tracking-[2px] uppercase hover:bg-[#e4c06a] transition-all shadow-[0_4px_24px_rgba(201,168,76,0.3)]"
               >
-                Retour à l&apos;accueil
+                Retour a l&apos;accueil
               </Link>
               <Link
                 href="/catalogue"
@@ -377,22 +338,15 @@ function CommanderPageContent() {
     )
   }
 
-  // ─── No Product — redirect to catalogue ───────────────────────
+  // ─── No Product ───────────────────────────────────────────────
   if (!loading && !product) {
-    // If no product_id was provided, redirect to catalogue
-    if (!productId) {
-      if (typeof window !== 'undefined') {
-        window.location.href = '/catalogue'
-        return null
-      }
-    }
     return (
       <div className="min-h-screen flex flex-col bg-[#08080a]">
         <Navbar />
         <main className="pt-[72px] flex-1 flex items-center justify-center">
           <div className="text-center space-y-4">
             <h2 className="font-serif text-2xl text-[#f5f5f0]">Produit introuvable</h2>
-            <p className="text-[#a0a09a]">Ce produit n&apos;existe pas ou a été retiré.</p>
+            <p className="text-[#a0a09a]">Ce produit n&apos;existe pas ou a ete retire.</p>
             <Link
               href="/catalogue"
               className="inline-flex items-center gap-2 bg-[#c9a84c] text-[#0a0800] px-6 py-3 rounded text-[11px] font-bold tracking-[2px] uppercase hover:bg-[#e4c06a] transition-all"
@@ -433,7 +387,7 @@ function CommanderPageContent() {
           <div className="max-w-[1000px] mx-auto px-4 sm:px-6 py-2.5 flex flex-wrap gap-4 sm:gap-6 justify-center">
             <div className="flex items-center gap-1.5">
               <Shield className="w-3.5 h-3.5 text-[#4ade80]" />
-              <span className="text-[10px] text-[#a0a09a]">Paiement à la livraison</span>
+              <span className="text-[10px] text-[#a0a09a]">Paiement a la livraison</span>
             </div>
             <div className="flex items-center gap-1.5">
               <Truck className="w-3.5 h-3.5 text-[#c9a84c]" />
@@ -441,7 +395,7 @@ function CommanderPageContent() {
             </div>
             <div className="flex items-center gap-1.5">
               <Phone className="w-3.5 h-3.5 text-[#c9a84c]" />
-              <span className="text-[10px] text-[#a0a09a]">Confirmation par téléphone</span>
+              <span className="text-[10px] text-[#a0a09a]">Confirmation par telephone</span>
             </div>
           </div>
         </div>
@@ -468,7 +422,7 @@ function CommanderPageContent() {
                 <div className="bg-[#111113] border border-white/[0.06] rounded-xl overflow-hidden">
                   <div className="px-5 py-3 border-b border-white/[0.06] flex items-center gap-2">
                     <Package className="w-4 h-4 text-[#c9a84c]" />
-                    <h3 className="text-[12px] font-semibold text-[#f5f5f0] uppercase tracking-[1.5px]">Produit sélectionné</h3>
+                    <h3 className="text-[12px] font-semibold text-[#f5f5f0] uppercase tracking-[1.5px]">Produit selectionne</h3>
                   </div>
 
                   {loading ? (
@@ -485,7 +439,7 @@ function CommanderPageContent() {
                           className="w-full h-full object-cover"
                         />
                       </div>
-                      {/* Product info — non modifiable */}
+                      {/* Product info */}
                       <div className="flex-1 min-w-0 flex flex-col justify-center">
                         <span className="text-[9px] tracking-[1.5px] uppercase text-[#c9a84c] font-semibold">{product.category}</span>
                         <h4 className="text-[15px] sm:text-[17px] font-medium text-[#f5f5f0] font-serif mt-0.5 leading-tight">{product.name}</h4>
@@ -498,7 +452,7 @@ function CommanderPageContent() {
                         </div>
                         {/* Quantity */}
                         <div className="flex items-center gap-3 mt-3">
-                          <span className="text-[10px] tracking-[1px] uppercase text-[#a0a09a] font-semibold">Quantité</span>
+                          <span className="text-[10px] tracking-[1px] uppercase text-[#a0a09a] font-semibold">Quantite</span>
                           <div className="flex items-center gap-0 bg-[#08080a] border border-white/[0.08] rounded-lg overflow-hidden">
                             <button
                               type="button"
@@ -553,7 +507,7 @@ function CommanderPageContent() {
                     {/* Phone */}
                     <div className="space-y-1.5">
                       <label className="text-[11px] tracking-[0.5px] uppercase text-[#a0a09a] font-medium">
-                        Numéro de téléphone <span className="text-[#c9a84c]">*</span>
+                        Numero de telephone <span className="text-[#c9a84c]">*</span>
                       </label>
                       <div className="relative">
                         <Phone className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-[#606060]" />
@@ -611,7 +565,7 @@ function CommanderPageContent() {
                         required
                         className={`w-full h-10 rounded-md border bg-[#08080a] px-3 py-2 text-[13px] text-[#f5f5f0] focus:outline-none focus:ring-1 focus:ring-[#c9a84c]/30 ${errors.wilaya ? 'border-[#f87171]' : 'border-white/[0.08] focus:border-[#c9a84c]'}`}
                       >
-                        <option value="" className="text-[#505050]">Sélectionner votre wilaya</option>
+                        <option value="" className="text-[#505050]">Selectionner votre wilaya</option>
                         {WILAYAS.map(w => (
                           <option key={w.code} value={w.code.toString()} className="bg-[#111113]">
                             {w.code} - {w.name}
@@ -635,7 +589,7 @@ function CommanderPageContent() {
                         className={`w-full h-10 rounded-md border bg-[#08080a] px-3 py-2 text-[13px] text-[#f5f5f0] focus:outline-none focus:ring-1 focus:ring-[#c9a84c]/30 disabled:opacity-40 disabled:cursor-not-allowed ${errors.commune ? 'border-[#f87171]' : 'border-white/[0.08] focus:border-[#c9a84c]'}`}
                       >
                         <option value="" className="text-[#505050]">
-                          {form.wilaya ? 'Sélectionner votre commune' : 'Sélectionnez d\'abord une wilaya'}
+                          {form.wilaya ? 'Selectionner votre commune' : 'Selectionnez d\'abord une wilaya'}
                         </option>
                         {availableCommunes.map(c => (
                           <option key={c} value={c} className="bg-[#111113]">{c}</option>
@@ -680,7 +634,6 @@ function CommanderPageContent() {
                         </label>
                         <div className="grid grid-cols-2 gap-2">
                           {enabledServices.map(([key, service]) => {
-                            // Find price for this service and wilaya
                             let servicePrice = 0
                             if (service.pricing_type === 'flat') {
                               servicePrice = service.flat_price
@@ -722,7 +675,7 @@ function CommanderPageContent() {
                       <div className="bg-[#f59e0b]/5 border border-[#f59e0b]/20 rounded-md p-3 flex items-start gap-2">
                         <AlertCircle className="w-4 h-4 text-[#f59e0b] flex-shrink-0 mt-0.5" />
                         <div className="text-[11px] text-[#a0a09a]">
-                          Les frais de livraison pour cette wilaya ne sont pas encore configurés. Notre équipe vous contactera pour confirmer le prix.
+                          Les frais de livraison pour cette wilaya ne sont pas encore configures. Notre equipe vous contactera pour confirmer le prix.
                         </div>
                       </div>
                     )}
@@ -730,21 +683,21 @@ function CommanderPageContent() {
                 </div>
               </div>
 
-              {/* ─── RIGHT: Récapitulatif (2/5) ──────────────────── */}
+              {/* ─── RIGHT: Recapitulatif (2/5) ──────────────────── */}
               <div className="lg:col-span-2">
                 <div className="sticky top-20 space-y-4">
-                  {/* Récapitulatif */}
+                  {/* Recapitulatif */}
                   <div className="bg-[#111113] border border-white/[0.06] rounded-xl overflow-hidden">
                     <div className="px-5 py-3 border-b border-white/[0.06] flex items-center gap-2">
                       <Clock className="w-4 h-4 text-[#c9a84c]" />
-                      <h3 className="text-[12px] font-semibold text-[#f5f5f0] uppercase tracking-[1.5px]">Récapitulatif</h3>
+                      <h3 className="text-[12px] font-semibold text-[#f5f5f0] uppercase tracking-[1.5px]">Recapitulatif</h3>
                     </div>
 
                     <div className="p-5 space-y-3">
                       {/* Sous-total */}
                       <div className="flex items-center justify-between text-[13px]">
                         <span className="text-[#a0a09a]">Sous-total ({quantity} article{quantity > 1 ? 's' : ''})</span>
-                        <span className="text-[#f5f5f0] font-medium">{product ? formatPrice(subtotal) : '—'} DA</span>
+                        <span className="text-[#f5f5f0] font-medium">{product ? formatPrice(subtotal) : '\u2014'} DA</span>
                       </div>
 
                       {/* Livraison */}
@@ -758,11 +711,11 @@ function CommanderPageContent() {
                         </span>
                         <span className={freeShipping ? 'text-[#4ade80] font-medium' : deliveryPrice > 0 ? 'text-[#f5f5f0] font-medium' : 'text-[#606060]'}>
                           {freeShipping
-                            ? 'Gratuite ✓'
+                            ? 'Gratuite \u2713'
                             : deliveryPrice > 0
                               ? `${formatPrice(deliveryPrice)} DA`
                               : form.wilaya
-                                ? 'À confirmer'
+                                ? 'A confirmer'
                                 : 'Selon wilaya'
                           }
                         </span>
@@ -772,23 +725,23 @@ function CommanderPageContent() {
                       {freeShipping && (
                         <div className="bg-[#4ade80]/5 border border-[#4ade80]/15 rounded-md px-3 py-2">
                           <p className="text-[10px] text-[#4ade80]">
-                            Livraison gratuite ! Votre commande dépasse {formatPrice(deliveryConfig?.global_settings.free_shipping_min_amount || 0)} DA
+                            Livraison gratuite ! Votre commande depasse {formatPrice(deliveryConfig?.global_settings.free_shipping_min_amount || 0)} DA
                           </p>
                         </div>
                       )}
 
                       {/* Total */}
                       <div className="border-t border-white/[0.06] pt-3 flex items-center justify-between">
-                        <span className="text-[#f5f5f0] font-semibold text-[15px]">Total à payer</span>
+                        <span className="text-[#f5f5f0] font-semibold text-[15px]">Total a payer</span>
                         <span className="text-xl font-bold text-[#c9a84c]">
-                          {product ? formatPrice(total) : '—'} <span className="text-[10px] text-[#606060] font-normal">DA</span>
+                          {product ? formatPrice(total) : '\u2014'} <span className="text-[10px] text-[#606060] font-normal">DA</span>
                         </span>
                       </div>
 
                       {/* Payment method */}
                       <div className="bg-[#4ade80]/5 border border-[#4ade80]/15 rounded-md px-3 py-2.5 flex items-center gap-2">
                         <Shield className="w-4 h-4 text-[#4ade80] flex-shrink-0" />
-                        <p className="text-[10px] text-[#4ade80] font-medium">Paiement à la livraison — Vous ne payez qu&apos;à la réception</p>
+                        <p className="text-[10px] text-[#4ade80] font-medium">Paiement a la livraison \u2014 Vous ne payez qu&apos;a la reception</p>
                       </div>
                     </div>
                   </div>
@@ -814,8 +767,8 @@ function CommanderPageContent() {
                   </button>
 
                   <p className="text-center text-[10px] text-[#505050] leading-relaxed">
-                    Vous serez contacté par téléphone pour confirmer votre commande.
-                    Aucun paiement en ligne — paiement à la livraison uniquement.
+                    Vous serez contacte par telephone pour confirmer votre commande.
+                    Aucun paiement en ligne \u2014 paiement a la livraison uniquement.
                   </p>
                 </div>
               </div>

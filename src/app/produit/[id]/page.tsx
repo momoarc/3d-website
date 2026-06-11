@@ -195,7 +195,7 @@ function StickyCartBar({ product, quantity, selectedAttributes, onAddToCart, add
           <p className="text-[#c9a84c] font-semibold">{formatPrice(product.price)} DA</p>
         </div>
         <a
-          href={`/commander?product_id=${product.id}`}
+          href={`/commander/${product.id}`}
           className={`px-5 py-3 rounded-lg text-[11px] font-bold tracking-[1.5px] uppercase transition-all flex items-center gap-2 no-underline ${
             isUnavailable
               ? 'bg-white/5 text-[#606060] cursor-not-allowed pointer-events-none'
@@ -704,7 +704,7 @@ export default function ProductDetailPage({ params }: { params: Promise<{ id: st
                 {/* Action buttons — Commander is PRIMARY */}
                 <div className="flex flex-col gap-3 mb-6">
                   <Link
-                    href={`/commander?product_id=${product.id}`}
+                    href={`/commander/${product.id}`}
                     className={`w-full py-4 rounded text-[12px] font-bold tracking-[2px] uppercase text-center transition-all duration-300 flex items-center justify-center gap-2 ${
                       isUnavailable
                         ? 'bg-white/5 text-[#606060] cursor-not-allowed pointer-events-none'

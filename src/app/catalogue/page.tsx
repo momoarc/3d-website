@@ -481,7 +481,7 @@ function CatalogueContent() {
                     <ProductCard
                       product={product}
                       onOrder={(productId) => {
-                        window.location.href = `/commander?product_id=${productId}`
+                        window.location.href = `/commander/${productId}`
                       }}
                     />
                   </div>

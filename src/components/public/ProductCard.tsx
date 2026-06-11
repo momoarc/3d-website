@@ -52,7 +52,7 @@ export default function ProductCard({ product, onOrder }: ProductCardProps) {
     e.preventDefault()
     e.stopPropagation()
     // Direct navigation to order form — bypass any parent link
-    window.location.href = `/commander?product_id=${product.id}`
+    window.location.href = `/commander/${product.id}`
   }
 
   const isUnavailable = product.available === false

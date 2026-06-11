@@ -286,7 +286,7 @@ export default function HomePage() {
                 key={product.id}
                 product={product}
                 onOrder={(productId) => {
-                  window.location.href = `/commander?product_id=${productId}`
+                  window.location.href = `/commander/${productId}`
                 }}
               />
             ))}
