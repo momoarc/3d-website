@@ -176,7 +176,7 @@ function SpecIcon({ spec }: { spec: string }) {
   return <CheckCircle2 className="w-5 h-5 text-[#c9a84c]" />
 }
 
-// ─── Sticky Add to Cart Bar (mobile) ───────────────────────────────────────
+// ─── Sticky Commander Bar (mobile) ─────────────────────────────────────────
 function StickyCartBar({ product, quantity, selectedAttributes, onAddToCart, addedToCart, isUnavailable }: {
   product: Product
   quantity: number
@@ -194,19 +194,16 @@ function StickyCartBar({ product, quantity, selectedAttributes, onAddToCart, add
           <p className="text-sm font-medium text-[#f5f5f0] truncate">{product.name}</p>
           <p className="text-[#c9a84c] font-semibold">{formatPrice(product.price)} DA</p>
         </div>
-        <button
-          onClick={onAddToCart}
-          disabled={isUnavailable}
-          className={`px-5 py-3 rounded-lg text-[11px] font-bold tracking-[1.5px] uppercase transition-all flex items-center gap-2 ${
+        <a
+          href={`/commander?product_id=${product.id}`}
+          className={`px-5 py-3 rounded-lg text-[11px] font-bold tracking-[1.5px] uppercase transition-all flex items-center gap-2 no-underline ${
             isUnavailable
-              ? 'bg-white/5 text-[#606060] cursor-not-allowed'
-              : addedToCart
-                ? 'bg-[#4ade80]/15 border border-[#4ade80]/30 text-[#4ade80]'
-                : 'bg-[#c9a84c] text-[#0a0800] shadow-[0_4px_20px_rgba(201,168,76,0.3)]'
+              ? 'bg-white/5 text-[#606060] cursor-not-allowed pointer-events-none'
+              : 'bg-[#c9a84c] text-[#0a0800] shadow-[0_4px_20px_rgba(201,168,76,0.3)]'
           }`}
         >
-          {isUnavailable ? 'Indisponible' : addedToCart ? 'Ajouté ✓' : 'Ajouter au panier'}
-        </button>
+          {isUnavailable ? 'Indisponible' : 'Commander'}
+        </a>
       </div>
     </div>
   )
@@ -704,25 +701,32 @@ export default function ProductDetailPage({ params }: { params: Promise<{ id: st
                   </div>
                 </div>
 
-                {/* Action buttons */}
+                {/* Action buttons — Commander is PRIMARY */}
                 <div className="flex flex-col gap-3 mb-6">
+                  <Link
+                    href={`/commander?product_id=${product.id}`}
+                    className={`w-full py-4 rounded text-[12px] font-bold tracking-[2px] uppercase text-center transition-all duration-300 flex items-center justify-center gap-2 ${
+                      isUnavailable
+                        ? 'bg-white/5 text-[#606060] cursor-not-allowed pointer-events-none'
+                        : 'bg-[#c9a84c] text-[#0a0800] hover:bg-[#e4c06a] shadow-[0_4px_24px_rgba(201,168,76,0.3)]'
+                    }`}
+                  >
+                    <ShoppingBag className="w-4 h-4" />
+                    {isUnavailable ? 'Indisponible' : 'Commander'}
+                  </Link>
+
                   <button
                     onClick={handleAddToCart}
                     disabled={isUnavailable}
-                    className={`w-full py-4 rounded text-[12px] font-bold tracking-[2px] uppercase transition-all duration-300 flex items-center justify-center gap-2 ${
+                    className={`w-full py-3.5 rounded text-[11px] font-semibold tracking-[2px] uppercase transition-all duration-200 border flex items-center justify-center gap-2 ${
                       isUnavailable
-                        ? 'bg-white/5 text-[#606060] cursor-not-allowed'
+                        ? 'border-white/[0.06] text-[#606060] cursor-not-allowed'
                         : addedToCart
-                          ? 'bg-[#4ade80]/15 border border-[#4ade80]/30 text-[#4ade80]'
-                          : 'bg-[#c9a84c] text-[#0a0800] hover:bg-[#e4c06a] shadow-[0_4px_24px_rgba(201,168,76,0.3)]'
+                          ? 'border-[#4ade80]/30 text-[#4ade80] bg-[#4ade80]/10'
+                          : 'border-white/[0.18] text-[#f5f5f0] hover:border-[#c9a84c] hover:text-[#c9a84c]'
                     }`}
                   >
-                    {isUnavailable ? (
-                      <>
-                        <ShoppingBag className="w-4 h-4" />
-                        Indisponible
-                      </>
-                    ) : addedToCart ? (
+                    {addedToCart ? (
                       <>
                         <CheckCircle2 className="w-4 h-4" />
                         Ajouté au panier
@@ -734,17 +738,6 @@ export default function ProductDetailPage({ params }: { params: Promise<{ id: st
                       </>
                     )}
                   </button>
-
-                  <Link
-                    href={`/commander?product_id=${product.id}`}
-                    className={`w-full py-3.5 rounded text-[11px] font-semibold tracking-[2px] uppercase text-center transition-all duration-200 border ${
-                      isUnavailable
-                        ? 'border-white/[0.06] text-[#606060] pointer-events-none'
-                        : 'border-white/[0.18] text-[#f5f5f0] hover:border-[#c9a84c] hover:text-[#c9a84c]'
-                    }`}
-                  >
-                    Commander directement
-                  </Link>
                 </div>
 
                 {/* FOMO: Delivery estimate */}

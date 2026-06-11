@@ -138,3 +138,25 @@ Stage Summary:
 - Order form calculates delivery price based on selected wilaya
 - Email, delivery service, and delivery price stored with orders
 - Migration SQL must be run in Supabase SQL Editor for DB changes
+
+---
+Task ID: 1
+Agent: main
+Task: Fix order form to be single-page and make Commander button primary
+
+Work Log:
+- Analyzed existing /commander page (already single-page) and /checkout page (multi-step with 4 steps)
+- User reported being redirected through 2 pages when ordering — this was the /checkout multi-step flow
+- Rewrote /commander/page.tsx with clean single-page layout containing ALL fields on one page
+- Rewrote /checkout/page.tsx to also be single-page instead of multi-step
+- Swapped visual hierarchy on product detail page: "Commander" is now the PRIMARY gold button, "Ajouter au panier" is secondary outline button
+- Updated sticky mobile bar to also show "Commander" button instead of "Ajouter au panier"
+- Added form validation (phone format, email, required fields)
+- Added delivery zone auto-selection when wilaya is selected
+- Both forms now show: product info + image, quantity, nom complet, téléphone, email, wilaya dropdown, commune dropdown, delivery type, prix livraison, total, commander button
+
+Stage Summary:
+- /commander/page.tsx — complete single-page order form
+- /checkout/page.tsx — converted from 4-step to single-page
+- /produit/[id]/page.tsx — "Commander" is now primary CTA, "Ajouter au panier" is secondary
+- Build passes successfully
