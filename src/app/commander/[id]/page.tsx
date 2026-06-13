@@ -9,30 +9,7 @@ import {
 import Navbar from '@/components/public/Navbar'
 import { Input } from '@/components/ui/input'
 import { WILAYAS, WILAYA_COMMUNES } from '@/lib/algeria-data'
-
-// Types
-interface DeliveryZone {
-  label: string
-  wilayas: Record<string, number>
-}
-
-interface DeliveryService {
-  name: string
-  enabled: boolean
-  pricing_type: 'zone' | 'flat'
-  flat_price: number
-  zones: Record<string, DeliveryZone>
-}
-
-interface DeliveryConfig {
-  services: Record<string, DeliveryService>
-  global_settings: {
-    free_shipping_enabled: boolean
-    free_shipping_min_amount: number
-    delivery_estimate_days: number
-    default_service: string
-  }
-}
+import { DEFAULT_DELIVERY_CONFIG, type DeliveryConfig, type DeliveryService } from '@/lib/delivery-config'
 
 interface ProductInfo {
   id: number
@@ -45,42 +22,7 @@ interface ProductInfo {
   stock?: number
 }
 
-const DEFAULT_DELIVERY_CONFIG: DeliveryConfig = {
-  services: {
-    yalidine: {
-      name: 'Yalidine',
-      enabled: true,
-      pricing_type: 'zone',
-      flat_price: 0,
-      zones: {
-        home: {
-          label: 'Domicile',
-          wilayas: {
-            '16': 400, '9': 400, '35': 400, '42': 400, '44': 400,
-            '2': 600, '6': 600, '15': 600, '18': 600, '21': 600, '23': 600, '24': 600, '25': 600, '27': 600, '31': 600, '34': 600, '36': 600, '43': 600, '46': 600, '48': 600,
-            '3': 700, '4': 700, '5': 700, '7': 700, '10': 700, '12': 700, '14': 700, '17': 700, '19': 700, '20': 700, '22': 700, '26': 700, '28': 700, '29': 700, '38': 700, '40': 700, '41': 700, '45': 700,
-            '1': 900, '8': 900, '11': 900, '13': 900, '30': 900, '32': 900, '33': 900, '37': 900, '39': 900, '47': 900, '49': 900, '50': 900, '51': 900, '52': 900, '53': 900, '54': 900, '55': 900, '56': 900, '57': 900, '58': 900,
-          },
-        },
-        stopdesk: {
-          label: 'Stop Desk',
-          wilayas: {
-            '16': 200, '9': 200, '35': 200, '42': 200, '44': 200,
-            '2': 300, '6': 300, '15': 300, '18': 300, '21': 300, '23': 300, '24': 300, '25': 300, '27': 300, '31': 300, '34': 300, '36': 300, '43': 300, '46': 300, '48': 300,
-            '3': 350, '4': 350, '5': 350, '7': 350, '10': 350, '12': 350, '14': 350, '17': 350, '19': 350, '20': 350, '22': 350, '26': 350, '28': 350, '29': 350, '38': 350, '40': 350, '41': 350, '45': 350,
-            '1': 450, '8': 450, '11': 450, '13': 450, '30': 450, '32': 450, '33': 450, '37': 450, '39': 450, '47': 450, '49': 450, '50': 450, '51': 450, '52': 450, '53': 450, '54': 450, '55': 450, '56': 450, '57': 450, '58': 450,
-          },
-        },
-      },
-    },
-  },
-  global_settings: {
-    free_shipping_enabled: false,
-    free_shipping_min_amount: 0,
-    delivery_estimate_days: 3,
-    default_service: 'yalidine',
-  },
-}
+
 
 export default function CommanderPage({ params }: { params: Promise<{ id: string }> }) {
   const { id } = use(params)

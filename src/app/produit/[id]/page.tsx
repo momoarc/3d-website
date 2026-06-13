@@ -17,8 +17,10 @@ import {
   Flame,
   CheckCircle2,
   Star,
+  ChevronLeft,
   ChevronRight,
   Copy,
+  X,
   MessageCircle,
   Heart,
   Package,
@@ -229,6 +231,31 @@ export default function ProductDetailPage({ params }: { params: Promise<{ id: st
   const [copied, setCopied] = useState(false)
   const [wishlist, setWishlist] = useState(false)
   const [selectedImageIndex, setSelectedImageIndex] = useState(0)
+  const [lightboxOpen, setLightboxOpen] = useState(false)
+
+  // Build images array from product data (needed early for lightbox keyboard nav)
+  const allImages = product?.images?.length
+    ? product.images
+    : (product?.image_url ? [product.image_url] : ['/images/watches/automatique-acier.jpg'])
+
+  // Reset selectedImageIndex if it's out of bounds (e.g. after product change)
+  const safeImageIndex = selectedImageIndex < allImages.length ? selectedImageIndex : 0
+
+  // Lightbox: keyboard navigation
+  useEffect(() => {
+    if (!lightboxOpen) return
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if (e.key === 'Escape') setLightboxOpen(false)
+      if (e.key === 'ArrowLeft') setSelectedImageIndex(prev => (prev - 1 + allImages.length) % allImages.length)
+      if (e.key === 'ArrowRight') setSelectedImageIndex(prev => (prev + 1) % allImages.length)
+    }
+    window.addEventListener('keydown', handleKeyDown)
+    document.body.style.overflow = 'hidden'
+    return () => {
+      window.removeEventListener('keydown', handleKeyDown)
+      document.body.style.overflow = ''
+    }
+  }, [lightboxOpen, product, allImages.length])
 
   // Fetch product by ID or slug
   useEffect(() => {
@@ -434,14 +461,6 @@ export default function ProductDetailPage({ params }: { params: Promise<{ id: st
       ? Math.min(product.stock, fomo.stock_urgency_threshold)
       : Math.floor(Math.random() * 4) + 2)
 
-  // Build images array from product data
-  const allImages = product.images?.length
-    ? product.images
-    : (product.image_url ? [product.image_url] : ['/images/watches/automatique-acier.jpg'])
-
-  // Reset selectedImageIndex if it's out of bounds (e.g. after product change)
-  const safeImageIndex = selectedImageIndex < allImages.length ? selectedImageIndex : 0
-
   // ─── JSON-LD Schema ──────────────────────────────────────────────────────
   const jsonLd = {
     '@context': 'https://schema.org',
@@ -494,9 +513,10 @@ export default function ProductDetailPage({ params }: { params: Promise<{ id: st
               <div className="space-y-3">
                 {/* Main Image */}
                 <div
-                  className="relative aspect-square rounded-[12px] overflow-hidden bg-[#111113] border border-white/[0.06] cursor-zoom-in"
+                  className="relative aspect-square rounded-[12px] overflow-hidden bg-[#111113] border border-white/[0.06] cursor-pointer"
                   onMouseEnter={() => setZoomed(true)}
                   onMouseLeave={() => setZoomed(false)}
+                  onClick={() => setLightboxOpen(true)}
                   onMouseMove={handleImageMouseMove}
                 >
                   <img
@@ -918,6 +938,88 @@ export default function ProductDetailPage({ params }: { params: Promise<{ id: st
           addedToCart={addedToCart}
           isUnavailable={isUnavailable}
         />
+      )}
+
+      {/* ─── Image Lightbox ──────────────────────────────────────────────── */}
+      {lightboxOpen && (
+        <div
+          className="fixed inset-0 z-[9999] bg-black/95 backdrop-blur-xl flex items-center justify-center"
+          onClick={() => setLightboxOpen(false)}
+        >
+          {/* Close button */}
+          <button
+            onClick={() => setLightboxOpen(false)}
+            className="absolute top-4 right-4 z-10 w-12 h-12 rounded-full bg-white/10 hover:bg-white/20 flex items-center justify-center transition-colors"
+            aria-label="Fermer"
+          >
+            <X className="w-6 h-6 text-[#f5f5f0]" />
+          </button>
+
+          {/* Image counter */}
+          <div className="absolute top-6 left-1/2 -translate-x-1/2 text-[13px] text-[#a0a09a] font-medium tracking-[1px]">
+            {safeImageIndex + 1} / {allImages.length}
+          </div>
+
+          {/* Left arrow */}
+          {allImages.length > 1 && (
+            <button
+              onClick={(e) => {
+                e.stopPropagation()
+                setSelectedImageIndex(prev => (prev - 1 + allImages.length) % allImages.length)
+              }}
+              className="absolute left-4 z-10 w-12 h-12 rounded-full bg-white/10 hover:bg-white/20 flex items-center justify-center transition-colors group"
+              aria-label="Image précédente"
+            >
+              <ChevronLeft className="w-6 h-6 text-[#a0a09a] group-hover:text-[#c9a84c] transition-colors" />
+            </button>
+          )}
+
+          {/* Main image */}
+          <img
+            src={allImages[safeImageIndex]}
+            alt={`${product.name} - Image ${safeImageIndex + 1}`}
+            className="max-w-[90vw] max-h-[85vh] object-contain rounded-lg select-none"
+            onClick={(e) => e.stopPropagation()}
+            draggable={false}
+          />
+
+          {/* Right arrow */}
+          {allImages.length > 1 && (
+            <button
+              onClick={(e) => {
+                e.stopPropagation()
+                setSelectedImageIndex(prev => (prev + 1) % allImages.length)
+              }}
+              className="absolute right-4 z-10 w-12 h-12 rounded-full bg-white/10 hover:bg-white/20 flex items-center justify-center transition-colors group"
+              aria-label="Image suivante"
+            >
+              <ChevronRight className="w-6 h-6 text-[#a0a09a] group-hover:text-[#c9a84c] transition-colors" />
+            </button>
+          )}
+
+          {/* Thumbnail strip in lightbox */}
+          {allImages.length > 1 && (
+            <div className="absolute bottom-6 left-1/2 -translate-x-1/2 flex items-center gap-2">
+              {allImages.map((img, index) => (
+                <button
+                  key={`lb-${img}-${index}`}
+                  onClick={(e) => {
+                    e.stopPropagation()
+                    setSelectedImageIndex(index)
+                  }}
+                  className={`w-12 h-12 rounded-md overflow-hidden border-2 transition-all duration-200 flex-shrink-0 ${
+                    safeImageIndex === index
+                      ? 'border-[#c9a84c] shadow-[0_0_8px_rgba(201,168,76,0.3)]'
+                      : 'border-white/10 hover:border-white/30 opacity-60 hover:opacity-100'
+                  }`}
+                  aria-label={`Voir image ${index + 1}`}
+                >
+                  <img src={img} alt={`${product.name} vignette ${index + 1}`} className="w-full h-full object-cover" />
+                </button>
+              ))}
+            </div>
+          )}
+        </div>
       )}
 
       {/* Footer */}
