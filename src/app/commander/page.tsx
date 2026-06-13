@@ -1,11 +1,11 @@
 'use client'
 
-import { Suspense, useEffect, useState, useCallback } from 'react'
+import { Suspense, useEffect, useState, useCallback, useRef } from 'react'
 import Link from 'next/link'
 import { useSearchParams, useRouter } from 'next/navigation'
 import {
   ArrowLeft, Phone, Shield, Truck, CheckCircle2, AlertCircle,
-  Minus, Plus, MapPin, Mail, User, Package, Clock
+  Minus, Plus, MapPin, Mail, User, Package, Clock, Search, X
 } from 'lucide-react'
 import Navbar from '@/components/public/Navbar'
 import { Input } from '@/components/ui/input'
@@ -21,10 +21,21 @@ interface ProductInfo {
   images?: string[]
   category: string
   stock?: number
+  available?: boolean
 }
 
+interface ProductListItem {
+  id: number
+  name: string
+  price: number
+  compare_price?: number
+  image_url: string | null
+  category: string
+  available?: boolean
+  slug?: string
+}
 
-
+// ─── Main Export ─────────────────────────────────────────────────────────
 export default function CommanderPage() {
   return (
     <Suspense fallback={
@@ -43,26 +54,31 @@ export default function CommanderPage() {
   )
 }
 
+// ─── Page Content ────────────────────────────────────────────────────────
 function CommanderPageContent() {
   const searchParams = useSearchParams()
   const productId = searchParams.get('product_id')
   const router = useRouter()
 
-  // Redirect to the new dynamic route /commander/[id]
-  useEffect(() => {
-    if (productId) {
-      router.replace(`/commander/${productId}`)
-    }
-  }, [productId, router])
-
+  // Product state
   const [product, setProduct] = useState<ProductInfo | null>(null)
+  const [products, setProducts] = useState<ProductListItem[]>([])
   const [loading, setLoading] = useState(true)
+  const [productsLoading, setProductsLoading] = useState(true)
   const [quantity, setQuantity] = useState(1)
+  const [searchQuery, setSearchQuery] = useState('')
+  const [searchOpen, setSearchOpen] = useState(false)
+  const [selectedCategory, setSelectedCategory] = useState<string>('all')
+  const searchRef = useRef<HTMLDivElement>(null)
+
+  // Delivery state
   const [deliveryConfig, setDeliveryConfig] = useState<DeliveryConfig>(DEFAULT_DELIVERY_CONFIG)
   const [selectedService, setSelectedService] = useState<string>('yalidine')
   const [selectedZone, setSelectedZone] = useState<string>('home')
   const [deliveryPrice, setDeliveryPrice] = useState(0)
   const [freeShipping, setFreeShipping] = useState(false)
+
+  // Form state
   const [submitting, setSubmitting] = useState(false)
   const [result, setResult] = useState<{ success: boolean; message: string; orderId?: string } | null>(null)
 
@@ -76,46 +92,50 @@ function CommanderPageContent() {
 
   const [errors, setErrors] = useState<Record<string, string>>({})
 
-  // Fetch product
+  // ─── If product_id in URL, redirect to /commander/[id] ──────────────
   useEffect(() => {
-    if (!productId) {
-      setLoading(false)
-      return
+    if (productId) {
+      router.replace(`/commander/${productId}`)
     }
-    fetch(`/api/products/${productId}`)
+  }, [productId, router])
+
+  // ─── Fetch product list for selection ───────────────────────────────
+  useEffect(() => {
+    fetch('/api/products')
       .then(r => r.json())
       .then(data => {
-        if (data && !data.error) {
-          setProduct({
-            id: data.id,
-            name: data.name,
-            price: data.price,
-            compare_price: data.compare_price,
-            image_url: data.image_url,
-            images: data.images,
-            category: data.category,
-            stock: data.stock,
-          })
+        if (Array.isArray(data)) {
+          const available = data.filter((p: Record<string, unknown>) => p.available !== false)
+          setProducts(available as ProductListItem[])
         }
       })
       .catch(() => {})
-      .finally(() => setLoading(false))
-  }, [productId])
+      .finally(() => setProductsLoading(false))
+  }, [])
 
-  // Fetch delivery config
+  // ─── Close search dropdown on outside click ─────────────────────────
+  useEffect(() => {
+    function handleClickOutside(event: MouseEvent) {
+      if (searchRef.current && !searchRef.current.contains(event.target as Node)) {
+        setSearchOpen(false)
+      }
+    }
+    document.addEventListener('mousedown', handleClickOutside)
+    return () => document.removeEventListener('mousedown', handleClickOutside)
+  }, [])
+
+  // ─── Fetch delivery config ──────────────────────────────────────────
   useEffect(() => {
     fetch('/api/delivery')
       .then(r => r.json())
       .then(data => {
         if (data && data.services) {
-          // Check if services have actual pricing data
           const hasPricing = Object.values(data.services as Record<string, DeliveryService>).some(
             s => s.enabled && Object.values(s.zones).some(z => Object.keys(z.wilayas).length > 0)
           )
           if (hasPricing) {
             setDeliveryConfig(data as DeliveryConfig)
           }
-          // Find default enabled service
           const enabled = Object.entries(data.services as Record<string, DeliveryService>).find(([, s]) => s.enabled)
           if (enabled) {
             setSelectedService(enabled[0])
@@ -125,17 +145,51 @@ function CommanderPageContent() {
       .catch(() => {})
   }, [])
 
-  // Available communes based on selected wilaya
+  // ─── Load selected product details ──────────────────────────────────
+  const selectProduct = useCallback(async (prod: ProductListItem) => {
+    setLoading(true)
+    setSearchOpen(false)
+    try {
+      const res = await fetch(`/api/products/${prod.id}`)
+      const data = await res.json()
+      if (data && !data.error) {
+        setProduct({
+          id: data.id,
+          name: data.name,
+          price: data.price,
+          compare_price: data.compare_price,
+          image_url: data.image_url,
+          images: data.images,
+          category: data.category,
+          stock: data.stock,
+          available: data.available,
+        })
+      }
+    } catch {
+      // Fallback to list data
+      setProduct({
+        id: prod.id,
+        name: prod.name,
+        price: prod.price,
+        compare_price: prod.compare_price,
+        image_url: prod.image_url,
+        category: prod.category,
+        available: prod.available,
+      })
+    } finally {
+      setLoading(false)
+    }
+  }, [])
+
+  // ─── Derived values ─────────────────────────────────────────────────
   const availableCommunes = form.wilaya
     ? WILAYA_COMMUNES[parseInt(form.wilaya)] || []
     : []
 
-  // Available delivery services (enabled only)
   const enabledServices = deliveryConfig
     ? Object.entries(deliveryConfig.services).filter(([, s]) => s.enabled)
     : []
 
-  // Get available zones for current service that have pricing for selected wilaya
   const availableZones = useCallback(() => {
     if (!selectedService || !deliveryConfig.services[selectedService]) return []
     const service = deliveryConfig.services[selectedService]
@@ -145,7 +199,24 @@ function CommanderPageContent() {
     )
   }, [selectedService, deliveryConfig, form.wilaya])
 
-  // Calculate delivery price
+  const formatPrice = (price: number) => new Intl.NumberFormat('fr-DZ').format(price)
+  const subtotal = (product?.price || 0) * quantity
+  const total = freeShipping ? subtotal : subtotal + deliveryPrice
+  const productImage = product?.images?.[0] || product?.image_url || '/images/watches/automatique-acier.jpg'
+
+  // Unique categories
+  const categories = ['all', ...Array.from(new Set(products.map(p => p.category)))]
+
+  // Filtered products for search
+  const filteredProducts = products.filter(p => {
+    const matchesSearch = !searchQuery ||
+      p.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
+      p.category.toLowerCase().includes(searchQuery.toLowerCase())
+    const matchesCategory = selectedCategory === 'all' || p.category === selectedCategory
+    return matchesSearch && matchesCategory
+  })
+
+  // ─── Calculate delivery price ───────────────────────────────────────
   useEffect(() => {
     if (!deliveryConfig || !form.wilaya || !selectedService) {
       setDeliveryPrice(0)
@@ -156,9 +227,8 @@ function CommanderPageContent() {
     const service = deliveryConfig.services[selectedService]
     if (!service) { setDeliveryPrice(0); setFreeShipping(false); return }
 
-    // Check free shipping
-    const subtotal = (product?.price || 0) * quantity
-    if (deliveryConfig.global_settings.free_shipping_enabled && subtotal >= deliveryConfig.global_settings.free_shipping_min_amount) {
+    const sub = (product?.price || 0) * quantity
+    if (deliveryConfig.global_settings.free_shipping_enabled && sub >= deliveryConfig.global_settings.free_shipping_min_amount) {
       setFreeShipping(true)
       setDeliveryPrice(0)
       return
@@ -170,15 +240,11 @@ function CommanderPageContent() {
       return
     }
 
-    // Zone-based pricing - find price for selected wilaya
     const wilayaCode = form.wilaya
     let price = 0
-
-    // Check selected zone first
     if (selectedZone && service.zones[selectedZone]?.wilayas[wilayaCode] !== undefined) {
       price = service.zones[selectedZone].wilayas[wilayaCode]
     } else {
-      // Search all zones
       for (const zone of Object.values(service.zones)) {
         if (zone.wilayas[wilayaCode] !== undefined) {
           price = zone.wilayas[wilayaCode]
@@ -186,26 +252,18 @@ function CommanderPageContent() {
         }
       }
     }
-
     setDeliveryPrice(price)
   }, [deliveryConfig, form.wilaya, selectedService, selectedZone, product, quantity])
 
-  const formatPrice = (price: number) => new Intl.NumberFormat('fr-DZ').format(price)
-  const subtotal = (product?.price || 0) * quantity
-  const total = freeShipping ? subtotal : subtotal + deliveryPrice
-  const productImage = product?.images?.[0] || product?.image_url || '/images/watches/automatique-acier.jpg'
-
+  // ─── Form handlers ──────────────────────────────────────────────────
   const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
     const { name, value } = e.target
     setForm(prev => ({ ...prev, [name]: value }))
-    // Clear error for this field
     if (errors[name]) {
       setErrors(prev => { const next = { ...prev }; delete next[name]; return next })
     }
-    // Reset commune when wilaya changes
     if (name === 'wilaya') {
       setForm(prev => ({ ...prev, commune: '' }))
-      // Auto-select first available zone for this wilaya
       if (deliveryConfig.services[selectedService]?.pricing_type === 'zone') {
         const service = deliveryConfig.services[selectedService]
         for (const [zoneKey, zone] of Object.entries(service.zones)) {
@@ -220,6 +278,7 @@ function CommanderPageContent() {
 
   const validate = () => {
     const newErrors: Record<string, string> = {}
+    if (!product) newErrors.product = 'Sélectionnez un produit'
     if (!form.name.trim()) newErrors.name = 'Le nom est obligatoire'
     if (!form.phone.trim()) newErrors.phone = 'Le téléphone est obligatoire'
     else if (!/^0[5-7]\d{8}$/.test(form.phone.replace(/\s/g, ''))) newErrors.phone = 'Numéro invalide (ex: 05XXXXXXXX)'
@@ -278,7 +337,22 @@ function CommanderPageContent() {
     }
   }
 
-  // ─── Success State ────────────────────────────────────────────
+  // ─── If product_id in URL, show redirect spinner ────────────────────
+  if (productId) {
+    return (
+      <div className="min-h-screen flex flex-col bg-[#08080a]">
+        <Navbar />
+        <main className="pt-[72px] flex-1 flex items-center justify-center">
+          <div className="flex flex-col items-center gap-4">
+            <div className="h-10 w-10 animate-spin rounded-full border-2 border-[#c9a84c] border-t-transparent" />
+            <p className="text-[#a0a09a] text-sm">Redirection...</p>
+          </div>
+        </main>
+      </div>
+    )
+  }
+
+  // ─── Success State ──────────────────────────────────────────────────
   if (result?.success) {
     return (
       <div className="min-h-screen flex flex-col bg-[#08080a]">
@@ -319,36 +393,7 @@ function CommanderPageContent() {
     )
   }
 
-  // ─── No Product — redirect to catalogue ───────────────────────
-  if (!loading && !product) {
-    // If no product_id was provided, redirect to catalogue
-    if (!productId) {
-      if (typeof window !== 'undefined') {
-        window.location.href = '/catalogue'
-        return null
-      }
-    }
-    return (
-      <div className="min-h-screen flex flex-col bg-[#08080a]">
-        <Navbar />
-        <main className="pt-[72px] flex-1 flex items-center justify-center">
-          <div className="text-center space-y-4">
-            <h2 className="font-serif text-2xl text-[#f5f5f0]">Produit introuvable</h2>
-            <p className="text-[#a0a09a]">Ce produit n&apos;existe pas ou a été retiré.</p>
-            <Link
-              href="/catalogue"
-              className="inline-flex items-center gap-2 bg-[#c9a84c] text-[#0a0800] px-6 py-3 rounded text-[11px] font-bold tracking-[2px] uppercase hover:bg-[#e4c06a] transition-all"
-            >
-              <ArrowLeft className="w-4 h-4" />
-              Voir le catalogue
-            </Link>
-          </div>
-        </main>
-      </div>
-    )
-  }
-
-  // ─── Main Form — SINGLE PAGE ─────────────────────────────────
+  // ─── Main Form ──────────────────────────────────────────────────────
   return (
     <div className="min-h-screen flex flex-col bg-[#08080a]">
       <Navbar />
@@ -362,11 +407,12 @@ function CommanderPageContent() {
               className="inline-flex items-center gap-2 text-[11px] tracking-[1.5px] uppercase text-[#a0a09a] hover:text-[#c9a84c] transition-colors mb-3"
             >
               <ArrowLeft className="w-3.5 h-3.5" />
-              Retour au produit
+              {product ? 'Retour au produit' : 'Retour au catalogue'}
             </Link>
             <h1 className="font-serif text-[clamp(24px,4vw,36px)] font-medium leading-[1.1] text-[#f5f5f0]">
               Passer Commande
             </h1>
+            <p className="text-[13px] text-[#a0a09a] mt-2">Paiement à la livraison sur toute l&apos;Algérie</p>
           </div>
         </section>
 
@@ -406,20 +452,27 @@ function CommanderPageContent() {
               {/* ─── LEFT: Form Fields (3/5) ──────────────────────── */}
               <div className="lg:col-span-3 space-y-5">
 
-                {/* ── Section 1: Produit ── */}
+                {/* ── Section 1: Produit — SÉLECTION INTERACTIVE ── */}
                 <div className="bg-[#111113] border border-white/[0.06] rounded-xl overflow-hidden">
                   <div className="px-5 py-3 border-b border-white/[0.06] flex items-center gap-2">
                     <Package className="w-4 h-4 text-[#c9a84c]" />
-                    <h3 className="text-[12px] font-semibold text-[#f5f5f0] uppercase tracking-[1.5px]">Produit sélectionné</h3>
+                    <h3 className="text-[12px] font-semibold text-[#f5f5f0] uppercase tracking-[1.5px]">
+                      {product ? 'Produit sélectionné' : 'Choisir un produit'}
+                    </h3>
+                    {product && (
+                      <button
+                        type="button"
+                        onClick={() => { setProduct(null); setQuantity(1) }}
+                        className="ml-auto text-[10px] text-[#c9a84c] hover:text-[#e4c06a] transition-colors tracking-[1px] uppercase font-semibold"
+                      >
+                        Changer
+                      </button>
+                    )}
                   </div>
 
-                  {loading ? (
-                    <div className="p-6 flex items-center justify-center">
-                      <div className="h-6 w-6 animate-spin rounded-full border-2 border-[#c9a84c] border-t-transparent" />
-                    </div>
-                  ) : product && (
+                  {product ? (
+                    /* ── Produit sélectionné ── */
                     <div className="p-4 flex gap-4">
-                      {/* Product image */}
                       <div className="w-24 h-24 sm:w-28 sm:h-28 rounded-lg overflow-hidden flex-shrink-0 bg-[#08080a] border border-white/[0.06]">
                         <img
                           src={productImage}
@@ -427,7 +480,6 @@ function CommanderPageContent() {
                           className="w-full h-full object-cover"
                         />
                       </div>
-                      {/* Product info — non modifiable */}
                       <div className="flex-1 min-w-0 flex flex-col justify-center">
                         <span className="text-[9px] tracking-[1.5px] uppercase text-[#c9a84c] font-semibold">{product.category}</span>
                         <h4 className="text-[15px] sm:text-[17px] font-medium text-[#f5f5f0] font-serif mt-0.5 leading-tight">{product.name}</h4>
@@ -438,7 +490,6 @@ function CommanderPageContent() {
                             <span className="text-[12px] text-[#606060] line-through ml-1">{formatPrice(product.compare_price)} DA</span>
                           )}
                         </div>
-                        {/* Quantity */}
                         <div className="flex items-center gap-3 mt-3">
                           <span className="text-[10px] tracking-[1px] uppercase text-[#a0a09a] font-semibold">Quantité</span>
                           <div className="flex items-center gap-0 bg-[#08080a] border border-white/[0.08] rounded-lg overflow-hidden">
@@ -464,6 +515,157 @@ function CommanderPageContent() {
                           <span className="text-[12px] text-[#606060]">= {formatPrice(subtotal)} DA</span>
                         </div>
                       </div>
+                    </div>
+                  ) : (
+                    /* ── Sélection de produit ── */
+                    <div className="p-5 space-y-4">
+                      {/* Search input */}
+                      <div ref={searchRef} className="relative">
+                        <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-[#606060]" />
+                        <Input
+                          type="text"
+                          placeholder="Rechercher une montre..."
+                          value={searchQuery}
+                          onChange={(e) => { setSearchQuery(e.target.value); setSearchOpen(true) }}
+                          onFocus={() => setSearchOpen(true)}
+                          className="bg-[#08080a] h-11 pl-10 pr-10 text-[#f5f5f0] placeholder:text-[#505050] border-white/[0.08] focus-visible:border-[#c9a84c] focus-visible:ring-1 focus-visible:ring-[#c9a84c]/30"
+                        />
+                        {searchQuery && (
+                          <button
+                            type="button"
+                            onClick={() => { setSearchQuery(''); setSearchOpen(true) }}
+                            className="absolute right-3 top-1/2 -translate-y-1/2 text-[#606060] hover:text-[#f5f5f0] transition-colors"
+                          >
+                            <X className="w-4 h-4" />
+                          </button>
+                        )}
+
+                        {/* Dropdown results */}
+                        {searchOpen && (
+                          <div className="absolute z-50 top-full left-0 right-0 mt-2 bg-[#161618] border border-white/[0.08] rounded-xl shadow-[0_16px_48px_rgba(0,0,0,0.5)] max-h-[360px] overflow-y-auto">
+                            {/* Category pills */}
+                            <div className="p-3 border-b border-white/[0.06] flex gap-2 overflow-x-auto">
+                              {categories.map(cat => (
+                                <button
+                                  key={cat}
+                                  type="button"
+                                  onClick={() => setSelectedCategory(cat)}
+                                  className={`flex-shrink-0 px-3 py-1.5 rounded-full text-[10px] font-semibold tracking-[0.5px] uppercase transition-all ${
+                                    selectedCategory === cat
+                                      ? 'bg-[#c9a84c] text-[#0a0800]'
+                                      : 'bg-white/5 text-[#a0a09a] hover:bg-white/10'
+                                  }`}
+                                >
+                                  {cat === 'all' ? 'Tous' : cat}
+                                </button>
+                              ))}
+                            </div>
+
+                            {/* Product list */}
+                            {productsLoading ? (
+                              <div className="p-6 flex items-center justify-center">
+                                <div className="h-6 w-6 animate-spin rounded-full border-2 border-[#c9a84c] border-t-transparent" />
+                              </div>
+                            ) : filteredProducts.length === 0 ? (
+                              <div className="p-6 text-center">
+                                <p className="text-[#a0a09a] text-sm">Aucun produit trouvé</p>
+                              </div>
+                            ) : (
+                              <div className="py-2">
+                                {filteredProducts.map(p => (
+                                  <button
+                                    key={p.id}
+                                    type="button"
+                                    onClick={() => selectProduct(p)}
+                                    className="w-full px-4 py-3 flex items-center gap-3 hover:bg-white/5 transition-colors text-left"
+                                  >
+                                    <div className="w-12 h-12 rounded-lg overflow-hidden flex-shrink-0 bg-[#08080a] border border-white/[0.06]">
+                                      <img
+                                        src={p.image_url || '/images/watches/automatique-acier.jpg'}
+                                        alt={p.name}
+                                        className="w-full h-full object-cover"
+                                      />
+                                    </div>
+                                    <div className="flex-1 min-w-0">
+                                      <span className="text-[8px] tracking-[1.5px] uppercase text-[#c9a84c] font-semibold">{p.category}</span>
+                                      <p className="text-[13px] text-[#f5f5f0] font-medium truncate">{p.name}</p>
+                                      <div className="flex items-baseline gap-1.5 mt-0.5">
+                                        <span className="text-[13px] text-[#f5f5f0] font-semibold">{formatPrice(p.price)} DA</span>
+                                        {p.compare_price && p.compare_price > p.price && (
+                                          <span className="text-[10px] text-[#606060] line-through">{formatPrice(p.compare_price)} DA</span>
+                                        )}
+                                      </div>
+                                    </div>
+                                    <Plus className="w-4 h-4 text-[#606060] flex-shrink-0" />
+                                  </button>
+                                ))}
+                              </div>
+                            )}
+                          </div>
+                        )}
+                      </div>
+
+                      {/* Product grid (always visible below search) */}
+                      {!searchOpen && (
+                        <div>
+                          {/* Category tabs */}
+                          <div className="flex gap-2 overflow-x-auto pb-2 mb-3">
+                            {categories.map(cat => (
+                              <button
+                                key={cat}
+                                type="button"
+                                onClick={() => setSelectedCategory(cat)}
+                                className={`flex-shrink-0 px-3 py-1.5 rounded-full text-[10px] font-semibold tracking-[0.5px] uppercase transition-all ${
+                                  selectedCategory === cat
+                                    ? 'bg-[#c9a84c] text-[#0a0800]'
+                                    : 'bg-white/5 text-[#a0a09a] hover:bg-white/10 border border-white/[0.06]'
+                                }`}
+                              >
+                                {cat === 'all' ? 'Tous' : cat}
+                              </button>
+                            ))}
+                          </div>
+
+                          {/* Product cards */}
+                          {productsLoading ? (
+                            <div className="py-8 flex items-center justify-center">
+                              <div className="h-6 w-6 animate-spin rounded-full border-2 border-[#c9a84c] border-t-transparent" />
+                            </div>
+                          ) : (
+                            <div className="grid grid-cols-2 sm:grid-cols-3 gap-3">
+                              {filteredProducts.slice(0, 12).map(p => (
+                                <button
+                                  key={p.id}
+                                  type="button"
+                                  onClick={() => selectProduct(p)}
+                                  className="group bg-[#08080a] border border-white/[0.06] rounded-lg overflow-hidden hover:border-[#c9a84c]/30 transition-all text-left"
+                                >
+                                  <div className="aspect-square overflow-hidden">
+                                    <img
+                                      src={p.image_url || '/images/watches/automatique-acier.jpg'}
+                                      alt={p.name}
+                                      className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
+                                    />
+                                  </div>
+                                  <div className="p-2.5">
+                                    <span className="text-[7px] tracking-[1px] uppercase text-[#c9a84c] font-semibold">{p.category}</span>
+                                    <p className="text-[11px] text-[#f5f5f0] font-medium truncate mt-0.5">{p.name}</p>
+                                    <p className="text-[12px] text-[#f5f5f0] font-semibold mt-1">{formatPrice(p.price)} DA</p>
+                                  </div>
+                                </button>
+                              ))}
+                            </div>
+                          )}
+                        </div>
+                      )}
+
+                      {/* No product selected warning */}
+                      {errors.product && (
+                        <div className="bg-[#f87171]/5 border border-[#f87171]/20 rounded-md px-3 py-2 flex items-center gap-2">
+                          <AlertCircle className="w-3.5 h-3.5 text-[#f87171] flex-shrink-0" />
+                          <p className="text-[11px] text-[#f87171]">{errors.product}</p>
+                        </div>
+                      )}
                     </div>
                   )}
                 </div>
@@ -614,7 +816,7 @@ function CommanderPageContent() {
                       </div>
                     )}
 
-                    {/* Delivery service selector (if multiple enabled) */}
+                    {/* Delivery service selector */}
                     {enabledServices.length > 1 && form.wilaya && (
                       <div className="space-y-2">
                         <label className="text-[11px] tracking-[0.5px] uppercase text-[#a0a09a] font-medium">
@@ -622,7 +824,6 @@ function CommanderPageContent() {
                         </label>
                         <div className="grid grid-cols-2 gap-2">
                           {enabledServices.map(([key, service]) => {
-                            // Find price for this service and wilaya
                             let servicePrice = 0
                             if (service.pricing_type === 'flat') {
                               servicePrice = service.flat_price
@@ -659,7 +860,7 @@ function CommanderPageContent() {
                       </div>
                     )}
 
-                    {/* No delivery available for this wilaya */}
+                    {/* No delivery available */}
                     {form.wilaya && deliveryPrice === 0 && !freeShipping && selectedService && (
                       <div className="bg-[#f59e0b]/5 border border-[#f59e0b]/20 rounded-md p-3 flex items-start gap-2">
                         <AlertCircle className="w-4 h-4 text-[#f59e0b] flex-shrink-0 mt-0.5" />
@@ -683,6 +884,31 @@ function CommanderPageContent() {
                     </div>
 
                     <div className="p-5 space-y-3">
+                      {/* Product line */}
+                      {product ? (
+                        <div className="flex items-center gap-3 pb-3 border-b border-white/[0.06]">
+                          <div className="w-14 h-14 rounded-lg overflow-hidden flex-shrink-0 bg-[#08080a] border border-white/[0.06]">
+                            <img
+                              src={productImage}
+                              alt={product.name}
+                              className="w-full h-full object-cover"
+                            />
+                          </div>
+                          <div className="flex-1 min-w-0">
+                            <p className="text-[12px] text-[#f5f5f0] font-medium truncate">{product.name}</p>
+                            <p className="text-[11px] text-[#606060]">x{quantity}</p>
+                          </div>
+                          <span className="text-[13px] text-[#f5f5f0] font-semibold">{formatPrice(subtotal)} DA</span>
+                        </div>
+                      ) : (
+                        <div className="flex items-center gap-3 pb-3 border-b border-white/[0.06]">
+                          <div className="w-14 h-14 rounded-lg bg-[#08080a] border border-dashed border-white/[0.12] flex items-center justify-center">
+                            <Package className="w-5 h-5 text-[#303030]" />
+                          </div>
+                          <p className="text-[12px] text-[#505050]">Sélectionnez un produit ci-dessus</p>
+                        </div>
+                      )}
+
                       {/* Sous-total */}
                       <div className="flex items-center justify-between text-[13px]">
                         <span className="text-[#a0a09a]">Sous-total ({quantity} article{quantity > 1 ? 's' : ''})</span>
@@ -750,6 +976,8 @@ function CommanderPageContent() {
                         <div className="h-4 w-4 animate-spin rounded-full border-2 border-[#0a0800] border-t-transparent" />
                         Traitement en cours...
                       </span>
+                    ) : !product ? (
+                      'Sélectionnez un produit d\'abord'
                     ) : (
                       'Commander'
                     )}
